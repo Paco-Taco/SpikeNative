@@ -10,6 +10,7 @@ export const ColorPalette = {
   bluePalette: "#1368CC",
   darkGrayPalette: "#2B3240",
   graphitePalette: "#39434F",
+  lightGraphite: '#445160',
   yellowPalette: "#FFC542",
   primary: "#1368CC",
   lightGrey: "#FCF8FF",
