@@ -1,5 +1,5 @@
 export interface GetVeterinariesRequest {
-  token: string;
+  token: string | null | undefined;
 }
 
 export interface GetVeterinariesResponse {

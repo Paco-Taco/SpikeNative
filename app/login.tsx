@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,23 +10,13 @@ import {
 import { useAuth } from "./context/AuthContext";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
-const ColorPalette = {
-  bluePalette: "#1368CC",
-  darkGrayPalette: "#2B3240",
-  graphitePalette: "#39434F",
-  lightGraphite: "#445160",
-  yellowPalette: "#FFC542",
-  primary: "#1368CC",
-  lightGrey: "#FCF8FF",
-  grey: "#EEE9F0",
-  medium: "#9F9AA1",
-  mediumDark: "#424242",
-  green: "#437919",
-};
+import { ColorPalette } from "@/constants/Colors";
+import { useLoginStore } from "@/stores/login.store";
+import { Roles } from "@/constants/Roles";
 
 const Login = () => {
-  const { onLogin } = useAuth();
+  const { onLogin, authState } = useAuth();
+  const { dataLogin } = useLoginStore((state) => state);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -35,19 +25,41 @@ const Login = () => {
     setPasswordVisible(!passwordVisible);
   };
 
+  useEffect(() => {
+    const loadSession = () => {
+      const role = dataLogin?.user.role;
+
+      if (authState?.authenticated !== null && authState?.authenticated && authState?.token) {
+        if (role === Roles.user) {
+          router.replace("/(app)/(user)/");
+        } else if (role === Roles.veterinary) {
+          router.replace("/(app)/(vet)/");
+        }
+      }
+    };
+    loadSession();
+  }, [authState?.authenticated, dataLogin]);
+
   const login = async () => {
     const result = await onLogin!({ email, password });
     if (result && result.error) {
       alert(result.msg);
     } else {
-      router.replace("/(app)/");
+      const role = dataLogin?.user.role;
+      if (role === Roles.user) {
+        router.replace("/(app)/(user)/");
+      } else if (role === Roles.veterinary) {
+        router.replace("/(app)/(vet)/");
+      }
     }
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
+        <Image
+          source={require("@/assets/images/logo.png")}
+          style={styles.logo}
+        />
       </View>
       <View style={styles.formContainer}>
         <Text style={styles.title}>Login</Text>

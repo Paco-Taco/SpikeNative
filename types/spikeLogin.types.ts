@@ -28,5 +28,5 @@ export interface User {
 
 export interface ErrorResponse {
   error: boolean;
-  msg: any;
+  message: any;
 }

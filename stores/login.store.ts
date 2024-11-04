@@ -1,33 +1,58 @@
 import { SpikeLoginService } from "@/services/spikeLoginService.service";
 import { LoginRequest, LoginResponse } from "@/types/spikeLogin.types";
 import { create, StateCreator } from "zustand";
+import * as SecureStore from 'expo-secure-store';
+
+const SECURE_STORE_KEY = "dataLogin";
 
 interface LoginState {
-  dataLogin?: LoginResponse;
-  fetchLogin: (data: LoginRequest) => Promise<LoginResponse | undefined>;
+  dataLogin?: LoginResponse | null;
+  fetchLogin: (data: LoginRequest) => Promise<LoginResponse | null>;
   cleanLoginStore: () => void;
+  loadLoginFromStore: () => Promise<void>;
 }
 
 const storeApi: StateCreator<LoginState> = (set, get) => ({
-  dataLogin: undefined,
+  dataLogin: null,
 
   fetchLogin: async (body: LoginRequest) => {
     try {
       const data = await SpikeLoginService.login(body);
       set({ dataLogin: data });
-      return data
+
+      // Guarda el login data en SecureStore
+      await SecureStore.setItemAsync(SECURE_STORE_KEY, JSON.stringify(data));
+      
+      return data;
     } catch (error) {  
       console.error("Error fetching data", error);
-      set({ dataLogin: undefined });
-      return undefined
+      set({ dataLogin: null });
+      return null;
     }
   },
 
-  cleanLoginStore: () => {
-    set({
-      dataLogin: undefined,
-    });
+  cleanLoginStore: async () => {
+    set({ dataLogin: null });
+    
+    // Elimina el login data del SecureStore
+    await SecureStore.deleteItemAsync(SECURE_STORE_KEY);
+  },
+
+  loadLoginFromStore: async () => {
+    try {
+      const storedData = await SecureStore.getItemAsync(SECURE_STORE_KEY);
+      if (storedData) {
+        set({ dataLogin: JSON.parse(storedData) });
+      }
+    } catch (error) {
+      console.error("Error loading login data from SecureStore", error);
+    }
   },
 });
 
-export const useLoginStore = create<LoginState>(storeApi)
+// Inicializa el store y carga los datos de SecureStore
+const useLoginStore = create<LoginState>(storeApi);
+
+useLoginStore.getState().loadLoginFromStore();
+
+export { useLoginStore };

@@ -1,8 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
-import { ErrorResponse, LoginRequest, LoginResponse } from "@/types/spikeLogin.types";
+import {
+  ErrorResponse,
+  LoginRequest,
+  LoginResponse,
+} from "@/types/spikeLogin.types";
 import { SpikeLoginService } from "@/services/spikeLoginService.service";
+import { useLoginStore } from "@/stores/login.store";
 
 interface AuthProps {
   authState?: { token: string | null; authenticated: boolean | null };
@@ -26,6 +31,7 @@ export const AuthProvider = ({ children }: any) => {
     token: null,
     authenticated: null,
   });
+  const { fetchLogin, cleanLoginStore } = useLoginStore((state) => state);
 
   useEffect(() => {
     const loadToken = async () => {
@@ -46,27 +52,29 @@ export const AuthProvider = ({ children }: any) => {
 
   const login = async (body: LoginRequest) => {
     try {
-      const result = await SpikeLoginService.login(body);
+      const result = await fetchLogin(body);
 
-      setAuthState({
-        token: result.token,
-        authenticated: true,
-      });
+      if (result !== null) {
+        setAuthState({
+          token: result.token,
+          authenticated: true,
+        });
 
-      // axios.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
+        // axios.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
 
-      await SecureStore.setItemAsync(TOKEN_KEY, result.token);
+        await SecureStore.setItemAsync(TOKEN_KEY, result.token);
 
-      return result;
+        return result;
+      }
     } catch (e) {
-      return { error: true, msg: (e as any) };
+      return { error: true, msg: (e as any) || "An unknown error occured" };
     }
   };
 
   const logout = async () => {
     // Delete token from storage
     await SecureStore.deleteItemAsync(TOKEN_KEY);
-
+    cleanLoginStore()
     // Update HTTP headers
     // axios.defaults.headers.common["Authorization"] = "";
 
