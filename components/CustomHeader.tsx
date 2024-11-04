@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import BottomSheet from "./BottomSheet";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useAuth } from "@/app/context/AuthContext";
 
 const SearchBar = () => (
   <View style={styles.searchContainer}>
@@ -31,7 +32,7 @@ const SearchBar = () => (
           cursorColor={ColorPalette.yellowPalette}
         />
       </View>
-      <Link href={"/"} asChild>
+      <Link href={"/(modal)/filter"} asChild>
         <TouchableOpacity style={styles.optionButton}>
           <Ionicons
             name="options-outline"
@@ -45,6 +46,7 @@ const SearchBar = () => (
 );
 
 const CustomHeader = () => {
+  const { onLogout } = useAuth();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const openModal = () => {
     bottomSheetRef.current?.present();
@@ -54,7 +56,7 @@ const CustomHeader = () => {
     <SafeAreaView style={styles.safeArea}>
       <BottomSheet ref={bottomSheetRef} />
       <View style={styles.container}>
-        <TouchableOpacity onPress={openModal}>
+        <TouchableOpacity onPress={onLogout}>
           <Ionicons
             name="location-outline"
             color={ColorPalette.medium}
