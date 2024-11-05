@@ -12,10 +12,6 @@ export class SpikeLoginService {
 
       return data;
     } catch (error) {
-      if (error instanceof AxiosError) {
-        console.log("LoginService: ", error.message);
-        throw new Error("LoginService: Unable to login");
-      }
       console.log(error);
       throw new Error("LoginService: Unable to login");
     }

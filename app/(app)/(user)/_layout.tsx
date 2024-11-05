@@ -18,9 +18,6 @@ export default function AppLayout() {
   const navigation = useNavigation();
   const { authState } = useAuth();
 
-  // if (authState?.authenticated == null) {
-  //   return <Text>Loading...</Text>;
-  // }
 
   if (!authState?.authenticated) {
     return <Redirect href={"/login"}/>
