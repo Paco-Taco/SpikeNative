@@ -19,7 +19,6 @@ import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 const Index = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const idOwner = dataLogin?.user.id;
-
   const [formData, setFormData] = useState({
     id_owner: idOwner,
     name: "",
@@ -128,7 +127,7 @@ const Index = () => {
       <TextInput
         style={{ borderWidth: 1, marginBottom: 10 }}
         onChangeText={(value) => handleInputChange("age", value)}
-        value={formData.age.toString()}
+        value={formData.age}
         keyboardType="numeric"
       />
       <Text>Peso (kg):</Text>
