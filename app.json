@@ -22,7 +22,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.spike.app"
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +37,11 @@
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9520f987-8014-4638-b591-51a07bcc2850"
+      }
     }
   }
 }
