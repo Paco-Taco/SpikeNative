@@ -1,16 +1,19 @@
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { LoginRequest, LoginResponse } from "@/types/spikeLogin.types";
-import { GetVeterinariesRequest, GetVeterinariesResponse } from "@/types/userTypes.types";
-import { AxiosError } from "axios";
+import { GetVeterinariesResponse } from "@/types/userTypes.types";
+import axios, { AxiosError } from "axios";
 
+axiosInstanceSpikeCore.interceptors.request.use(request => {
+  console.log("Headers enviados:", request.headers);
+  return request;
+});
 export class UserService {
-  static getVeterinaries = async (body: GetVeterinariesRequest): Promise<GetVeterinariesResponse> => {
+  static getVeterinaries = async (): Promise<GetVeterinariesResponse> => {
     try {
       const { data } = await axiosInstanceSpikeCore.post<GetVeterinariesResponse>(
-        "/getveterinaries",
-        body
-      );
-
+        "/getVeterinaries",
+      )
+      
       return data;
     } catch (error) {
       if (error instanceof AxiosError) {

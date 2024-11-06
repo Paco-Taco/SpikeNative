@@ -1,7 +1,3 @@
-export interface GetVeterinariesRequest {
-  token: string | null | undefined;
-}
-
 export interface GetVeterinariesResponse {
   veterinaries: Veterinary[];
 }

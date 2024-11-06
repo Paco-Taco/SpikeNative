@@ -8,6 +8,7 @@ import {
 } from "@/types/spikeLogin.types";
 import { SpikeLoginService } from "@/services/spikeLoginService.service";
 import { useLoginStore } from "@/stores/login.store";
+import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 
 interface AuthProps {
   authState?: { token: string | null; authenticated: boolean | null };
@@ -39,7 +40,7 @@ export const AuthProvider = ({ children }: any) => {
       // console.log("stored: ", token);
 
       if (token) {
-        // axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        axiosInstanceSpikeCore.defaults.headers.common["authorization"] = `Bearer ${token}`;
 
         setAuthState({
           token: token,
@@ -60,7 +61,7 @@ export const AuthProvider = ({ children }: any) => {
           authenticated: true,
         });
 
-        // axios.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
+        axiosInstanceSpikeCore.defaults.headers.common["authorization"] = `Bearer ${result.token}`;
 
         await SecureStore.setItemAsync(TOKEN_KEY, result.token);
 
@@ -76,7 +77,7 @@ export const AuthProvider = ({ children }: any) => {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     cleanLoginStore()
     // Update HTTP headers
-    // axios.defaults.headers.common["Authorization"] = "";
+    axiosInstanceSpikeCore.defaults.headers.common["authorization"] = "";
 
     // Reeset auth state
     setAuthState({
