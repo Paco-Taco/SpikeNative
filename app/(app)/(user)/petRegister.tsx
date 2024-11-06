@@ -2,7 +2,6 @@ import {
   View,
   Text,
   Alert,
-  TextInput,
   Button,
   Image,
   TouchableOpacity,
@@ -10,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLoginStore } from "@/stores/login.store";
@@ -18,6 +18,8 @@ import axios, { isAxiosError } from "axios";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import KeyBoardAvoidWrapper from "@/components/KeyBoardAvoidWrapper";
+import { TextField } from "react-native-ui-lib";
+import { ColorPalette } from "@/constants/Colors";
 
 const PetRegister = () => {
   const { dataLogin } = useLoginStore((state) => state);
@@ -120,66 +122,43 @@ const PetRegister = () => {
           Registro de Mascota
         </Text>
 
-        <Text>Nombre de la Mascota:</Text>
-        <TextInput
-          style={{
-            borderWidth: 1,
-            marginBottom: 10,
-            padding: 8,
-            borderRadius: 5,
-          }}
-          onChangeText={(value) => handleInputChange("name", value)}
+        <TextField
+          onChangeText={(value: string) => handleInputChange("name", value)}
           value={formData.name}
+          placeholder='Nombre de Mascota: '
+          floatingPlaceholder
+          floatOnFocus
+          containerStyle={styles.textField}
         />
 
         <Text>Género (0 = masculino, 1 = femenino):</Text>
-        <TextInput
-          style={{
-            borderWidth: 1,
-            marginBottom: 10,
-            padding: 8,
-            borderRadius: 5,
-          }}
-          onChangeText={(value) => handleInputChange("gender", value)}
+        <TextField
+          style={styles.textField}
+          onChangeText={(value: string) => handleInputChange("gender", value)}
           value={formData.gender}
           keyboardType="numeric"
         />
 
         <Text>Edad:</Text>
-        <TextInput
-          style={{
-            borderWidth: 1,
-            marginBottom: 10,
-            padding: 8,
-            borderRadius: 5,
-          }}
-          onChangeText={(value) => handleInputChange("age", value)}
+        <TextField
+          style={styles.textField}
+          onChangeText={(value: string) => handleInputChange("age", value)}
           value={formData.age}
           keyboardType="numeric"
         />
 
         <Text>Peso (kg):</Text>
-        <TextInput
-          style={{
-            borderWidth: 1,
-            marginBottom: 10,
-            padding: 8,
-            borderRadius: 5,
-          }}
-          onChangeText={(value) => handleInputChange("weight", value)}
+        <TextField
+          style={styles.textField}
+          onChangeText={(value: string) => handleInputChange("weight", value)}
           value={formData.weight}
           keyboardType="numeric"
         />
 
         <Text>Tamaño (1 = pequeño, 2 = mediano, 3 = grande, 4 = gigante):</Text>
-        <TextInput
-          style={{
-            borderWidth: 1,
-            marginBottom: 10,
-            padding: 8,
-            borderRadius: 5,
-          }}
-          onChangeText={(value) => handleInputChange("height", value)}
+        <TextField
+          style={styles.textField}
+          onChangeText={(value: string) => handleInputChange("height", value)}
           value={formData.height}
           keyboardType="numeric"
         />
@@ -188,14 +167,9 @@ const PetRegister = () => {
           Tipo de Animal (1 = Perro, 2 = Gato, 3 = Conejo, 4 = Aves, 5 =
           Reptiles, 6 = Otros):
         </Text>
-        <TextInput
-          style={{
-            borderWidth: 1,
-            marginBottom: 10,
-            padding: 8,
-            borderRadius: 5,
-          }}
-          onChangeText={(value) => handleInputChange("animal", value)}
+        <TextField
+          style={styles.textField}
+          onChangeText={(value: string) => handleInputChange("animal", value)}
           value={formData.animal}
           keyboardType="numeric"
         />
@@ -228,5 +202,12 @@ const PetRegister = () => {
     </KeyBoardAvoidWrapper>
   );
 };
+
+const styles = StyleSheet.create({
+  textField: {
+    marginBottom: 10,
+    borderBottomWidth: 1
+  },
+});
 
 export default PetRegister;
