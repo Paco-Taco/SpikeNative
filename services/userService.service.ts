@@ -3,10 +3,6 @@ import { LoginRequest, LoginResponse } from "@/types/spikeLogin.types";
 import { GetVeterinariesResponse } from "@/types/userTypes.types";
 import axios, { AxiosError } from "axios";
 
-axiosInstanceSpikeCore.interceptors.request.use(request => {
-  console.log("Headers enviados:", request.headers);
-  return request;
-});
 export class UserService {
   static getVeterinaries = async (): Promise<GetVeterinariesResponse> => {
     try {
