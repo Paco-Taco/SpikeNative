@@ -46,10 +46,10 @@ const Index = () => {
 
     fetchVets();
     fetchPets();
-  }, [idOwner]);
+  }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: ColorPalette.graphitePalette }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: ColorPalette.graphitePalette, paddingTop: 100 }}>
       <View paddingH-20 flex>
         <FlatList
           data={veterinaryClinics}
@@ -81,7 +81,7 @@ const Index = () => {
           <Button
             label="Omitir"
             onPress={() => setShowModal(false)}
-            backgroundColor={ColorPalette.mediumGrey}
+            backgroundColor={ColorPalette.grey}
           />
           <Button
             label="Registrar Mascota"
@@ -89,7 +89,7 @@ const Index = () => {
               setShowModal(false);
               router.push("/petRegister");
             }}
-            backgroundColor={ColorPalette.light}
+            backgroundColor={ColorPalette.lightGrey}
           />
         </View>
       </Dialog>

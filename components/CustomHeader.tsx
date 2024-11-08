@@ -33,7 +33,7 @@ const SearchBar = () => (
           cursorColor={ColorPalette.yellowPalette}
         />
       </View>
-      <Link href={"/(modal)/filter"} asChild>
+      {/* <Link href={"/(modal)/filter"} asChild>
         <TouchableOpacity style={styles.optionButton}>
           <Ionicons
             name="options-outline"
@@ -41,7 +41,7 @@ const SearchBar = () => (
             color={ColorPalette.primary}
           ></Ionicons>
         </TouchableOpacity>
-      </Link>
+      </Link> */}
     </View>
   </View>
 );

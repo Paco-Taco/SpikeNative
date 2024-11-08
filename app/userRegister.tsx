@@ -1,15 +1,26 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from "react-native";
+import { StyleSheet, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
-import { Wizard, TextField, Button, Toast } from "react-native-ui-lib";
+import {
+  Wizard,
+  TextField,
+  Button,
+  Toast,
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
-import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore"; 
-import axios from "axios";
+import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
+import axios, { isAxiosError } from "axios";
+import { Roles } from "@/constants/Roles";
+import { Fonts } from "@/constants/Fonts";
+import LottieView from "lottie-react-native";
 
-const UserGreeting = () => {
+const UserRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -17,17 +28,16 @@ const UserGreeting = () => {
     email: "",
     phone: "",
     password: "",
-    role: "PET_OWNER",
+    role: Roles.user,
     city: "",
     number_int: "",
     cp: "",
-    img: null,
+    img: null as ImagePicker.ImagePickerAsset | null,
   });
-  const [toastMessage, setToastMessage] = useState(null);
+  const [toastMessage, setToastMessage] = useState("");
 
-  const handleInputChange = (name, value) => {
+  const handleInputChange = (name: string, value: string) => {
     setFormData({ ...formData, [name]: value });
-    console.log(formData);
   };
 
   const pickImage = async () => {
@@ -41,7 +51,29 @@ const UserGreeting = () => {
     }
   };
 
+  const isFormComplete = () => {
+    return (
+      formData.firstName &&
+      formData.lastName &&
+      formData.email &&
+      formData.phone &&
+      formData.password &&
+      formData.city &&
+      formData.number_int &&
+      formData.cp &&
+      formData.img
+    );
+  };
+
   const handleSubmit = async () => {
+    if (!isFormComplete()) {
+      Alert.alert(
+        "Error",
+        "Por favor, completa todos los campos y selecciona una imagen."
+      );
+      return;
+    }
+
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       if (key === "img" && formData.img) {
@@ -49,23 +81,29 @@ const UserGreeting = () => {
           uri: formData.img.uri,
           name: "user_image.jpg",
           type: "image/jpeg",
-        });
+        } as any);
       } else {
         data.append(key, formData[key]);
       }
     });
-  
+
     try {
       await axiosInstanceSpikeCore.post("/createUser", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setToastMessage("Usuario registrado exitosamente.");
-      setTimeout(() => setToastMessage(null), 2000);
+      setTimeout(() => setToastMessage(""), 2000);
     } catch (error) {
       Alert.alert("Error", "No se pudo completar el registro.");
+      if (isAxiosError(error)) {
+        console.error(
+          error.response?.data !== undefined
+            ? error.response.data.error
+            : "Error desconocido"
+        );
+      }
     }
   };
-  
 
   const goToPrevStep = () => {
     setActiveIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : prevIndex));
@@ -83,79 +121,122 @@ const UserGreeting = () => {
     switch (activeIndex) {
       case 0:
         return (
-          <View style={styles.stepContainer}>
-            <TextField
-              placeholder="Nombre"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.firstName}
-              onChangeText={(value) => handleInputChange("firstName", value)}
-              style={styles.input}
-            />
-            <TextField
-              placeholder="Apellido"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.lastName}
-              onChangeText={(value) => handleInputChange("lastName", value)}
-              style={styles.input}
-            />
-            <TextField
-              placeholder="Correo Electrónico"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.email}
-              onChangeText={(value) => handleInputChange("email", value)}
-              style={styles.input}
-            />
+          <View
+            flex
+            padding-20
+            centerH
+            backgroundColor={ColorPalette.background}
+            style={styles.stepContainer}
+          >
+            <View marginV-20 centerV padding-20 centerH height={200}>
+              <Text style={{ fontFamily: Fonts.PoppinsBold }} text30>
+                ¡Hey there!
+              </Text>
+              <Text style={{ fontFamily: Fonts.PoppinsLight }} text30>
+                Let's start
+              </Text>
+              <LottieView
+                source={require("@/assets/lottie/BrownDogWalking.json")}
+                autoPlay
+                loop
+                style={{ width: 125, height: 125 }}
+              />
+            </View>
+            <View padding-20 style={{ width: "100%" }}>
+              <TextField
+                placeholder="Nombre"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.firstName}
+                onChangeText={(value) => handleInputChange("firstName", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Apellido"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.lastName}
+                onChangeText={(value) => handleInputChange("lastName", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Correo Electrónico"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.email}
+                onChangeText={(value) => handleInputChange("email", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Contraseña"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.password}
+                onChangeText={(value) => handleInputChange("password", value)}
+                secureTextEntry
+                containerStyle={styles.textFieldContainer}
+              />
+            </View>
           </View>
         );
       case 1:
         return (
-          <View style={styles.stepContainer}>
-            <TextField
-              placeholder="Teléfono"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.phone}
-              onChangeText={(value) => handleInputChange("phone", value)}
-              keyboardType="numeric"
-              style={styles.input}
-            />
-            <TextField
-              placeholder="Contraseña"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.password}
-              onChangeText={(value) => handleInputChange("password", value)}
-              secureTextEntry
-              style={styles.input}
-            />
-            <TextField
-              placeholder="Ciudad"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.city}
-              onChangeText={(value) => handleInputChange("city", value)}
-              style={styles.input}
-            />
+          <View
+            flex
+            padding-20
+            centerH
+            backgroundColor={ColorPalette.background}
+            style={styles.stepContainer}
+          >
+            <View marginV-20 centerV padding-20 centerH height={300}>
+              <Text style={{ textAlign: "center" }} text30 bold>
+                Where are you from?
+              </Text>
+              <LottieView
+                source={require("@/assets/lottie/LocationHand.json")}
+                autoPlay
+                loop
+                style={{ width: 200, height: 200,flex: 1 }}
+              />
+            </View>
+            <View paddingT-20 style={{ width: "100%" }}>
+              <TextField
+                placeholder="Teléfono"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.phone}
+                onChangeText={(value) => handleInputChange("phone", value)}
+                keyboardType="numeric"
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Ciudad"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.city}
+                onChangeText={(value) => handleInputChange("city", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Número Interior"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.number_int}
+                onChangeText={(value) => handleInputChange("number_int", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Código Postal"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.cp}
+                onChangeText={(value) => handleInputChange("cp", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+            </View>
           </View>
         );
       case 2:
         return (
           <View style={styles.stepContainer}>
-            <TextField
-              placeholder="Número Interior"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.number_int}
-              onChangeText={(value) => handleInputChange("number_int", value)}
-              style={styles.input}
-            />
-            <TextField
-              placeholder="Código Postal"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.cp}
-              onChangeText={(value) => handleInputChange("cp", value)}
-              style={styles.input}
-            />
             <TouchableOpacity onPress={pickImage} style={styles.imageButton}>
               <Text style={styles.imageButtonText}>Seleccionar Imagen</Text>
             </TouchableOpacity>
-            {formData.img && <Text style={styles.imageText}>Imagen seleccionada</Text>}
+            {formData.img && (
+              <Text style={styles.imageText}>Imagen seleccionada</Text>
+            )}
           </View>
         );
       default:
@@ -165,32 +246,60 @@ const UserGreeting = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push("/signUp")}>
-        <MaterialCommunityIcons name="arrow-left" size={24} color={ColorPalette.medium} />
-        <Text style={styles.backText}>Back to Login</Text>
-      </TouchableOpacity>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.wizardContainer}>
-          <Wizard activeIndex={activeIndex} onActiveIndexChanged={setActiveIndex}>
-            <Wizard.Step state={Wizard.States.ENABLED} label="Paso 1" />
-            <Wizard.Step state={Wizard.States.ENABLED} label="Paso 2" />
-            <Wizard.Step state={Wizard.States.ENABLED} label="Paso 3" />
+          <Wizard
+            activeIndex={activeIndex}
+            onActiveIndexChanged={setActiveIndex}
+            containerStyle={{
+              shadowOpacity: 0,
+              borderBottomWidth: 0,
+            }}
+          >
+            <Wizard.Step
+              state={Wizard.States.ENABLED}
+              label="Personal details"
+            />
+            <Wizard.Step state={Wizard.States.ENABLED} label="Location" />
+            <Wizard.Step state={Wizard.States.ENABLED} label="Picture" />
           </Wizard>
           {renderCurrentStep()}
         </View>
 
         <View style={styles.navigationButtons}>
+          {activeIndex == 0 && (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.push("/signUp")}
+            >
+              <Text style={styles.backText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
           {activeIndex > 0 && (
-            <Button label="Anterior" onPress={goToPrevStep} style={styles.navButton} />
+            <Button
+              label="Anterior"
+              onPress={goToPrevStep}
+              style={styles.navButton}
+            />
           )}
           {activeIndex < 2 ? (
-            <Button label="Siguiente" onPress={goToNextStep} style={styles.navButton} />
+            <Button
+              label="Siguiente"
+              onPress={goToNextStep}
+              style={styles.navButton}
+            />
           ) : (
-            <Button label="Finalizar" onPress={handleSubmit} style={styles.navButton} />
+            <Button
+              label="Finalizar"
+              onPress={handleSubmit}
+              style={styles.navButton}
+            />
           )}
         </View>
       </ScrollView>
-      {toastMessage && <Toast visible position="bottom" message={toastMessage} />}
+      {toastMessage && (
+        <Toast visible position="bottom" message={toastMessage} />
+      )}
     </SafeAreaView>
   );
 };
@@ -198,13 +307,11 @@ const UserGreeting = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: ColorPalette.graphitePalette,
+    backgroundColor: ColorPalette.background,
   },
   backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 40,
-    marginLeft: 20,
+    width: "20%",
+    justifyContent: "center",
   },
   backText: {
     marginLeft: 5,
@@ -216,29 +323,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 20,
   },
+  wizardComponent: {
+    backgroundColor: ColorPalette.background,
+    borderBottomWidth: 0,
+  },
   stepContainer: {
-    padding: 20,
-    alignItems: "center",
-    backgroundColor: ColorPalette.dark, // Fondo oscuro
     borderRadius: 8,
     marginVertical: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
   },
   input: {
-    width: "100%",
     marginBottom: 15,
-    backgroundColor: ColorPalette.graphitePalette,
+    backgroundColor: ColorPalette.background,
     borderRadius: 8,
     padding: 10,
-    color: ColorPalette.light, // Texto claro
+    borderWidth: 1,
+    borderColor: ColorPalette.medium,
+  },
+  textFieldContainer: {
+    width: "100%",
+    marginBottom: 15,
+    backgroundColor: ColorPalette.background,
+    borderRadius: 8,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: ColorPalette.medium,
   },
   navButton: {
-    marginVertical: 5,
     backgroundColor: ColorPalette.medium,
-    paddingVertical: 12,
     borderRadius: 8,
   },
   navButtonText: {
@@ -250,7 +361,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 60,
   },
   imageButton: {
     backgroundColor: ColorPalette.medium,
@@ -270,4 +381,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UserGreeting;
+export default UserRegister;

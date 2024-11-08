@@ -33,7 +33,7 @@ export default function AppLayout() {
               header: () => <CustomHeader />,
             }}
           />
-          <Stack.Screen
+          {/* <Stack.Screen
             name="(modal)/filter"
             options={{
               presentation: "modal",
@@ -59,8 +59,8 @@ export default function AppLayout() {
                   />
                 </TouchableOpacity>
               ),
-            }}
-          />
+            }} */}
+          {/* /> */}
         </Stack>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>

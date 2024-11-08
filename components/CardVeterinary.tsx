@@ -8,7 +8,7 @@ import { ColorPalette } from "@/constants/Colors";
 const CardVeterinary = ({ item }: { item: Veterinary }) => {
   return (
     <Card
-      marginV-40
+      marginV-10
       padding-20
       borderRadius={10}
       backgroundColor={ColorPalette.lightGraphite}
