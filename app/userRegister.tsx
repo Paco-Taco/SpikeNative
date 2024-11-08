@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, ScrollView, Alert, TouchableOpacity } from "react-native";
+import { StyleSheet, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
@@ -10,12 +10,15 @@ import {
   Toast,
   View,
   Text,
+  TouchableOpacity,
 } from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import axios, { isAxiosError } from "axios";
 import { Roles } from "@/constants/Roles";
+import { Fonts } from "@/constants/Fonts";
+import LottieView from "lottie-react-native";
 
 const UserRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -125,11 +128,19 @@ const UserRegister = () => {
             backgroundColor={ColorPalette.background}
             style={styles.stepContainer}
           >
-            <View marginB-40 centerV centerH height={200}>
-              <Text style={{ fontFamily: "Poppins" }} text30>
+            <View marginV-20 centerV padding-20 centerH height={200}>
+              <Text style={{ fontFamily: Fonts.PoppinsBold }} text30>
                 ¡Hey there!
               </Text>
-              <Text text30>Let's start</Text>
+              <Text style={{ fontFamily: Fonts.PoppinsLight }} text30>
+                Let's start
+              </Text>
+              <LottieView
+                source={require("@/assets/lottie/BrownDogWalking.json")}
+                autoPlay
+                loop
+                style={{ width: 125, height: 125 }}
+              />
             </View>
             <View padding-20 style={{ width: "100%" }}>
               <TextField
@@ -166,41 +177,60 @@ const UserRegister = () => {
         );
       case 1:
         return (
-          <View style={styles.stepContainer}>
-            <TextField
-              placeholder="Teléfono"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.phone}
-              onChangeText={(value) => handleInputChange("phone", value)}
-              keyboardType="numeric"
-              style={styles.input}
-            />
-            <TextField
-              placeholder="Ciudad"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.city}
-              onChangeText={(value) => handleInputChange("city", value)}
-              style={styles.input}
-            />
+          <View
+            flex
+            padding-20
+            centerH
+            backgroundColor={ColorPalette.background}
+            style={styles.stepContainer}
+          >
+            <View marginV-20 centerV padding-20 centerH height={300}>
+              <Text style={{ textAlign: "center" }} text30 bold>
+                Where are you from?
+              </Text>
+              <LottieView
+                source={require("@/assets/lottie/LocationHand.json")}
+                autoPlay
+                loop
+                style={{ width: 200, height: 200,flex: 1 }}
+              />
+            </View>
+            <View paddingT-20 style={{ width: "100%" }}>
+              <TextField
+                placeholder="Teléfono"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.phone}
+                onChangeText={(value) => handleInputChange("phone", value)}
+                keyboardType="numeric"
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Ciudad"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.city}
+                onChangeText={(value) => handleInputChange("city", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Número Interior"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.number_int}
+                onChangeText={(value) => handleInputChange("number_int", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Código Postal"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.cp}
+                onChangeText={(value) => handleInputChange("cp", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+            </View>
           </View>
         );
       case 2:
         return (
           <View style={styles.stepContainer}>
-            <TextField
-              placeholder="Número Interior"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.number_int}
-              onChangeText={(value) => handleInputChange("number_int", value)}
-              style={styles.input}
-            />
-            <TextField
-              placeholder="Código Postal"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.cp}
-              onChangeText={(value) => handleInputChange("cp", value)}
-              style={styles.input}
-            />
             <TouchableOpacity onPress={pickImage} style={styles.imageButton}>
               <Text style={styles.imageButtonText}>Seleccionar Imagen</Text>
             </TouchableOpacity>
@@ -216,31 +246,31 @@ const UserRegister = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.push("/signUp")}
-      >
-        <MaterialCommunityIcons
-          name="arrow-left"
-          size={24}
-          color={ColorPalette.medium}
-        />
-        <Text style={styles.backText}>Back</Text>
-      </TouchableOpacity>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.wizardContainer}>
           <Wizard
             activeIndex={activeIndex}
             onActiveIndexChanged={setActiveIndex}
           >
-            <Wizard.Step state={Wizard.States.ENABLED} label="Paso 1" />
-            <Wizard.Step state={Wizard.States.ENABLED} label="Paso 2" />
-            <Wizard.Step state={Wizard.States.ENABLED} label="Paso 3" />
+            <Wizard.Step
+              state={Wizard.States.ENABLED}
+              label="Personal details"
+            />
+            <Wizard.Step state={Wizard.States.ENABLED} label="Location" />
+            <Wizard.Step state={Wizard.States.ENABLED} label="Picture" />
           </Wizard>
           {renderCurrentStep()}
         </View>
 
         <View style={styles.navigationButtons}>
+          {activeIndex == 0 && (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.push("/signUp")}
+            >
+              <Text style={styles.backText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
           {activeIndex > 0 && (
             <Button
               label="Anterior"
@@ -276,10 +306,8 @@ const styles = StyleSheet.create({
     backgroundColor: ColorPalette.background,
   },
   backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 40,
-    marginLeft: 20,
+    width: "20%",
+    justifyContent: "center",
   },
   backText: {
     marginLeft: 5,
@@ -298,10 +326,6 @@ const styles = StyleSheet.create({
   stepContainer: {
     borderRadius: 8,
     marginVertical: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
   },
   input: {
     marginBottom: 15,
@@ -321,9 +345,7 @@ const styles = StyleSheet.create({
     borderColor: ColorPalette.medium,
   },
   navButton: {
-    marginVertical: 5,
     backgroundColor: ColorPalette.medium,
-    paddingVertical: 12,
     borderRadius: 8,
   },
   navButtonText: {
@@ -335,7 +357,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 60,
   },
   imageButton: {
     backgroundColor: ColorPalette.medium,

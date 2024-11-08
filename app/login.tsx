@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react"; 
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Image,
+  ScrollView,
+  Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import { useAuth } from "./context/AuthContext";
 import { router } from "expo-router";
@@ -14,9 +14,12 @@ import { ColorPalette } from "@/constants/Colors";
 import { useLoginStore } from "@/stores/login.store";
 import { Roles } from "@/constants/Roles";
 import { Svg, Polygon } from "react-native-svg";
+import { Text, View, Image } from "react-native-ui-lib";
+import { SafeAreaView } from "react-native-safe-area-context";
+import KeyBoardAvoidWrapper from "@/components/KeyBoardAvoidWrapper";
 
 const FiveSidedShape = () => {
-  const points = "0,900 0,400 200,300 500,440 400,900"; 
+  const points = "0,900 0,400 200,300 500,440 400,900";
 
   return (
     <Svg height="100%" width="100%">
@@ -40,7 +43,11 @@ const Login = () => {
     const loadSession = () => {
       const role = dataLogin?.user.role;
 
-      if (authState?.authenticated !== null && authState?.authenticated && authState?.token) {
+      if (
+        authState?.authenticated !== null &&
+        authState?.authenticated &&
+        authState?.token
+      ) {
         if (role === Roles.user) {
           router.replace("/(app)/(user)/");
         } else if (role === Roles.veterinary) {
@@ -66,67 +73,73 @@ const Login = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.shapeContainer}>
-        <FiveSidedShape />
-        <Image
-          source={require("../assets/images/logo.png")}
-          style={styles.logo}
-        />
-        <Text style={styles.title}>Spike</Text>
-        <Image
-          source={require("../assets/images/catbox.png")}
-          style={styles.catbox}
-        />
-        <View style={styles.formContainer}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Correo electrónico"
-              placeholderTextColor={ColorPalette.medium}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
+    <SafeAreaView
+      style={{ flex: 2, backgroundColor: ColorPalette.darkGrayPalette }}
+    >
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps={"handled"}
+        >
+          <View flex style={styles.imageContainer}>
+            <Image
+              source={require("@/assets/images/logo.png")}
+              style={styles.logo}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Contraseña"
-              placeholderTextColor={ColorPalette.medium}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!passwordVisible}
-            />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={togglePasswordVisibility}
-            >
-              <MaterialCommunityIcons
-                name={passwordVisible ? "eye-off" : "eye"}
-                size={24}
-                color={ColorPalette.medium}
+            <Text semiBold style={styles.title}>
+              Spike
+            </Text>
+          </View>
+          <View flex padding-20 style={styles.formContainer}>
+            <Text bold style={styles.title}>
+              Login
+            </Text>
+            <View centerV flex>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor={ColorPalette.medium}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
-            </TouchableOpacity>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.inputPassword}
+                  placeholder="Password"
+                  placeholderTextColor={ColorPalette.medium}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!passwordVisible}
+                />
+                <TouchableOpacity
+                  style={styles.eyeIcon}
+                  onPress={togglePasswordVisibility}
+                >
+                  <MaterialCommunityIcons
+                    name={passwordVisible ? "eye-off" : "eye"}
+                    size={24}
+                    color={ColorPalette.medium}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.button} onPress={login}>
+                  <Text style={styles.buttonText}>Continue</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/signUp")}>
+                  <Text style={styles.linkText}>Sign up</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={login}>
-              <Text style={styles.buttonText}>Continue</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.signupContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.signupText}>You don’t have an account?</Text>
-            <View style={styles.divider} />
-          </View>
-          <TouchableOpacity
-            style={styles.registerButton}
-            onPress={() => router.push("/signUp")}
-          >
-            <Text style={styles.registerButtonText}>Register</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -134,58 +147,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: ColorPalette.darkGrayPalette,
-    justifyContent: "center",
-    alignItems: "center",
   },
-  shapeContainer: {
-    position: "relative",
-    width: "100%",
-    height: "100%",
+  imageContainer: {
     justifyContent: "center",
     alignItems: "center",
   },
   logo: {
-    position: "absolute",
-    top: 100, 
-    left: 100, 
     width: 100,
     height: 100,
     resizeMode: "contain",
   },
-  catbox: {
-    position: "absolute",
-    top: "30%", 
-    transform: [{ translateY: -60 }], 
-    left: 90, 
-    width: 200,
-    height: 200,
-    padding: 20,
-    resizeMode: "contain",
-  },
   formContainer: {
-    position: "absolute",
-    top: 400, 
-    left: 0,
-    right: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: 'transparent',
-    zIndex: 1,
+    backgroundColor: ColorPalette.graphitePalette,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
   },
   title: {
-    fontSize: 44,
-    fontWeight: "bold",
+    fontSize: 24,
     textAlign: "center",
-    marginBottom: 20,
+    padding: 10,
     color: ColorPalette.lightGrey,
-    position: "absolute",
-    right: 90, 
-    top: 125, 
-  },
-  inputContainer: {
-    marginBottom: 15,
-    width: '100%',
   },
   input: {
     height: 50,
@@ -197,15 +178,28 @@ const styles = StyleSheet.create({
     backgroundColor: ColorPalette.lightGraphite,
     color: ColorPalette.lightGrey,
   },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  inputPassword: {
+    flex: 1,
+    height: 50,
+    borderColor: ColorPalette.lightGraphite,
+    borderWidth: 1,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    backgroundColor: ColorPalette.lightGraphite,
+    color: ColorPalette.lightGrey,
+  },
   eyeIcon: {
     position: "absolute",
     right: 15,
-    top: 15,
   },
   buttonContainer: {
     justifyContent: "flex-end",
     marginBottom: 20,
-    width: '100%',
   },
   button: {
     backgroundColor: ColorPalette.bluePalette,
@@ -219,34 +213,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  signupContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 30,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'lightgray',
-    marginHorizontal: 10,
-  },
-  signupText: {
-    color: ColorPalette.gray,
+  linkText: {
+    color: ColorPalette.medium,
     fontSize: 14,
-    paddingHorizontal: 8,
-  },
-  registerButton: {
-    backgroundColor: "white",
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: "center",
-    marginBottom: 15,
-    width: '100%',
-    paddingHorizontal: 26,
-  },
-  registerButtonText: {
-    fontSize: 18,
-    color: "#3E4357",
+    textAlign: "center",
   },
 });
 

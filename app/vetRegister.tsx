@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from "react-native";
+import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
-import { Wizard, TextField, Button, Toast } from "react-native-ui-lib";
+import { Wizard, Text, TextField, Button, Toast } from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
