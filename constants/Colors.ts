@@ -18,6 +18,7 @@ export const ColorPalette = {
   medium: "#9F9AA1",
   mediumDark: "#424242",
   green: "#437919",
+  background: '#fff'
 };
 
 export const Colors = {

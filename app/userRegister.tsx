@@ -1,16 +1,23 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from "react-native";
+import { StyleSheet, ScrollView, Alert, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
-import { Wizard, TextField, Button, Toast } from "react-native-ui-lib";
+import {
+  Wizard,
+  TextField,
+  Button,
+  Toast,
+  View,
+  Text,
+} from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
-import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore"; 
-import axios from "axios";
+import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
+import axios, { isAxiosError } from "axios";
 import { Roles } from "@/constants/Roles";
 
-const UserGreeting = () => {
+const UserRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -22,13 +29,12 @@ const UserGreeting = () => {
     city: "",
     number_int: "",
     cp: "",
-    img: null,
+    img: null as ImagePicker.ImagePickerAsset | null,
   });
-  const [toastMessage, setToastMessage] = useState(null);
+  const [toastMessage, setToastMessage] = useState("");
 
-  const handleInputChange = (name, value) => {
+  const handleInputChange = (name: string, value: string) => {
     setFormData({ ...formData, [name]: value });
-    console.log(formData);
   };
 
   const pickImage = async () => {
@@ -42,7 +48,29 @@ const UserGreeting = () => {
     }
   };
 
+  const isFormComplete = () => {
+    return (
+      formData.firstName &&
+      formData.lastName &&
+      formData.email &&
+      formData.phone &&
+      formData.password &&
+      formData.city &&
+      formData.number_int &&
+      formData.cp &&
+      formData.img
+    );
+  };
+
   const handleSubmit = async () => {
+    if (!isFormComplete()) {
+      Alert.alert(
+        "Error",
+        "Por favor, completa todos los campos y selecciona una imagen."
+      );
+      return;
+    }
+
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       if (key === "img" && formData.img) {
@@ -50,23 +78,29 @@ const UserGreeting = () => {
           uri: formData.img.uri,
           name: "user_image.jpg",
           type: "image/jpeg",
-        });
+        } as any);
       } else {
         data.append(key, formData[key]);
       }
     });
-  
+
     try {
       await axiosInstanceSpikeCore.post("/createUser", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setToastMessage("Usuario registrado exitosamente.");
-      setTimeout(() => setToastMessage(null), 2000);
+      setTimeout(() => setToastMessage(""), 2000);
     } catch (error) {
       Alert.alert("Error", "No se pudo completar el registro.");
+      if (isAxiosError(error)) {
+        console.error(
+          error.response?.data !== undefined
+            ? error.response.data.error
+            : "Error desconocido"
+        );
+      }
     }
   };
-  
 
   const goToPrevStep = () => {
     setActiveIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : prevIndex));
@@ -84,28 +118,50 @@ const UserGreeting = () => {
     switch (activeIndex) {
       case 0:
         return (
-          <View style={styles.stepContainer}>
-            <TextField
-              placeholder="Nombre"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.firstName}
-              onChangeText={(value) => handleInputChange("firstName", value)}
-              style={styles.input}
-            />
-            <TextField
-              placeholder="Apellido"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.lastName}
-              onChangeText={(value) => handleInputChange("lastName", value)}
-              style={styles.input}
-            />
-            <TextField
-              placeholder="Correo Electrónico"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.email}
-              onChangeText={(value) => handleInputChange("email", value)}
-              style={styles.input}
-            />
+          <View
+            flex
+            padding-20
+            centerH
+            backgroundColor={ColorPalette.background}
+            style={styles.stepContainer}
+          >
+            <View marginB-40 centerV centerH height={200}>
+              <Text style={{ fontFamily: "Poppins" }} text30>
+                ¡Hey there!
+              </Text>
+              <Text text30>Let's start</Text>
+            </View>
+            <View padding-20 style={{ width: "100%" }}>
+              <TextField
+                placeholder="Nombre"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.firstName}
+                onChangeText={(value) => handleInputChange("firstName", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Apellido"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.lastName}
+                onChangeText={(value) => handleInputChange("lastName", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Correo Electrónico"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.email}
+                onChangeText={(value) => handleInputChange("email", value)}
+                containerStyle={styles.textFieldContainer}
+              />
+              <TextField
+                placeholder="Contraseña"
+                placeholderTextColor={ColorPalette.medium}
+                value={formData.password}
+                onChangeText={(value) => handleInputChange("password", value)}
+                secureTextEntry
+                containerStyle={styles.textFieldContainer}
+              />
+            </View>
           </View>
         );
       case 1:
@@ -117,14 +173,6 @@ const UserGreeting = () => {
               value={formData.phone}
               onChangeText={(value) => handleInputChange("phone", value)}
               keyboardType="numeric"
-              style={styles.input}
-            />
-            <TextField
-              placeholder="Contraseña"
-              placeholderTextColor={ColorPalette.medium}
-              value={formData.password}
-              onChangeText={(value) => handleInputChange("password", value)}
-              secureTextEntry
               style={styles.input}
             />
             <TextField
@@ -156,7 +204,9 @@ const UserGreeting = () => {
             <TouchableOpacity onPress={pickImage} style={styles.imageButton}>
               <Text style={styles.imageButtonText}>Seleccionar Imagen</Text>
             </TouchableOpacity>
-            {formData.img && <Text style={styles.imageText}>Imagen seleccionada</Text>}
+            {formData.img && (
+              <Text style={styles.imageText}>Imagen seleccionada</Text>
+            )}
           </View>
         );
       default:
@@ -166,13 +216,23 @@ const UserGreeting = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push("/signUp")}>
-        <MaterialCommunityIcons name="arrow-left" size={24} color={ColorPalette.medium} />
-        <Text style={styles.backText}>Back to Login</Text>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.push("/signUp")}
+      >
+        <MaterialCommunityIcons
+          name="arrow-left"
+          size={24}
+          color={ColorPalette.medium}
+        />
+        <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.wizardContainer}>
-          <Wizard activeIndex={activeIndex} onActiveIndexChanged={setActiveIndex}>
+          <Wizard
+            activeIndex={activeIndex}
+            onActiveIndexChanged={setActiveIndex}
+          >
             <Wizard.Step state={Wizard.States.ENABLED} label="Paso 1" />
             <Wizard.Step state={Wizard.States.ENABLED} label="Paso 2" />
             <Wizard.Step state={Wizard.States.ENABLED} label="Paso 3" />
@@ -182,16 +242,30 @@ const UserGreeting = () => {
 
         <View style={styles.navigationButtons}>
           {activeIndex > 0 && (
-            <Button label="Anterior" onPress={goToPrevStep} style={styles.navButton} />
+            <Button
+              label="Anterior"
+              onPress={goToPrevStep}
+              style={styles.navButton}
+            />
           )}
           {activeIndex < 2 ? (
-            <Button label="Siguiente" onPress={goToNextStep} style={styles.navButton} />
+            <Button
+              label="Siguiente"
+              onPress={goToNextStep}
+              style={styles.navButton}
+            />
           ) : (
-            <Button label="Finalizar" onPress={handleSubmit} style={styles.navButton} />
+            <Button
+              label="Finalizar"
+              onPress={handleSubmit}
+              style={styles.navButton}
+            />
           )}
         </View>
       </ScrollView>
-      {toastMessage && <Toast visible position="bottom" message={toastMessage} />}
+      {toastMessage && (
+        <Toast visible position="bottom" message={toastMessage} />
+      )}
     </SafeAreaView>
   );
 };
@@ -199,7 +273,7 @@ const UserGreeting = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: ColorPalette.graphitePalette,
+    backgroundColor: ColorPalette.background,
   },
   backButton: {
     flexDirection: "row",
@@ -217,10 +291,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 20,
   },
+  wizardComponent: {
+    backgroundColor: ColorPalette.background,
+    borderBottomWidth: 0,
+  },
   stepContainer: {
-    padding: 20,
-    alignItems: "center",
-    backgroundColor: ColorPalette.graphitePalette, // Fondo oscuro
     borderRadius: 8,
     marginVertical: 10,
     shadowColor: "#000",
@@ -229,12 +304,21 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   input: {
-    width: "100%",
     marginBottom: 15,
-    backgroundColor: ColorPalette.graphitePalette,
+    backgroundColor: ColorPalette.background,
     borderRadius: 8,
     padding: 10,
-    color: ColorPalette.lightGrey, // Texto claro
+    borderWidth: 1,
+    borderColor: ColorPalette.medium,
+  },
+  textFieldContainer: {
+    width: "100%",
+    marginBottom: 15,
+    backgroundColor: ColorPalette.background,
+    borderRadius: 8,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: ColorPalette.medium,
   },
   navButton: {
     marginVertical: 5,
@@ -271,4 +355,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UserGreeting;
+export default UserRegister;
