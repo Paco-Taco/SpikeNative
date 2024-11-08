@@ -49,7 +49,7 @@ const Index = () => {
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: ColorPalette.graphitePalette, paddingTop: 40 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: ColorPalette.graphitePalette, paddingTop: 100 }}>
       <View paddingH-20 flex>
         <FlatList
           data={veterinaryClinics}

@@ -251,6 +251,10 @@ const UserRegister = () => {
           <Wizard
             activeIndex={activeIndex}
             onActiveIndexChanged={setActiveIndex}
+            containerStyle={{
+              shadowOpacity: 0,
+              borderBottomWidth: 0,
+            }}
           >
             <Wizard.Step
               state={Wizard.States.ENABLED}
