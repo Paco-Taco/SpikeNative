@@ -27,7 +27,7 @@ const Index = () => {
   return (
     <View
       flex
-      marginT-100
+      paddingT-140
       backgroundColor={ColorPalette.graphitePalette}
       // useSafeArea
     >

@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore"; 
 import axios from "axios";
+import { Roles } from "@/constants/Roles";
 
 const UserGreeting = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -17,7 +18,7 @@ const UserGreeting = () => {
     email: "",
     phone: "",
     password: "",
-    role: "PET_OWNER",
+    role: Roles.user,
     city: "",
     number_int: "",
     cp: "",
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
   stepContainer: {
     padding: 20,
     alignItems: "center",
-    backgroundColor: ColorPalette.dark, // Fondo oscuro
+    backgroundColor: ColorPalette.graphitePalette, // Fondo oscuro
     borderRadius: 8,
     marginVertical: 10,
     shadowColor: "#000",
@@ -233,7 +234,7 @@ const styles = StyleSheet.create({
     backgroundColor: ColorPalette.graphitePalette,
     borderRadius: 8,
     padding: 10,
-    color: ColorPalette.light, // Texto claro
+    color: ColorPalette.lightGrey, // Texto claro
   },
   navButton: {
     marginVertical: 5,
