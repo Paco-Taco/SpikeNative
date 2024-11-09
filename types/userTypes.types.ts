@@ -17,6 +17,7 @@ export interface Veterinary {
   cp: string;
   rfc: string;
   category: string[];
+  daysOfWeek: string[];
   img: string;
   img_public_id: null | string;
   createdAt: Date;

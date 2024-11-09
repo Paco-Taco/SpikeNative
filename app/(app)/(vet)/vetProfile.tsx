@@ -5,12 +5,13 @@ import { ColorPalette } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/app/context/AuthContext";
-import { useLoginStore } from "@/stores/login.store";  // Asegúrate de importar el store correctamente
+import { useLoginStore } from "@/stores/login.store";  
 import * as ImagePicker from 'expo-image-picker';
 
 const VetProfile = () => {
-  const { dataLogin } = useLoginStore((state) => state);  // Suscríbete al store
+  const { dataLogin } = useLoginStore((state) => state);  
   const { user, token } = dataLogin || {};
+  const [loading, setLoading] = useState<boolean>(true); 
   const userId = user?.id;
 
   const { onLogout } = useAuth();
@@ -23,7 +24,6 @@ const VetProfile = () => {
     img: user?.img || "",
   });
 
-  // Efecto para escuchar cambios en los datos del login
   useEffect(() => {
     if (user) {
       setFormData({
@@ -31,7 +31,7 @@ const VetProfile = () => {
         img: user.img,
       });
     }
-  }, [user]);  // Esta dependencia asegura que se actualicen cuando cambie 'user'
+  }, [user]);  
 
   return (
     <SafeAreaView style={styles.safeArea}>

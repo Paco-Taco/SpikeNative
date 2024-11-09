@@ -1,21 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, TextInput, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ColorPalette } from "@/constants/Colors";
-import { Ionicons } from "@expo/vector-icons";
 import { useLoginStore } from "@/stores/login.store";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import * as ImagePicker from 'expo-image-picker';  
-import { UpdateService  } from "@/services/updateService";
+import * as ImagePicker from 'expo-image-picker';
+import { VeterinaryService } from "@/services/vetServices";
 
 const VetProfile = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const { user, token } = dataLogin || {};
-  const userId = user?.id;  // ID del usuario logueado
+  const [loading, setLoading] = useState<boolean>(true); 
+  const userId = user?.id;
   const router = useRouter();
 
-  const [isEditing, setIsEditing] = useState(true); 
+  const [isEditing, setIsEditing] = useState(true);
 
   const [formData, setFormData] = useState({
     veterinarieName: user?.veterinarieName || "",
@@ -28,17 +27,29 @@ const VetProfile = () => {
     number_int: user?.number_int || "",
     cp: user?.cp || "",
     rfc: user?.rfc || "",
-    category: user?.category || [],
+    category: user?.category || [], 
+    diasSemana: user?.diasSemana || [], 
+    horaInicio: user?.horaInicio || "", 
+    horaFin: user?.horaFin || "", 
     img: user?.img || "",
     img_public_id: user?.img_public_id || null,
   });
 
-  // Función para manejar cambios en el formulario
+  const categories = ["CARE", "RECREATION", "NUTRITION"];
+  const dias = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+  // Elimina el fetch de datos del perfil
+  useEffect(() => {
+    if (userId && token) {
+      console.log("User ID:", userId);
+    }
+  }, [userId, token]);
+
   const handleChange = (name, value) => {
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
-    });
+    }));
   };
 
   const handleImagePick = async () => {
@@ -48,63 +59,68 @@ const VetProfile = () => {
       aspect: [4, 3],
       quality: 1,
     });
-  
-    console.log("Resultado de selección de imagen:", result); 
-  
+
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setFormData({
         ...formData,
-        img: uri,  
+        img: uri,
       });
-    } else {
-      console.log("Selección de imagen cancelada");
     }
   };
-  
 
-  // Función para actualizar el perfil
-  const handleUpdateProfile = async () => {
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('veterinarieName', formData.veterinarieName);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('phone', formData.phone);
-      formDataToSend.append('street', formData.street);
-      formDataToSend.append('city', formData.city);
-      formDataToSend.append('locality', formData.locality);
-      formDataToSend.append('cologne', formData.cologne);
-      formDataToSend.append('number_int', formData.number_int);
-      formDataToSend.append('cp', formData.cp);
-      formDataToSend.append('rfc', formData.rfc);
-      formDataToSend.append('category', JSON.stringify(formData.category));
-  
-      if (formData.img) {
-        const imageFile = {
+  const handleCategoryChange = (category) => {
+    const updatedCategories = formData.category.includes(category)
+      ? formData.category.filter((cat) => cat !== category)
+      : [...formData.category, category];
+    
+    handleChange("category", updatedCategories);
+  };
+
+  const handleSubmit = async () => {
+    const validDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const filteredDays = Array.isArray(formData.diasSemana) 
+      ? formData.diasSemana.filter(day => validDays.includes(day)) 
+      : [];
+
+    const data = new FormData();
+
+    Object.keys(formData).forEach((key) => {
+      if (key === "img" && formData.img) {
+        data.append("img", {
           uri: formData.img,
-          type: 'image/jpeg',
-          name: 'profile.jpg',
-        };
-        formDataToSend.append('img', imageFile);
+          name: "vet_image.jpg",
+          type: "image/jpeg",
+        });
+      } else if (key === "diasSemana") {
+        filteredDays.forEach((day) => data.append("diasSemana[]", day));
+      } else if (key === "horaInicio") {
+        data.append("horaInicio", formData.horaInicio);
+      } else if (key === "horaFin") {
+        data.append("horaFin", formData.horaFin);
+      } else if (key === "category") {
+        formData.category.forEach(cat => data.append("category[]", cat)); 
+      } else {
+        data.append(key, formData[key]);
       }
-  
- 
+    });
 
-      const response = await UpdateService.updateVetProfile(userId, formDataToSend, token);
+    try {
+      const response = await VeterinaryService.updateVeterinary(userId, data, token);
       useLoginStore.getState().updateProfile({
         veterinarieName: formData.veterinarieName,
         img: formData.img,
       });
       Alert.alert("Éxito", response.message);
-      router.push("../")
+      router.push("../");
     } catch (error) {
-      console.error("Error al actualizar perfil:", error);
-      Alert.alert("Error", "No se pudo actualizar el perfil. Intenta nuevamente.");
+      console.error("Error al actualizar perfil:", error.response?.data || error);
+      Alert.alert("Error", `No se pudo actualizar el perfil. Detalles: ${error.response?.data?.message || error.message}`);
     }
   };
-  
+
   const handleCancel = () => {
-    router.push("../")
+    router.push("../");
   };
 
   return (
@@ -120,17 +136,12 @@ const VetProfile = () => {
 
           {isEditing && (
             <View style={styles.formContainer}>
+              {/* Campos de texto */}
               <TextInput
                 style={styles.input}
                 placeholder="Nombre del veterinario"
                 value={formData.veterinarieName}
                 onChangeText={(text) => handleChange("veterinarieName", text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={formData.email}
-                onChangeText={(text) => handleChange("email", text)}
               />
               <TextInput
                 style={styles.input}
@@ -174,27 +185,70 @@ const VetProfile = () => {
                 value={formData.cp}
                 onChangeText={(text) => handleChange("cp", text)}
               />
+              {/* Campos para horaInicio y horaFin */}
               <TextInput
                 style={styles.input}
-                placeholder="RFC"
-                value={formData.rfc}
-                onChangeText={(text) => handleChange("rfc", text)}
+                placeholder="Hora de inicio"
+                value={formData.horaInicio}
+                onChangeText={(text) => handleChange("horaInicio", text)}
               />
+              <TextInput
+                style={styles.input}
+                placeholder="Hora de fin"
+                value={formData.horaFin}
+                onChangeText={(text) => handleChange("horaFin", text)}
+              />
+
+              {/* Menú para elegir días de la semana */}
+              <Text style={styles.label}>Días disponibles:</Text>
+              <View style={styles.categoryContainer}>
+                {dias.map((day) => (
+                  <TouchableOpacity
+                    key={day}
+                    style={[
+                      styles.categoryButton,
+                      formData.diasSemana.includes(day) && styles.categorySelected,
+                    ]}
+                    onPress={() => {
+                      const updatedDays = formData.diasSemana.includes(day)
+                        ? formData.diasSemana.filter((d) => d !== day)
+                        : [...formData.diasSemana, day];
+                      handleChange("diasSemana", updatedDays);
+                    }}
+                  >
+                    <Text style={styles.categoryText}>{day}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Menú para elegir categorías */}
+              <Text style={styles.label}>Categorías de servicio:</Text>
+              <View style={styles.categoryContainer}>
+                {categories.map((category) => (
+                  <TouchableOpacity
+                    key={category}
+                    style={[
+                      styles.categoryButton,
+                      formData.category.includes(category) && styles.categorySelected,
+                    ]}
+                    onPress={() => handleCategoryChange(category)}
+                  >
+                    <Text style={styles.categoryText}>{category}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           )}
 
-          {/* Botones para confirmar o cancelar */}
-          {isEditing && (
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
-                <Text style={styles.buttonText}>Cancelar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={handleUpdateProfile} style={styles.saveButton}>
-                <Text style={styles.buttonText}>Guardar cambios</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+          {/* Botones de guardar y cancelar */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+              <Text style={styles.buttonText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Guardar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -204,22 +258,21 @@ const VetProfile = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: ColorPalette.lightGrey,
   },
   container: {
     padding: 20,
-    alignItems: "center",
+    flex: 1,
+    alignItems: 'center',
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 20,
   },
   profileName: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
-    color: ColorPalette.darkGrayPalette,
     marginBottom: 20,
   },
   formContainer: {
@@ -230,32 +283,51 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 10,
     marginVertical: 5,
-    backgroundColor: ColorPalette.white,
-    borderRadius: 8,
     borderWidth: 1,
-    borderColor: ColorPalette.border,
+    borderColor: '#ccc',
+    borderRadius: 5,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginVertical: 5,
+    color: '#333',
+  },
+  categoryContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 10,
+  },
+  categoryButton: {
+    padding: 10,
+    margin: 5,
+    backgroundColor: '#ddd',
+    borderRadius: 5,
+  },
+  categorySelected: {
+    backgroundColor: '#00f',
+  },
+  categoryText: {
+    color: '#fff',
   },
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 20,
   },
   cancelButton: {
-    backgroundColor: ColorPalette.lightGrey,
     padding: 10,
-    borderRadius: 8,
-    width: "45%",
-    alignItems: "center",
+    backgroundColor: '#ccc',
+    borderRadius: 5,
   },
   saveButton: {
-    backgroundColor: ColorPalette.primary,
     padding: 10,
-    borderRadius: 8,
-    width: "45%",
-    alignItems: "center",
+    backgroundColor: '#00f',
+    borderRadius: 5,
   },
   buttonText: {
-    color: ColorPalette.white,
+    color: '#fff',
     fontSize: 16,
   },
 });
