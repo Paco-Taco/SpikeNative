@@ -22,3 +22,28 @@ export interface Veterinary {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// types/userTypes.types.ts
+
+export interface ResponseEditVet {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    veterinarieName: string;
+    email: string;
+    phone: string;
+    street: string;
+    city: string;
+    locality: string;
+    cologne: string;
+    number_int: string;
+    cp: string;
+    rfc: string;
+    category: string[];
+    img: string;
+    img_public_id: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
