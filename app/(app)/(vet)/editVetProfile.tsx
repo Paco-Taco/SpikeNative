@@ -6,42 +6,75 @@ import { useRouter } from "expo-router";
 import axios from "axios";
 import * as ImagePicker from 'expo-image-picker';
 import { VeterinaryService } from "@/services/vetServices";
+import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 
 const VetProfile = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const { user, token } = dataLogin || {};
-  const [loading, setLoading] = useState<boolean>(true); 
+  const [loading, setLoading] = useState(true); 
   const userId = user?.id;
   const router = useRouter();
 
   const [isEditing, setIsEditing] = useState(true);
-
   const [formData, setFormData] = useState({
-    veterinarieName: user?.veterinarieName || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    street: user?.street || "",
-    city: user?.city || "",
-    locality: user?.locality || "",
-    cologne: user?.cologne || "",
-    number_int: user?.number_int || "",
-    cp: user?.cp || "",
-    rfc: user?.rfc || "",
-    category: user?.category || [], 
-    diasSemana: user?.diasSemana || [], 
-    horaInicio: user?.horaInicio || "", 
-    horaFin: user?.horaFin || "", 
-    img: user?.img || "",
-    img_public_id: user?.img_public_id || null,
+    veterinarieName: "",
+    email: "",
+    phone: "",
+    street: "",
+    city: "",
+    locality: "",
+    cologne: "",
+    number_int: "",
+    cp: "",
+    rfc: "",
+    category: [], 
+    diasSemana: [], 
+    horaInicio: "", 
+    horaFin: "", 
+    img: "",
+    img_public_id: null,
   });
 
   const categories = ["CARE", "RECREATION", "NUTRITION"];
   const dias = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-  // Elimina el fetch de datos del perfil
   useEffect(() => {
+    const fetchVeterinaryProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstanceSpikeCore.get(`/getveterinary/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = response.data.veterinary;
+        
+        setFormData({
+          veterinarieName: data.veterinarieName,
+          email: data.email,
+          phone: data.phone,
+          street: data.street,
+          city: data.city,
+          locality: data.locality,
+          cologne: data.cologne,
+          number_int: data.number_int,
+          cp: data.cp,
+          rfc: data.rfc,
+          category: data.category || [],
+          diasSemana: data.dias || [],
+          horaInicio: data.hora_ini || "",
+          horaFin: data.hora_fin || "",
+          img: data.img || "",
+          img_public_id: data.img_public_id || null,
+        });
+      } catch (error) {
+        console.error("Error fetching profile data:", error.response?.data || error.message);
+        Alert.alert("Error", "No se pudo cargar el perfil.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (userId && token) {
-      console.log("User ID:", userId);
+      fetchVeterinaryProfile();
     }
   }, [userId, token]);
 
@@ -126,130 +159,122 @@ const VetProfile = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView>
-        <View style={styles.container}>
-          {/* Imagen de perfil */}
-          <TouchableOpacity onPress={handleImagePick}>
-            <Image source={formData.img ? { uri: formData.img } : require("@/assets/images/catbox.png")} style={styles.profileImage} />
-          </TouchableOpacity>
+        {loading ? (
+          <Text>Cargando perfil...</Text>
+        ) : (
+          <View style={styles.container}>
+            <TouchableOpacity onPress={handleImagePick}>
+              <Image source={formData.img ? { uri: formData.img } : require("@/assets/images/catbox.png")} style={styles.profileImage} />
+            </TouchableOpacity>
 
-          <Text style={styles.profileName}>{formData.veterinarieName}</Text>
+            <Text style={styles.profileName}>{formData.veterinarieName}</Text>
 
-          {isEditing && (
-            <View style={styles.formContainer}>
-              {/* Campos de texto */}
-              <TextInput
-                style={styles.input}
-                placeholder="Nombre del veterinario"
-                value={formData.veterinarieName}
-                onChangeText={(text) => handleChange("veterinarieName", text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Teléfono"
-                value={formData.phone}
-                onChangeText={(text) => handleChange("phone", text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Calle"
-                value={formData.street}
-                onChangeText={(text) => handleChange("street", text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Ciudad"
-                value={formData.city}
-                onChangeText={(text) => handleChange("city", text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Localidad"
-                value={formData.locality}
-                onChangeText={(text) => handleChange("locality", text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Colonia"
-                value={formData.cologne}
-                onChangeText={(text) => handleChange("cologne", text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Número interior"
-                value={formData.number_int}
-                onChangeText={(text) => handleChange("number_int", text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Código Postal"
-                value={formData.cp}
-                onChangeText={(text) => handleChange("cp", text)}
-              />
-              {/* Campos para horaInicio y horaFin */}
-              <TextInput
-                style={styles.input}
-                placeholder="Hora de inicio"
-                value={formData.horaInicio}
-                onChangeText={(text) => handleChange("horaInicio", text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Hora de fin"
-                value={formData.horaFin}
-                onChangeText={(text) => handleChange("horaFin", text)}
-              />
+            {isEditing && (
+              <View style={styles.formContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Teléfono"
+                  value={formData.phone}
+                  onChangeText={(text) => handleChange("phone", text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Calle"
+                  value={formData.street}
+                  onChangeText={(text) => handleChange("street", text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ciudad"
+                  value={formData.city}
+                  onChangeText={(text) => handleChange("city", text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Localidad"
+                  value={formData.locality}
+                  onChangeText={(text) => handleChange("locality", text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Colonia"
+                  value={formData.cologne}
+                  onChangeText={(text) => handleChange("cologne", text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Número interior"
+                  value={formData.number_int}
+                  onChangeText={(text) => handleChange("number_int", text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Código Postal"
+                  value={formData.cp}
+                  onChangeText={(text) => handleChange("cp", text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Hora de inicio"
+                  value={formData.horaInicio}
+                  onChangeText={(text) => handleChange("horaInicio", text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Hora de fin"
+                  value={formData.horaFin}
+                  onChangeText={(text) => handleChange("horaFin", text)}
+                />
 
-              {/* Menú para elegir días de la semana */}
-              <Text style={styles.label}>Días disponibles:</Text>
-              <View style={styles.categoryContainer}>
-                {dias.map((day) => (
-                  <TouchableOpacity
-                    key={day}
-                    style={[
-                      styles.categoryButton,
-                      formData.diasSemana.includes(day) && styles.categorySelected,
-                    ]}
-                    onPress={() => {
-                      const updatedDays = formData.diasSemana.includes(day)
-                        ? formData.diasSemana.filter((d) => d !== day)
-                        : [...formData.diasSemana, day];
-                      handleChange("diasSemana", updatedDays);
-                    }}
-                  >
-                    <Text style={styles.categoryText}>{day}</Text>
-                  </TouchableOpacity>
-                ))}
+                <Text style={styles.label}>Días disponibles:</Text>
+                <View style={styles.categoryContainer}>
+                  {dias.map((day) => (
+                    <TouchableOpacity
+                      key={day}
+                      style={[
+                        styles.categoryButton,
+                        formData.diasSemana.includes(day) && styles.categorySelected,
+                      ]}
+                      onPress={() => {
+                        const updatedDays = formData.diasSemana.includes(day)
+                          ? formData.diasSemana.filter((d) => d !== day)
+                          : [...formData.diasSemana, day];
+                        handleChange("diasSemana", updatedDays);
+                      }}
+                    >
+                      <Text style={styles.categoryText}>{day}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={styles.label}>Categorías de servicio:</Text>
+                <View style={styles.categoryContainer}>
+                  {categories.map((category) => (
+                    <TouchableOpacity
+                      key={category}
+                      style={[
+                        styles.categoryButton,
+                        formData.category.includes(category) && styles.categorySelected,
+                      ]}
+                      onPress={() => handleCategoryChange(category)}
+                    >
+                      <Text style={styles.categoryText}>{category}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
+            )}
 
-              {/* Menú para elegir categorías */}
-              <Text style={styles.label}>Categorías de servicio:</Text>
-              <View style={styles.categoryContainer}>
-                {categories.map((category) => (
-                  <TouchableOpacity
-                    key={category}
-                    style={[
-                      styles.categoryButton,
-                      formData.category.includes(category) && styles.categorySelected,
-                    ]}
-                    onPress={() => handleCategoryChange(category)}
-                  >
-                    <Text style={styles.categoryText}>{category}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
+                <Text style={styles.buttonText}>Guardar</Text>
+              </TouchableOpacity>
             </View>
-          )}
-
-          {/* Botones de guardar y cancelar */}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-              <Text style={styles.buttonText}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Guardar</Text>
-            </TouchableOpacity>
           </View>
-        </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

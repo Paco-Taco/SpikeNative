@@ -26,7 +26,6 @@ const storeApi: StateCreator<LoginState> = (set, get) => ({
 
       // Guarda el login data en SecureStore
       await SecureStore.setItemAsync(SECURE_STORE_KEY, JSON.stringify(data));
-      
       return data;
     } catch (error) {  
       set({ dataLogin: null });

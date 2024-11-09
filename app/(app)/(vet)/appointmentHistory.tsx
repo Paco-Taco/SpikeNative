@@ -26,13 +26,15 @@ const Appointment = () => {
 
   // Función para visualizar detalles de la cita
   const visualizarCita = (cita: any) => {
+    console.log(cita)
     const genderText = cita.pet.gender === "0" ? "Masculino" : "Femenino";
     const heightText = ["Pequeño", "Mediano", "Grande", "Gigante"][parseInt(cita.pet.height) - 1];
     const animalText = ["Perro", "Gato", "Conejo", "Aves", "Reptiles", "Otros"][parseInt(cita.pet.animal) - 1];
 
+
     Alert.alert(
         "Detalles de la Cita",
-        `Dueño: ${cita.pet.ownerId} 
+        `Dueño: ${cita.user.firstName} ${cita.user.lastName}
         \nMascota: ${cita.pet.name}
         \nEdad: ${cita.pet.age}
         \nGénero: ${genderText}
