@@ -11,6 +11,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Image,
 } from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
@@ -19,6 +20,12 @@ import axios, { isAxiosError } from "axios";
 import { Roles } from "@/constants/Roles";
 import { Fonts } from "@/constants/Fonts";
 import LottieView from "lottie-react-native";
+import TipContainer from "@/components/wizard/TipContainer";
+import SimpleTextField from "@/components/wizard/SimpleTextField";
+import ValidationTextField from "@/components/wizard/ValidationTextField";
+import PictureInput from "@/components/wizard/PictureInput";
+import StepLayout from "@/components/layout/StepLayout";
+import FormContainer from "@/components/wizard/FormContainer";
 
 const UserRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -51,25 +58,49 @@ const UserRegister = () => {
     }
   };
 
-  const isFormComplete = () => {
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isValidPassword = (password: string): boolean => {
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
+  const isValidPhoneNumber = (phone: string): boolean => {
+    const phoneRegex = /^\d{10}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const isPart1Complete = () => {
     return (
       formData.firstName &&
       formData.lastName &&
-      formData.email &&
-      formData.phone &&
-      formData.password &&
+      isValidEmail(formData.email) &&
+      isValidPassword(formData.password)
+    );
+  };
+
+  const isPart2Complete = () => {
+    return (
+      isValidPhoneNumber(formData.phone) &&
       formData.city &&
       formData.number_int &&
-      formData.cp &&
-      formData.img
+      formData.cp
     );
+  };
+
+  const isFormComplete = () => {
+    return isPart1Complete() && isPart2Complete() && formData.img;
   };
 
   const handleSubmit = async () => {
     if (!isFormComplete()) {
       Alert.alert(
         "Error",
-        "Por favor, completa todos los campos y selecciona una imagen."
+        "Por favor, completa todos los campos antes de continuar."
       );
       return;
     }
@@ -121,14 +152,8 @@ const UserRegister = () => {
     switch (activeIndex) {
       case 0:
         return (
-          <View
-            flex
-            padding-20
-            centerH
-            backgroundColor={ColorPalette.background}
-            style={styles.stepContainer}
-          >
-            <View marginV-20 centerV padding-20 centerH height={200}>
+          <StepLayout>
+            <TipContainer height={200}>
               <Text style={{ fontFamily: Fonts.PoppinsBold }} text30>
                 ¡Hey there!
               </Text>
@@ -141,50 +166,43 @@ const UserRegister = () => {
                 loop
                 style={{ width: 125, height: 125 }}
               />
-            </View>
-            <View padding-20 style={{ width: "100%" }}>
-              <TextField
-                placeholder="Nombre"
-                placeholderTextColor={ColorPalette.medium}
+            </TipContainer>
+            <FormContainer>
+              <SimpleTextField
+                placeholder="Name"
                 value={formData.firstName}
                 onChangeText={(value) => handleInputChange("firstName", value)}
-                containerStyle={styles.textFieldContainer}
               />
-              <TextField
-                placeholder="Apellido"
-                placeholderTextColor={ColorPalette.medium}
+              <SimpleTextField
+                placeholder="Second Name"
                 value={formData.lastName}
                 onChangeText={(value) => handleInputChange("lastName", value)}
-                containerStyle={styles.textFieldContainer}
               />
-              <TextField
-                placeholder="Correo Electrónico"
-                placeholderTextColor={ColorPalette.medium}
+              <ValidationTextField
+                placeholder="Email"
                 value={formData.email}
                 onChangeText={(value) => handleInputChange("email", value)}
-                containerStyle={styles.textFieldContainer}
+                validate={["required", (value) => isValidEmail(value || "")]}
+                validationMessage={["Field is required", "Email is invalid"]}
               />
-              <TextField
-                placeholder="Contraseña"
-                placeholderTextColor={ColorPalette.medium}
+              <ValidationTextField
+                placeholder="Password"
                 value={formData.password}
                 onChangeText={(value) => handleInputChange("password", value)}
                 secureTextEntry
-                containerStyle={styles.textFieldContainer}
+                validate={["required", (value) => isValidPassword(value || "")]}
+                validationMessage={[
+                  "Field is required",
+                  "Password must contain at least 8 characters, one number and one special character",
+                ]}
               />
-            </View>
-          </View>
+            </FormContainer>
+          </StepLayout>
         );
       case 1:
         return (
-          <View
-            flex
-            padding-20
-            centerH
-            backgroundColor={ColorPalette.background}
-            style={styles.stepContainer}
-          >
-            <View marginV-20 centerV padding-20 centerH height={300}>
+          <StepLayout>
+            <TipContainer height={200}>
               <Text style={{ textAlign: "center" }} text30 bold>
                 Where are you from?
               </Text>
@@ -192,52 +210,61 @@ const UserRegister = () => {
                 source={require("@/assets/lottie/LocationHand.json")}
                 autoPlay
                 loop
-                style={{ width: 200, height: 200,flex: 1 }}
+                style={{ width: 150, height: 150, flex: 1 }}
               />
-            </View>
-            <View paddingT-20 style={{ width: "100%" }}>
-              <TextField
-                placeholder="Teléfono"
-                placeholderTextColor={ColorPalette.medium}
+            </TipContainer>
+            <FormContainer>
+              <ValidationTextField
+                placeholder="Phone number"
                 value={formData.phone}
                 onChangeText={(value) => handleInputChange("phone", value)}
-                keyboardType="numeric"
-                containerStyle={styles.textFieldContainer}
+                keyboardType="phone-pad"
+                validate={[
+                  "required",
+                  (value) => isValidPhoneNumber(value || ""),
+                ]}
+                validationMessage={[
+                  "Field is required",
+                  "Phone number is invalid",
+                ]}
               />
-              <TextField
-                placeholder="Ciudad"
-                placeholderTextColor={ColorPalette.medium}
+              <SimpleTextField
+                placeholder="City"
                 value={formData.city}
                 onChangeText={(value) => handleInputChange("city", value)}
-                containerStyle={styles.textFieldContainer}
               />
-              <TextField
-                placeholder="Número Interior"
-                placeholderTextColor={ColorPalette.medium}
+              <SimpleTextField
+                placeholder="Street Number"
                 value={formData.number_int}
                 onChangeText={(value) => handleInputChange("number_int", value)}
-                containerStyle={styles.textFieldContainer}
               />
-              <TextField
-                placeholder="Código Postal"
-                placeholderTextColor={ColorPalette.medium}
+              <SimpleTextField
+                placeholder="Postal Code"
                 value={formData.cp}
                 onChangeText={(value) => handleInputChange("cp", value)}
-                containerStyle={styles.textFieldContainer}
               />
-            </View>
-          </View>
+            </FormContainer>
+          </StepLayout>
         );
       case 2:
         return (
-          <View style={styles.stepContainer}>
-            <TouchableOpacity onPress={pickImage} style={styles.imageButton}>
-              <Text style={styles.imageButtonText}>Seleccionar Imagen</Text>
-            </TouchableOpacity>
-            {formData.img && (
-              <Text style={styles.imageText}>Imagen seleccionada</Text>
-            )}
-          </View>
+          <StepLayout>
+            <TipContainer height={200}>
+              <Text style={{ textAlign: "center" }} text30 bold>
+                Picture time!
+              </Text>
+              <LottieView
+                source={require("@/assets/lottie/CameraShot.json")}
+                autoPlay
+                loop
+                style={{ width: 200, height: 200, flex: 1 }}
+              />
+            </TipContainer>
+          <PictureInput
+            onPress={pickImage}
+            image={formData.img}
+          />  
+          </StepLayout>
         );
       default:
         return null;
@@ -257,42 +284,75 @@ const UserRegister = () => {
             }}
           >
             <Wizard.Step
-              state={Wizard.States.ENABLED}
+              state={
+                activeIndex === 0
+                  ? Wizard.States.ENABLED
+                  : isPart1Complete()
+                  ? Wizard.States.COMPLETED
+                  : Wizard.States.DISABLED
+              }
               label="Personal details"
             />
-            <Wizard.Step state={Wizard.States.ENABLED} label="Location" />
-            <Wizard.Step state={Wizard.States.ENABLED} label="Picture" />
+            <Wizard.Step
+              state={
+                activeIndex === 1
+                  ? Wizard.States.ENABLED
+                  : isPart1Complete() && isPart2Complete()
+                  ? Wizard.States.COMPLETED
+                  : Wizard.States.DISABLED
+              }
+              label="Location"
+            />
+            <Wizard.Step
+              state={
+                activeIndex === 2
+                  ? Wizard.States.ENABLED
+                  : isFormComplete()
+                  ? Wizard.States.COMPLETED
+                  : Wizard.States.DISABLED
+              }
+              label="Picture"
+            />
           </Wizard>
+
           {renderCurrentStep()}
         </View>
 
         <View style={styles.navigationButtons}>
           {activeIndex == 0 && (
             <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.push("/signUp")}
+              style={styles.cancelButton}
+              onPress={() => router.navigate("/signUp")}
             >
-              <Text style={styles.backText}>Cancel</Text>
+              <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           )}
           {activeIndex > 0 && (
             <Button
-              label="Anterior"
+              label="Back"
               onPress={goToPrevStep}
-              style={styles.navButton}
+              backgroundColor="transparent"
+              color={ColorPalette.medium}
+              style={styles.backButton}
             />
           )}
           {activeIndex < 2 ? (
             <Button
               label="Siguiente"
               onPress={goToNextStep}
-              style={styles.navButton}
+              style={styles.nextButton}
+              backgroundColor={ColorPalette.bluePalette}
+              disabled={
+                (activeIndex == 0 && !isPart1Complete()) ||
+                (activeIndex == 1 && !isPart2Complete())
+              }
             />
           ) : (
             <Button
               label="Finalizar"
               onPress={handleSubmit}
-              style={styles.navButton}
+              backgroundColor={ColorPalette.bluePalette}
+              style={styles.nextButton}
             />
           )}
         </View>
@@ -309,11 +369,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: ColorPalette.background,
   },
-  backButton: {
+  cancelButton: {
     width: "20%",
     justifyContent: "center",
   },
-  backText: {
+  cancelText: {
     marginLeft: 5,
     fontSize: 16,
     color: ColorPalette.medium,
@@ -348,9 +408,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: ColorPalette.medium,
   },
-  navButton: {
-    backgroundColor: ColorPalette.medium,
+  nextButton: {
     borderRadius: 8,
+  },
+  backButton: {
+    borderRadius: 8,
+    borderColor: ColorPalette.medium,
   },
   navButtonText: {
     color: "#ffffff",

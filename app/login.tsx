@@ -63,7 +63,7 @@ const Login = () => {
     if (result && result.error) {
       alert(result.msg);
     } else {
-      console.log("Login result:", result);
+      const role = dataLogin?.user.role;
       if (role === Roles.user) {
         router.replace("/(app)/(user)/");
       } else if (role === Roles.veterinary) {
