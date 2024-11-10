@@ -9,6 +9,7 @@ import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { useLoginStore } from "@/stores/login.store";
 import { Veterinary } from "@/types/userTypes.types";
 import CardVeterinary from "@/components/CardVeterinary";
+import { useSearch } from "@/app/context/SearchContext";
 
 const Index = () => {
   const { getVets } = useUserStore((state) => state);
@@ -18,7 +19,8 @@ const Index = () => {
   const [veterinaryClinics, setVeterinaryClinics] = useState<Veterinary[]>([]);
   const [pets, setPets] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("all"); // Estado para el filtro de categorías
+  const [selectedCategory, setSelectedCategory] = useState("all"); 
+  const { searchQuery } = useSearch();
 
   const renderItem = ({ item }: { item: Veterinary }) => <CardVeterinary item={item} />;
 
@@ -44,17 +46,15 @@ const Index = () => {
 
     fetchVets();
     fetchPets();
-  }, []);
+  }, [idOwner, getVets]);
 
-  const filteredVeterinaryClinics = veterinaryClinics.filter((clinic) => {
-    console.log("Selected Category:", selectedCategory);
-    console.log("Clinic Category:", clinic.category);
-  
-    return selectedCategory === "all" || clinic.category.includes(selectedCategory);
-  });
-
-
-
+  const filteredVeterinaryClinics = veterinaryClinics
+    .filter((clinic) =>
+      selectedCategory === "all" || clinic.category.includes(selectedCategory)
+    )
+    .filter((clinic) => 
+      clinic.veterinarieName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: ColorPalette.graphitePalette, paddingTop: 50 }}>
@@ -63,7 +63,6 @@ const Index = () => {
         <SegmentedControl
           segments={[{ label: "All" }, { label: "Nutrition" }, { label: "Recreation" }, { label: "Care" }]}
           onChangeIndex={(index) => {
-            // Actualiza la categoría seleccionada
             const category = ["all", "NUTRITION", "RECREATION", "CARE"][index];
             setSelectedCategory(category);
           }}
@@ -72,7 +71,6 @@ const Index = () => {
         />
       </View>
 
-      {/* Lista de clínicas veterinarias */}
       <View paddingH-20 flex>
         <FlatList
           data={filteredVeterinaryClinics}
@@ -82,7 +80,6 @@ const Index = () => {
         />
       </View>
 
-      {/* Modal para registrar la primera mascota */}
       <Dialog
         visible={showModal}
         onDismiss={() => setShowModal(false)}
