@@ -6,12 +6,8 @@ import { ColorPalette } from "@/constants/Colors";
 import { Wizard, Text, TextField, Button, Toast } from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
-import { Picker } from '@react-native-picker/picker';
 import MultiSelect from 'react-native-multiple-select';
-import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { VeterinaryService } from "@/services/vetServices";
-
 
 const VetGreeting = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -80,12 +76,12 @@ const VetGreeting = () => {
 
       const response = await VeterinaryService.createVeterinary(data);
       
-      if (response.success) {
+      if (response) {
         setToastMessage("Veterinaria registrada exitosamente.");
         setTimeout(() => setToastMessage(null), 2000);
       } else {
         console.error("Error del servidor:", response);
-        Alert.alert("Error", response.message);
+        Alert.alert("Error", response.error || "Hubo un problema en el registro.");
       }
     } catch (error) {
       console.error("Error en la solicitud:", error);
@@ -110,6 +106,7 @@ const VetGreeting = () => {
       { id: "Tuesday", name: "Tuesday" },
       { id: "Wednesday", name: "Wednesday" },
       { id: "Thursday", name: "Thursday" },
+      { id: "Friday", name: "Friday" },
       { id: "Saturday", name: "Saturday" },
       { id: "Sunday", name: "Sunday" },
     ];
