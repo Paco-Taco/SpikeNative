@@ -20,6 +20,12 @@ import axios, { isAxiosError } from "axios";
 import { Roles } from "@/constants/Roles";
 import { Fonts } from "@/constants/Fonts";
 import LottieView from "lottie-react-native";
+import TipContainer from "@/components/wizard/TipContainer";
+import SimpleTextField from "@/components/wizard/SimpleTextField";
+import ValidationTextField from "@/components/wizard/ValidationTextField";
+import PictureInput from "@/components/wizard/PictureInput";
+import StepLayout from "@/components/layout/StepLayout";
+import FormContainer from "@/components/wizard/FormContainer";
 
 const UserRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -146,14 +152,8 @@ const UserRegister = () => {
     switch (activeIndex) {
       case 0:
         return (
-          <View
-            flex
-            padding-20
-            centerH
-            backgroundColor={ColorPalette.background}
-            style={styles.stepContainer}
-          >
-            <View marginV-20 centerV padding-20 centerH height={200}>
+          <StepLayout>
+            <TipContainer height={200}>
               <Text style={{ fontFamily: Fonts.PoppinsBold }} text30>
                 ¡Hey there!
               </Text>
@@ -166,63 +166,43 @@ const UserRegister = () => {
                 loop
                 style={{ width: 125, height: 125 }}
               />
-            </View>
-            <View paddingT-20 style={{ width: "100%" }}>
-              <TextField
+            </TipContainer>
+            <FormContainer>
+              <SimpleTextField
                 placeholder="Name"
-                placeholderTextColor={ColorPalette.medium}
                 value={formData.firstName}
                 onChangeText={(value) => handleInputChange("firstName", value)}
-                containerStyle={styles.textFieldContainer}
               />
-              <TextField
+              <SimpleTextField
                 placeholder="Second Name"
-                placeholderTextColor={ColorPalette.medium}
                 value={formData.lastName}
                 onChangeText={(value) => handleInputChange("lastName", value)}
-                containerStyle={styles.textFieldContainer}
               />
-              <TextField
+              <ValidationTextField
                 placeholder="Email"
-                placeholderTextColor={ColorPalette.medium}
                 value={formData.email}
                 onChangeText={(value) => handleInputChange("email", value)}
-                containerStyle={styles.textFieldContainer}
-                enableErrors
-                validateOnChange
                 validate={["required", (value) => isValidEmail(value || "")]}
                 validationMessage={["Field is required", "Email is invalid"]}
-                retainValidationSpace={false}
               />
-              <TextField
+              <ValidationTextField
                 placeholder="Password"
-                placeholderTextColor={ColorPalette.medium}
                 value={formData.password}
                 onChangeText={(value) => handleInputChange("password", value)}
                 secureTextEntry
-                enableErrors
-                validateOnChange
                 validate={["required", (value) => isValidPassword(value || "")]}
                 validationMessage={[
                   "Field is required",
                   "Password must contain at least 8 characters, one number and one special character",
                 ]}
-                retainValidationSpace={false}
-                containerStyle={styles.textFieldContainer}
               />
-            </View>
-          </View>
+            </FormContainer>
+          </StepLayout>
         );
       case 1:
         return (
-          <View
-            flex
-            paddingH-20
-            centerH
-            backgroundColor={ColorPalette.background}
-            style={styles.stepContainer}
-          >
-            <View marginV-20 centerV padding-20 centerH height={250}>
+          <StepLayout>
+            <TipContainer height={200}>
               <Text style={{ textAlign: "center" }} text30 bold>
                 Where are you from?
               </Text>
@@ -232,58 +212,44 @@ const UserRegister = () => {
                 loop
                 style={{ width: 150, height: 150, flex: 1 }}
               />
-            </View>
-            <View paddingT-20 style={{ width: "100%" }}>
-              <TextField
+            </TipContainer>
+            <FormContainer>
+              <ValidationTextField
                 placeholder="Phone number"
-                placeholderTextColor={ColorPalette.medium}
                 value={formData.phone}
                 onChangeText={(value) => handleInputChange("phone", value)}
-                keyboardType="numeric"
-                containerStyle={styles.textFieldContainer}
-                enableErrors
-                validateOnChange
-                validate={["required", (value) => isValidPhoneNumber(value)]}
+                keyboardType="phone-pad"
+                validate={[
+                  "required",
+                  (value) => isValidPhoneNumber(value || ""),
+                ]}
                 validationMessage={[
                   "Field is required",
                   "Phone number is invalid",
                 ]}
-                retainValidationSpace={false}
               />
-              <TextField
+              <SimpleTextField
                 placeholder="City"
-                placeholderTextColor={ColorPalette.medium}
                 value={formData.city}
                 onChangeText={(value) => handleInputChange("city", value)}
-                containerStyle={styles.textFieldContainer}
               />
-              <TextField
+              <SimpleTextField
                 placeholder="Street Number"
-                placeholderTextColor={ColorPalette.medium}
                 value={formData.number_int}
                 onChangeText={(value) => handleInputChange("number_int", value)}
-                containerStyle={styles.textFieldContainer}
               />
-              <TextField
+              <SimpleTextField
                 placeholder="Postal Code"
-                placeholderTextColor={ColorPalette.medium}
                 value={formData.cp}
                 onChangeText={(value) => handleInputChange("cp", value)}
-                containerStyle={styles.textFieldContainer}
               />
-            </View>
-          </View>
+            </FormContainer>
+          </StepLayout>
         );
       case 2:
         return (
-          <View
-            flex
-            padding-20
-            centerH
-            backgroundColor={ColorPalette.background}
-            style={styles.stepContainer}
-          >
-            <View marginV-20 centerV padding-20 centerH height={200}>
+          <StepLayout>
+            <TipContainer height={200}>
               <Text style={{ textAlign: "center" }} text30 bold>
                 Picture time!
               </Text>
@@ -293,37 +259,12 @@ const UserRegister = () => {
                 loop
                 style={{ width: 200, height: 200, flex: 1 }}
               />
-            </View>
-            <TouchableOpacity
-              onPress={pickImage}
-              // style={{ marginBottom: 10, alignItems: "center" }}
-              style={{
-                width: "100%",
-                borderWidth: 1,
-                borderRadius: 15,
-                padding: 20,
-                borderStyle: "dashed",
-                borderColor: ColorPalette.medium,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ color: ColorPalette.bluePalette, margin: 10 }}>
-                Select picture
-              </Text>
-              {formData.img && (
-                <Image
-                  source={{ uri: formData.img.uri }}
-                  style={{
-                    width: 200,
-                    height: 200,
-                    marginBottom: 10,
-                    alignSelf: "center",
-                  }}
-                />
-              )}
-            </TouchableOpacity>
-          </View>
+            </TipContainer>
+          <PictureInput
+            onPress={pickImage}
+            image={formData.img}
+          />  
+          </StepLayout>
         );
       default:
         return null;
@@ -381,7 +322,7 @@ const UserRegister = () => {
           {activeIndex == 0 && (
             <TouchableOpacity
               style={styles.cancelButton}
-              onPress={() => router.push("/signUp")}
+              onPress={() => router.navigate("/signUp")}
             >
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
