@@ -7,13 +7,14 @@ import {
   TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { ColorPalette, Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router"; 
 import BottomSheet from "./BottomSheet";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useAuth } from "@/app/context/AuthContext";
+import { useLoginStore } from "@/stores/login.store";
 
 const SearchBar = () => (
   <View style={styles.searchContainer}>
@@ -38,7 +39,7 @@ const SearchBar = () => (
             name="options-outline"
             size={20}
             color={ColorPalette.primary}
-          ></Ionicons>
+          />
         </TouchableOpacity>
       </Link> */}
     </View>
@@ -46,8 +47,12 @@ const SearchBar = () => (
 );
 
 const CustomHeader = () => {
+  const { dataLogin } = useLoginStore((state) => state);
+  const role = dataLogin?.user.role;  
   const { onLogout } = useAuth();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const router = useRouter();  
+
   const openModal = () => {
     bottomSheetRef.current?.present();
   };
@@ -76,7 +81,18 @@ const CustomHeader = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.profileButton}>
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={() => {
+            if (role === "VETERINARY_OWNER") {
+              router.push('/vetProfile'); 
+            } else if (role === "PET_OWNER") {
+              router.push('/petOwnerProfile');  
+            } else {
+              console.error("Role not recognized:", role);
+            }
+          }}
+        >
           <Image
             style={styles.profileButton}
             source={require("@/assets/images/ic_pet.jpg")}

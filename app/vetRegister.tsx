@@ -1,17 +1,20 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Alert, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
 import { Wizard, Text, TextField, Button, Toast } from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
+import { Picker } from '@react-native-picker/picker';
+import MultiSelect from 'react-native-multiple-select';
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { VeterinaryService } from "@/services/vetServices";
+
 
 const VetGreeting = () => {
   const [activeIndex, setActiveIndex] = useState(0);
- // const route = useRoute();  
   const [formData, setFormData] = useState({
     veterinarieName: "",
     email: "",
@@ -24,10 +27,10 @@ const VetGreeting = () => {
     cologne: "",
     cp: "",
     rfc: "",
-    category: "",
+    category: [],
     horaInicio: "",
     horaFin: "",
-    diasSemana: "",
+    diasSemana: [],
     role: "VETERINARY_OWNER",
     img: null,
   });
@@ -35,7 +38,6 @@ const VetGreeting = () => {
 
   const handleInputChange = (name, value) => {
     setFormData({ ...formData, [name]: value });
-    console.log(formData);
   };
 
   const pickImage = async () => {
@@ -50,32 +52,44 @@ const VetGreeting = () => {
   };
 
   const handleSubmit = async () => {
-    const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (key === "img" && formData.img) {
-        data.append("img", {
-          uri: formData.img.uri,
-          name: "vet_image.jpg",
-          type: "image/jpeg",
-        });
-      } else if (key === "category") {
-        data.append(key, formData[key]);
-      } else {
-        data.append(key, formData[key]);
-      }
-    });
-  
     try {
-      await axiosInstanceSpikeCore.post("/createVeterinary", data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setToastMessage("Veterinario registrado exitosamente.");
-      setTimeout(() => setToastMessage(null), 2000);
-      // route.push('Login');  
+      const validDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const filteredDays = formData.diasSemana.filter((day) => validDays.includes(day));
 
+      if (filteredDays.length !== formData.diasSemana.length) {
+        Alert.alert("Error", "Algunos días seleccionados no son válidos o están duplicados.");
+        return;
+      }
+
+      const data = new FormData();
+      Object.keys(formData).forEach((key) => {
+        if (key === "img" && formData.img) {
+          data.append("img", {
+            uri: formData.img.uri,
+            name: "vet_image.jpg",
+            type: "image/jpeg",
+          });
+        } else if (key === "diasSemana") {
+          filteredDays.forEach((day) => data.append("diasSemana[]", day));
+        } else if (key === "category") {
+          formData.category.forEach((cat) => data.append("category[]", cat));
+        } else {
+          data.append(key, formData[key]);
+        }
+      });
+
+      const response = await VeterinaryService.createVeterinary(data);
+      
+      if (response.success) {
+        setToastMessage("Veterinaria registrada exitosamente.");
+        setTimeout(() => setToastMessage(null), 2000);
+      } else {
+        console.error("Error del servidor:", response);
+        Alert.alert("Error", response.message);
+      }
     } catch (error) {
-      console.error("Error al registrar veterinaria:", error.response?.data || error);
-      Alert.alert("Error", "No se pudo completar el registro.");
+      console.error("Error en la solicitud:", error);
+      Alert.alert("Error", error.message || "No se pudo completar el registro.");
     }
   };
 
@@ -90,35 +104,41 @@ const VetGreeting = () => {
   };
 
   const renderCurrentStep = () => {
+    const categories = ["NUTRITION", "RECREATION", "CARE"];
+    const daysOfWeek = [
+      { id: "Monday", name: "Monday" },
+      { id: "Tuesday", name: "Tuesday" },
+      { id: "Wednesday", name: "Wednesday" },
+      { id: "Thursday", name: "Thursday" },
+      { id: "Saturday", name: "Saturday" },
+      { id: "Sunday", name: "Sunday" },
+    ];
+
     const stepComponents = [
-      <>
+      <View key="step1">
         <TextField
           placeholder="Nombre de la Veterinaria"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.veterinarieName}
           onChangeText={(value) => handleInputChange("veterinarieName", value)}
           style={styles.input}
         />
         <TextField
           placeholder="Correo Electrónico"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.email}
           onChangeText={(value) => handleInputChange("email", value)}
           style={styles.input}
         />
         <TextField
           placeholder="Teléfono"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.phone}
           onChangeText={(value) => handleInputChange("phone", value)}
           keyboardType="numeric"
           style={styles.input}
         />
-      </>,
-      <>
+      </View>,
+      <View key="step2">
         <TextField
           placeholder="Contraseña"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.password}
           onChangeText={(value) => handleInputChange("password", value)}
           secureTextEntry
@@ -126,89 +146,87 @@ const VetGreeting = () => {
         />
         <TextField
           placeholder="Calle"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.street}
           onChangeText={(value) => handleInputChange("street", value)}
           style={styles.input}
         />
         <TextField
           placeholder="Número Interior"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.number_int}
           onChangeText={(value) => handleInputChange("number_int", value)}
           style={styles.input}
         />
         <TextField
           placeholder="Localidad"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.locality}
           onChangeText={(value) => handleInputChange("locality", value)}
           style={styles.input}
         />
         <TextField
           placeholder="Ciudad"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.city}
           onChangeText={(value) => handleInputChange("city", value)}
           style={styles.input}
         />
         <TextField
           placeholder="Colonia"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.cologne}
           onChangeText={(value) => handleInputChange("cologne", value)}
           style={styles.input}
         />
         <TextField
           placeholder="Código Postal"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.cp}
           onChangeText={(value) => handleInputChange("cp", value)}
           keyboardType="numeric"
           style={styles.input}
         />
-      </>,
-      <>
+      </View>,
+      <View key="step3">
         <TextField
           placeholder="RFC"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.rfc}
           onChangeText={(value) => handleInputChange("rfc", value)}
           style={styles.input}
         />
-        <TextField
-          placeholder="Categoría"
-          placeholderTextColor={ColorPalette.medium}
-          value={formData.category}
-          onChangeText={(value) => handleInputChange("category", value)}
-          style={styles.input}
+
+        <MultiSelect
+          items={categories.map((cat) => ({ id: cat, name: cat }))}
+          uniqueKey="id"
+          onSelectedItemsChange={(selectedItems) => handleInputChange("category", selectedItems)}
+          selectedItems={formData.category}
+          selectText="Selecciona las categorías"
+          searchInputPlaceholderText="Buscar categorías..."
+          styleDropdownMenu={styles.multiSelectDropdown}
         />
+
+        <MultiSelect
+          items={daysOfWeek}
+          uniqueKey="id"
+          onSelectedItemsChange={(selectedItems) => handleInputChange("diasSemana", selectedItems)}
+          selectedItems={formData.diasSemana}
+          selectText="Selecciona los días de la semana"
+          searchInputPlaceholderText="Buscar días..."
+          styleDropdownMenu={styles.multiSelectDropdown}
+        />
+
         <TextField
           placeholder="Hora de Inicio"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.horaInicio}
           onChangeText={(value) => handleInputChange("horaInicio", value)}
           style={styles.input}
         />
         <TextField
           placeholder="Hora de Fin"
-          placeholderTextColor={ColorPalette.medium}
           value={formData.horaFin}
           onChangeText={(value) => handleInputChange("horaFin", value)}
-          style={styles.input}
-        />
-        <TextField
-          placeholder="Días de la Semana"
-          placeholderTextColor={ColorPalette.medium}
-          value={formData.diasSemana}
-          onChangeText={(value) => handleInputChange("diasSemana", value)}
           style={styles.input}
         />
         <TouchableOpacity onPress={pickImage} style={styles.imageButton}>
           <Text style={styles.imageButtonText}>Seleccionar Imagen</Text>
         </TouchableOpacity>
         {formData.img && <Text style={styles.imageText}>Imagen seleccionada</Text>}
-      </>
+      </View>,
     ];
 
     return <View style={styles.stepContainer}>{stepComponents[activeIndex]}</View>;
@@ -220,7 +238,11 @@ const VetGreeting = () => {
         <MaterialCommunityIcons name="arrow-left" size={24} color={ColorPalette.medium} />
         <Text style={styles.backText}>Back to Login</Text>
       </TouchableOpacity>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
         <View style={styles.wizardContainer}>
           <Wizard activeIndex={activeIndex} onActiveIndexChanged={setActiveIndex}>
             <Wizard.Step state={Wizard.States.ENABLED} label="Paso 1" />
@@ -229,11 +251,13 @@ const VetGreeting = () => {
           </Wizard>
           {renderCurrentStep()}
         </View>
+
         <View style={styles.navigationButtons}>
           {activeIndex > 0 && <Button label="Anterior" onPress={goToPrevStep} style={styles.navButton} />}
           <Button label={activeIndex < 2 ? "Siguiente" : "Finalizar"} onPress={goToNextStep} style={styles.navButton} />
         </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
+
       {toastMessage && <Toast visible position="bottom" message={toastMessage} />}
     </SafeAreaView>
   );
@@ -256,12 +280,11 @@ const styles = StyleSheet.create({
     color: ColorPalette.medium,
   },
   wizardContainer: {
-    flex: 1,
-    justifyContent: "center",
     paddingHorizontal: 20,
+    marginTop: 20,
   },
   stepContainer: {
-    marginVertical: 20,
+    marginTop: 30,
   },
   input: {
     marginBottom: 20,
@@ -274,25 +297,28 @@ const styles = StyleSheet.create({
   navButton: {
     marginVertical: 10,
   },
-  navigationButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
   imageButton: {
-    backgroundColor: ColorPalette.darkGrey,
+    backgroundColor: ColorPalette.medium,
     padding: 10,
     borderRadius: 5,
     alignItems: "center",
     marginTop: 20,
   },
   imageButtonText: {
-    color: ColorPalette.lightGrey,
+    color: "#fff",
   },
   imageText: {
     marginTop: 10,
-    color: ColorPalette.lightGrey,
+    color: ColorPalette.medium,
+  },
+  multiSelectDropdown: {
+    marginBottom: 20,
+  },
+  navigationButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
 });
 

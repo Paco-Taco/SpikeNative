@@ -12,11 +12,13 @@ interface LoginState {
   fetchLogin: (data: LoginRequest) => Promise<LoginResponse | null>;
   cleanLoginStore: () => void;
   loadLoginFromStore: () => Promise<void>;
+  updateProfile: (newProfileData: Partial<LoginResponse['user']>) => Promise<void>;
 }
 
 const storeApi: StateCreator<LoginState> = (set, get) => ({
   dataLogin: null,
 
+  // Función para hacer login
   fetchLogin: async (body: LoginRequest) => {
     try {
       const data = await SpikeLoginService.login(body);
@@ -24,7 +26,6 @@ const storeApi: StateCreator<LoginState> = (set, get) => ({
 
       // Guarda el login data en SecureStore
       await SecureStore.setItemAsync(SECURE_STORE_KEY, JSON.stringify(data));
-      
       return data;
     } catch (error) {  
       set({ dataLogin: null });
@@ -34,6 +35,7 @@ const storeApi: StateCreator<LoginState> = (set, get) => ({
     }
   },
 
+  // Función para limpiar los datos de login
   cleanLoginStore: async () => {
     set({ dataLogin: null });
     
@@ -41,6 +43,7 @@ const storeApi: StateCreator<LoginState> = (set, get) => ({
     await SecureStore.deleteItemAsync(SECURE_STORE_KEY);
   },
 
+  // Función para cargar los datos de login desde SecureStore
   loadLoginFromStore: async () => {
     try {
       const storedData = await SecureStore.getItemAsync(SECURE_STORE_KEY);
@@ -51,6 +54,25 @@ const storeApi: StateCreator<LoginState> = (set, get) => ({
       console.error("Error loading login data from SecureStore", error);
     }
   },
+
+  // Función para actualizar el perfil
+  updateProfile: async (newProfileData) => {
+    const currentData = get().dataLogin;
+    if (!currentData) return;
+
+    const updatedData = { 
+      ...currentData,
+      user: {
+        ...currentData.user,
+        ...newProfileData,  
+      }
+    };
+
+    set({ dataLogin: updatedData });
+
+    // Guarda los nuevos datos actualizados en SecureStore
+    await SecureStore.setItemAsync(SECURE_STORE_KEY, JSON.stringify(updatedData));
+  }
 });
 
 // Inicializa el store y carga los datos de SecureStore

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "expo-router";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Card, Text, Button, Image, Dialog } from "react-native-ui-lib";
+import { View, Text, Button, Dialog, SegmentedControl } from "react-native-ui-lib";
 import { FlatList } from "react-native";
 import { ColorPalette } from "@/constants/Colors";
 import { useUserStore } from "@/stores/user.store";
@@ -15,14 +14,13 @@ const Index = () => {
   const { getVets } = useUserStore((state) => state);
   const { dataLogin } = useLoginStore((state) => state);
   const idOwner = dataLogin?.user.id;
-  
-  const [veterinaryClinics, setVeterinaryClinics] = useState<Veterinary[]>([]);
-  const [pets, setPets] = useState([]); 
-  const [showModal, setShowModal] = useState(false);
 
-  const renderItem = ({ item }: { item: Veterinary }) => (
-    <CardVeterinary item={item} />
-  );
+  const [veterinaryClinics, setVeterinaryClinics] = useState<Veterinary[]>([]);
+  const [pets, setPets] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("all"); // Estado para el filtro de categorías
+
+  const renderItem = ({ item }: { item: Veterinary }) => <CardVeterinary item={item} />;
 
   useEffect(() => {
     const fetchVets = async () => {
@@ -35,7 +33,7 @@ const Index = () => {
         const response = await axiosInstanceSpikeCore.get(`/getpets/${idOwner}`);
         const petsData = response.data || [];
         setPets(petsData);
-        
+
         if (petsData.length === 0) {
           setShowModal(true);
         }
@@ -48,11 +46,36 @@ const Index = () => {
     fetchPets();
   }, []);
 
+  const filteredVeterinaryClinics = veterinaryClinics.filter((clinic) => {
+    console.log("Selected Category:", selectedCategory);
+    console.log("Clinic Category:", clinic.category);
+  
+    return selectedCategory === "all" || clinic.category.includes(selectedCategory);
+  });
+
+
+
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: ColorPalette.graphitePalette, paddingTop: 100 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: ColorPalette.graphitePalette, paddingTop: 50 }}>
+      {/* Barra de filtros de categoría */}
+      <View paddingH-20 marginB-20>
+        <SegmentedControl
+          segments={[{ label: "All" }, { label: "Nutrition" }, { label: "Recreation" }, { label: "Care" }]}
+          onChangeIndex={(index) => {
+            // Actualiza la categoría seleccionada
+            const category = ["all", "NUTRITION", "RECREATION", "CARE"][index];
+            setSelectedCategory(category);
+          }}
+          activeColor={ColorPalette.medium}
+          backgroundColor={ColorPalette.dark}
+        />
+      </View>
+
+      {/* Lista de clínicas veterinarias */}
       <View paddingH-20 flex>
         <FlatList
-          data={veterinaryClinics}
+          data={filteredVeterinaryClinics}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 20 }}
@@ -64,12 +87,12 @@ const Index = () => {
         visible={showModal}
         onDismiss={() => setShowModal(false)}
         style={{
-          backgroundColor: ColorPalette.medium, 
+          backgroundColor: ColorPalette.medium,
           padding: 20,
           borderRadius: 8,
-          opacity: 1, 
+          opacity: 1,
         }}
-        overlayBackgroundColor="rgba(0, 0, 0, 0.7)" 
+        overlayBackgroundColor="rgba(0, 0, 0, 0.7)"
       >
         <Text text60 marginB-20 color={ColorPalette.light}>
           Registra tu primer mascota
