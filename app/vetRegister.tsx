@@ -12,6 +12,7 @@ import {
   Incubator,
   Dialog,
   Image,
+  LoaderScreen,
 } from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
@@ -31,9 +32,11 @@ import MultiPicker from "@/components/wizard/MultiPicker";
 import HourPicker from "@/components/wizard/HourPicker";
 import PictureInput from "@/components/wizard/PictureInput";
 import { AxiosError, isAxiosError } from "axios";
+import ErrorDialog from "@/components/wizard/ErrorDialog";
 
 const VetRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     veterinarieName: "",
     email: "",
@@ -60,7 +63,6 @@ const VetRegister = () => {
     name: string,
     value: string | number | PickerMultiValue | undefined
   ) => {
-    console.log(name, value);
     setFormData({ ...formData, [name]: value });
   };
 
@@ -122,6 +124,7 @@ const VetRegister = () => {
 
   const handleSubmit = async () => {
     try {
+      setLoading(true);
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
         if (key === "img" && formData.img) {
@@ -143,12 +146,18 @@ const VetRegister = () => {
 
       const response = await VeterinaryService.createVeterinary(data);
       console.log(response);
-      setDialogMessage("Veterinary created successfully");
     } catch (error) {
-      console.log(error);
+      if (isAxiosError(error)) {
+        console.log(error.response?.data);
+      } else {
+        console.log(error);
+      }
       setDialogMessage("Please, verify all fields are correct");
-    } finally {
       setIsDialogVisible(true);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2500);
     }
   };
 
@@ -229,7 +238,7 @@ const VetRegister = () => {
             validate={["required", (value) => (value?.length || 0) === 12]}
             validationMessage={[
               "Field is required",
-              "RFC must be 13 characters",
+              "RFC must be 12 characters",
             ]}
           />
           <ValidationTextField
@@ -450,43 +459,28 @@ const VetRegister = () => {
           )}
         </View>
       </ScrollView>
-      <Dialog
-        visible={isDialogVisible}
-        onDismiss={() => setIsDialogVisible(false)}
-        useSafeArea
-        containerStyle={{
-          borderRadius: 8,
-          backgroundColor: ColorPalette.background,
-          padding: 30,
-        }}
-      >
-        <View
-          marginB-20
-          paddingB-10
-          width="100%"
-          style={{
-            borderBottomWidth: 1,
-            borderColor: ColorPalette.grey,
-            justifyContent: "space-between",
-            flexDirection: "row",
-          }}
-        >
-          <Text>Whoops... an error occurred :c</Text>
-          <TouchableOpacity>
-            <Ionicons
-              name="close"
-              size={24}
-              color={ColorPalette.medium}
-              onPress={() => setIsDialogVisible(false)}
+      {loading ? (
+        <LoaderScreen
+          message="Loading..."
+          overlay
+          backgroundColor="white"
+          messageStyle={{ fontFamily: Fonts.PoppinsRegular }}
+          customLoader={
+            <LottieView
+              source={require("@/assets/lottie/LoadingCat.json")}
+              autoPlay
+              loop
+              style={{ width: 125, height: 125 }}
             />
-          </TouchableOpacity>
-        </View>
-        <Text bold>{dialogMessage}</Text>
-        <Image
-          source={require("@/assets/images/seriousDog.png")}
-          style={{ width: 200, height: 200, alignSelf: "center", margin: 20 }}
+          }
         />
-      </Dialog>
+      ) : !loading && isDialogVisible ? (
+        <ErrorDialog
+          visible={isDialogVisible}
+          dialogMessage={dialogMessage}
+          onDismiss={() => setIsDialogVisible(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };

@@ -12,6 +12,7 @@ import {
   Text,
   TouchableOpacity,
   Image,
+  LoaderScreen,
 } from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
@@ -29,6 +30,7 @@ import FormContainer from "@/components/wizard/FormContainer";
 import { isValidEmail } from "@/utils/isValidEmail";
 import { isValidPassword } from "@/utils/isValidPassword";
 import { isValidPhoneNumber } from "@/utils/isValidPhoneNumber";
+import ErrorDialog from "@/components/wizard/ErrorDialog";
 
 const UserRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -44,7 +46,10 @@ const UserRegister = () => {
     cp: "",
     img: null as ImagePicker.ImagePickerAsset | null,
   });
-  const [toastMessage, setToastMessage] = useState("");
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false)
 
   const handleInputChange = (name: string, value: string) => {
     setFormData({ ...formData, [name]: value });
@@ -106,20 +111,24 @@ const UserRegister = () => {
     });
 
     try {
+      setLoading(true);
       await axiosInstanceSpikeCore.post("/createUser", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setToastMessage("Usuario registrado exitosamente.");
-      setTimeout(() => setToastMessage(""), 2000);
+
+      setSuccess(true);
     } catch (error) {
-      Alert.alert("Error", "No se pudo completar el registro.");
       if (isAxiosError(error)) {
-        console.error(
-          error.response?.data !== undefined
-            ? error.response.data.error
-            : "Error desconocido"
-        );
+        console.log(error.response?.data);
+      } else {
+        console.log(error);
       }
+      setDialogMessage("Please, verify all fields are correct");
+      setIsDialogVisible(true);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2500);
     }
   };
 
@@ -342,9 +351,29 @@ const UserRegister = () => {
           )}
         </View>
       </ScrollView>
-      {toastMessage && (
-        <Toast visible position="bottom" message={toastMessage} />
-      )}
+      {loading ? (
+        <LoaderScreen
+          message="Loading..."
+          overlay
+          backgroundColor="white"
+          messageStyle={{ fontFamily: Fonts.PoppinsRegular }}
+          customLoader={
+            <LottieView
+              source={require("@/assets/lottie/LoadingCat.json")}
+              autoPlay
+              loop
+              style={{ width: 125, height: 125 }}
+            />
+          }
+        />
+      ) : !loading && isDialogVisible ? (
+        <ErrorDialog
+          visible={isDialogVisible}
+          dialogMessage={dialogMessage}
+          onDismiss={() => setIsDialogVisible(false)}
+        />
+      ) :
+       null}
     </SafeAreaView>
   );
 };
