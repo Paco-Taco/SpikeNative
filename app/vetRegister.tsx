@@ -175,6 +175,7 @@ const VetRegister = () => {
       { id: "Tuesday", name: "Tuesday" },
       { id: "Wednesday", name: "Wednesday" },
       { id: "Thursday", name: "Thursday" },
+      { id: "Friday", name: "Friday" },
       { id: "Saturday", name: "Saturday" },
       { id: "Sunday", name: "Sunday" },
     ];

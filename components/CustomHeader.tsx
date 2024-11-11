@@ -1,3 +1,4 @@
+import React,{useEffect, useRef} from "react";
 import {
   View,
   Text,
@@ -7,7 +8,6 @@ import {
   TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useEffect, useRef } from "react";
 import { ColorPalette, Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router"; 
@@ -15,36 +15,34 @@ import BottomSheet from "./BottomSheet";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoginStore } from "@/stores/login.store";
+import { useSearch } from "@/app/context/SearchContext"; // Importa el hook del contexto
 
-const SearchBar = () => (
-  <View style={styles.searchContainer}>
-    <View style={styles.searchSection}>
-      <View style={styles.searchField}>
-        <Ionicons
-          style={styles.searchIcon}
-          name="search-outline"
-          size={20}
-          color={ColorPalette.medium}
-        />
-        <TextInput
-          placeholder="Veterinaries, care services, products"
-          style={styles.input}
-          placeholderTextColor={ColorPalette.medium}
-          cursorColor={ColorPalette.yellowPalette}
-        />
-      </View>
-      {/* <Link href={"/(modal)/filter"} asChild>
-        <TouchableOpacity style={styles.optionButton}>
+const SearchBar = () => {
+  const { searchQuery, setSearchQuery } = useSearch(); // Usa el contexto
+
+  return (
+    <View style={styles.searchContainer}>
+      <View style={styles.searchSection}>
+        <View style={styles.searchField}>
           <Ionicons
-            name="options-outline"
+            style={styles.searchIcon}
+            name="search-outline"
             size={20}
-            color={ColorPalette.primary}
+            color={ColorPalette.medium}
           />
-        </TouchableOpacity>
-      </Link> */}
+          <TextInput
+            placeholder="Veterinaries, care services, products"
+            style={styles.input}
+            placeholderTextColor={ColorPalette.medium}
+            cursorColor={ColorPalette.yellowPalette}
+            value={searchQuery} // Enlaza el valor con el contexto
+            onChangeText={setSearchQuery} // Actualiza el valor en el contexto
+          />
+        </View>
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 const CustomHeader = () => {
   const { dataLogin } = useLoginStore((state) => state);

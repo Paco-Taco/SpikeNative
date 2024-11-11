@@ -5,6 +5,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { ThemeManager, Typography } from "react-native-ui-lib";
+import {SearchProvider} from "./context/SearchContext"
 
 SplashScreen.preventAutoHideAsync();
 
@@ -46,7 +47,9 @@ export default function Root() {
   return (
     <AuthProvider>
       <SafeAreaProvider>
+        <SearchProvider>
         <Slot />
+        </SearchProvider>
       </SafeAreaProvider>
     </AuthProvider>
   );
