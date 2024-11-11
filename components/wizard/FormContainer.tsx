@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 
 const FormContainer = ({ children }: { children: ReactNode }) => {
   return (
-    <View paddingT-20 style={{ width: "100%" }}>
+    <View paddingT-20 centerH style={{ width: "100%" }}>
       {children}
     </View>
   );
