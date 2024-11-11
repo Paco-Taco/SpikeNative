@@ -10,7 +10,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 const petOwnerProfile = () => {
   const { dataLogin } = useLoginStore((state) => state);  
-  const { user } = dataLogin || {};
+  const { user, token } = dataLogin || {};
   const [loading, setLoading] = useState<boolean>(true); 
   const userId = user?.id;
 
@@ -20,14 +20,14 @@ const petOwnerProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const [formData, setFormData] = useState({
-    ownerName: user?.ownerName || "",
+    veterinarieName: user?.veterinarieName || "",
     img: user?.img || "",
   });
 
   useEffect(() => {
     if (user) {
       setFormData({
-        ownerName: user.ownerName,
+        veterinarieName: user.veterinarieName,
         img: user.img,
       });
     }
@@ -39,13 +39,13 @@ const petOwnerProfile = () => {
         <View style={styles.container}>
           {/* Imagen de perfil */}
           <TouchableOpacity>
-            <Image source={formData.img ? { uri: formData.img } : require("@/assets/images/dog-profile.png")} style={styles.profileImage} />
+            <Image source={formData.img ? { uri: formData.img } : require("@/assets/images/catbox.png")} style={styles.profileImage} />
           </TouchableOpacity>
 
-          <Text style={styles.profileName}>{formData.ownerName}</Text>
+          <Text style={styles.profileName}>{formData.veterinarieName}</Text>
 
           {/* Botón para editar perfil */}
-          <TouchableOpacity onPress={() => router.push("/editOwnerProfile")} style={styles.optionButton}>
+          <TouchableOpacity onPress={() => router.push("/editVetProfile")} style={styles.optionButton}>
             <Text style={styles.optionText}>Editar perfil</Text>
             <Ionicons name="chevron-forward-outline" size={20} color={ColorPalette.primary} />
           </TouchableOpacity>
@@ -53,12 +53,6 @@ const petOwnerProfile = () => {
           {/* Historial de citas */}
           <TouchableOpacity onPress={() => router.push("/appointmentHistory")} style={styles.optionButton}>
             <Text style={styles.optionText}>Historial de citas</Text>
-            <Ionicons name="chevron-forward-outline" size={20} color={ColorPalette.primary} />
-          </TouchableOpacity>
-
-          {/* Mis mascotas */}
-          <TouchableOpacity onPress={() => router.push("/myPets")} style={styles.optionButton}>
-            <Text style={styles.optionText}>Mis mascotas</Text>
             <Ionicons name="chevron-forward-outline" size={20} color={ColorPalette.primary} />
           </TouchableOpacity>
 
@@ -107,6 +101,19 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     color: ColorPalette.lightGrey,
+  },
+  formContainer: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  input: {
+    width: "100%",
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: ColorPalette.white,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: ColorPalette.medium,
   },
 });
 
