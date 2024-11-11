@@ -1,19 +1,38 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Alert, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { router } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
-import { Wizard, Text, TextField, Button, Toast } from "react-native-ui-lib";
+import {
+  Wizard,
+  Text,
+  Button,
+  Picker,
+  View,
+  Incubator,
+  Dialog,
+  Image,
+} from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
-import { Picker } from '@react-native-picker/picker';
-import MultiSelect from 'react-native-multiple-select';
-import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { VeterinaryService } from "@/services/vetServices";
+import StepLayout from "@/components/layout/StepLayout";
+import TipContainer from "@/components/wizard/TipContainer";
+import { Fonts } from "@/constants/Fonts";
+import LottieView from "lottie-react-native";
+import FormContainer from "@/components/wizard/FormContainer";
+import SimpleTextField from "@/components/wizard/SimpleTextField";
+import ValidationTextField from "@/components/wizard/ValidationTextField";
+import { isValidEmail } from "@/utils/isValidEmail";
+import { isValidPhoneNumber } from "@/utils/isValidPhoneNumber";
+import { isValidPassword } from "@/utils/isValidPassword";
+import { PickerMultiValue } from "react-native-ui-lib/src/components/picker/types";
+import MultiPicker from "@/components/wizard/MultiPicker";
+import HourPicker from "@/components/wizard/HourPicker";
+import PictureInput from "@/components/wizard/PictureInput";
+import { AxiosError, isAxiosError } from "axios";
 
-
-const VetGreeting = () => {
+const VetRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [formData, setFormData] = useState({
     veterinarieName: "",
@@ -28,15 +47,20 @@ const VetGreeting = () => {
     cp: "",
     rfc: "",
     category: [],
-    horaInicio: "",
-    horaFin: "",
+    horaInicio: "0:00",
+    horaFin: "0:00",
     diasSemana: [],
     role: "VETERINARY_OWNER",
-    img: null,
+    img: null as ImagePicker.ImagePickerAsset | null,
   });
-  const [toastMessage, setToastMessage] = useState(null);
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
 
-  const handleInputChange = (name, value) => {
+  const handleInputChange = (
+    name: string,
+    value: string | number | PickerMultiValue | undefined
+  ) => {
+    console.log(name, value);
     setFormData({ ...formData, [name]: value });
   };
 
@@ -51,16 +75,53 @@ const VetGreeting = () => {
     }
   };
 
+  const formatTime = (date: Date) => {
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
+
+  const parseTimeToDate = (time: string) => {
+    const [hours, minutes] = time.split(":");
+    const date = new Date();
+    date.setHours(parseInt(hours, 10));
+    date.setMinutes(parseInt(minutes, 10));
+    return date;
+  };
+
+  const isPart1Complete = () => {
+    return (
+      formData.veterinarieName &&
+      isValidEmail(formData.email) &&
+      isValidPhoneNumber(formData.phone) &&
+      isValidPassword(formData.password) &&
+      formData.rfc
+    );
+  };
+
+  const isPart2Complete = () => {
+    return (
+      formData.street &&
+      formData.number_int &&
+      formData.locality &&
+      formData.city &&
+      formData.cologne &&
+      formData.cp
+    );
+  };
+
+  const isFormComplete = () => {
+    return (
+      isPart1Complete() &&
+      isPart2Complete() &&
+      formData.category.length > 0 &&
+      formData.diasSemana.length > 0 &&
+      formData.img
+    );
+  };
+
   const handleSubmit = async () => {
     try {
-      const validDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-      const filteredDays = formData.diasSemana.filter((day) => validDays.includes(day));
-
-      if (filteredDays.length !== formData.diasSemana.length) {
-        Alert.alert("Error", "Algunos días seleccionados no son válidos o están duplicados.");
-        return;
-      }
-
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
         if (key === "img" && formData.img) {
@@ -68,9 +129,11 @@ const VetGreeting = () => {
             uri: formData.img.uri,
             name: "vet_image.jpg",
             type: "image/jpeg",
-          });
+          } as any);
         } else if (key === "diasSemana") {
-          filteredDays.forEach((day) => data.append("diasSemana[]", day));
+          formData.diasSemana.forEach((dia) =>
+            data.append("diasSemana[]", dia)
+          );
         } else if (key === "category") {
           formData.category.forEach((cat) => data.append("category[]", cat));
         } else {
@@ -79,21 +142,19 @@ const VetGreeting = () => {
       });
 
       const response = await VeterinaryService.createVeterinary(data);
-      
-      if (response.success) {
-        setToastMessage("Veterinaria registrada exitosamente.");
-        setTimeout(() => setToastMessage(null), 2000);
-      } else {
-        console.error("Error del servidor:", response);
-        Alert.alert("Error", response.message);
-      }
+      console.log(response);
+      setDialogMessage("Veterinary created successfully");
     } catch (error) {
-      console.error("Error en la solicitud:", error);
-      Alert.alert("Error", error.message || "No se pudo completar el registro.");
+      console.log(error);
+      setDialogMessage("Please, verify all fields are correct");
+    } finally {
+      setIsDialogVisible(true);
     }
   };
 
-  const goToPrevStep = () => setActiveIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+  const goToPrevStep = () => {
+    setActiveIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : prevIndex));
+  };
 
   const goToNextStep = () => {
     if (activeIndex < 2) {
@@ -104,7 +165,11 @@ const VetGreeting = () => {
   };
 
   const renderCurrentStep = () => {
-    const categories = ["NUTRITION", "RECREATION", "CARE"];
+    const categories = [
+      { id: 1, name: "NUTRITION" },
+      { id: 2, name: "RECREATION" },
+      { id: 3, name: "CARE" },
+    ];
     const daysOfWeek = [
       { id: "Monday", name: "Monday" },
       { id: "Tuesday", name: "Tuesday" },
@@ -115,150 +180,312 @@ const VetGreeting = () => {
     ];
 
     const stepComponents = [
-      <View key="step1">
-        <TextField
-          placeholder="Nombre de la Veterinaria"
-          value={formData.veterinarieName}
-          onChangeText={(value) => handleInputChange("veterinarieName", value)}
-          style={styles.input}
-        />
-        <TextField
-          placeholder="Correo Electrónico"
-          value={formData.email}
-          onChangeText={(value) => handleInputChange("email", value)}
-          style={styles.input}
-        />
-        <TextField
-          placeholder="Teléfono"
-          value={formData.phone}
-          onChangeText={(value) => handleInputChange("phone", value)}
-          keyboardType="numeric"
-          style={styles.input}
-        />
-      </View>,
-      <View key="step2">
-        <TextField
-          placeholder="Contraseña"
-          value={formData.password}
-          onChangeText={(value) => handleInputChange("password", value)}
-          secureTextEntry
-          style={styles.input}
-        />
-        <TextField
-          placeholder="Calle"
-          value={formData.street}
-          onChangeText={(value) => handleInputChange("street", value)}
-          style={styles.input}
-        />
-        <TextField
-          placeholder="Número Interior"
-          value={formData.number_int}
-          onChangeText={(value) => handleInputChange("number_int", value)}
-          style={styles.input}
-        />
-        <TextField
-          placeholder="Localidad"
-          value={formData.locality}
-          onChangeText={(value) => handleInputChange("locality", value)}
-          style={styles.input}
-        />
-        <TextField
-          placeholder="Ciudad"
-          value={formData.city}
-          onChangeText={(value) => handleInputChange("city", value)}
-          style={styles.input}
-        />
-        <TextField
-          placeholder="Colonia"
-          value={formData.cologne}
-          onChangeText={(value) => handleInputChange("cologne", value)}
-          style={styles.input}
-        />
-        <TextField
-          placeholder="Código Postal"
-          value={formData.cp}
-          onChangeText={(value) => handleInputChange("cp", value)}
-          keyboardType="numeric"
-          style={styles.input}
-        />
-      </View>,
-      <View key="step3">
-        <TextField
-          placeholder="RFC"
-          value={formData.rfc}
-          onChangeText={(value) => handleInputChange("rfc", value)}
-          style={styles.input}
-        />
+      <StepLayout key="step1">
+        <TipContainer height={200}>
+          <Text style={{ fontFamily: Fonts.PoppinsBold }} text30>
+            ¡Hey there!
+          </Text>
+          <Text style={{ fontFamily: Fonts.PoppinsLight }} text30>
+            Let's start
+          </Text>
+          <LottieView
+            source={require("@/assets/lottie/BrownDogWalking.json")}
+            autoPlay
+            loop
+            style={{ width: 125, height: 125 }}
+          />
+        </TipContainer>
+        <FormContainer>
+          <SimpleTextField
+            placeholder="Veterinary name"
+            value={formData.veterinarieName}
+            onChangeText={(value) =>
+              handleInputChange("veterinarieName", value)
+            }
+          />
+          <ValidationTextField
+            placeholder="Email"
+            value={formData.email}
+            onChangeText={(value) => handleInputChange("email", value)}
+            validate={["required", (value) => isValidEmail(value || "")]}
+            validationMessage={["Field is required", "Email is invalid"]}
+          />
+          <ValidationTextField
+            placeholder="Password"
+            value={formData.password}
+            onChangeText={(value) => handleInputChange("password", value)}
+            secureTextEntry
+            validate={["required", (value) => isValidPassword(value || "")]}
+            validationMessage={[
+              "Field is required",
+              "Password must contain at least 8 characters, one number and one special character",
+            ]}
+          />
+          <ValidationTextField
+            placeholder="RFC"
+            value={formData.rfc}
+            onChangeText={(value) => handleInputChange("rfc", value)}
+            validate={["required", (value) => (value?.length || 0) === 12]}
+            validationMessage={[
+              "Field is required",
+              "RFC must be 13 characters",
+            ]}
+          />
+          <ValidationTextField
+            placeholder="Phone number"
+            value={formData.phone}
+            onChangeText={(value) => handleInputChange("phone", value)}
+            keyboardType="phone-pad"
+            validate={["required", (value) => isValidPhoneNumber(value || "")]}
+            validationMessage={["Field is required", "Phone number is invalid"]}
+          />
+        </FormContainer>
+      </StepLayout>,
+      <StepLayout key="step2">
+        <TipContainer height={200}>
+          <Text
+            style={{
+              textAlign: "center",
+              fontFamily: Fonts.PoppinsBold,
+              fontSize: 30,
+            }}
+          >
+            Where are you located?
+          </Text>
+          <LottieView
+            source={require("@/assets/lottie/Location.json")}
+            autoPlay
+            loop
+            style={{ width: 125, height: 125 }}
+          />
+        </TipContainer>
+        <FormContainer>
+          <SimpleTextField
+            placeholder="Street name"
+            value={formData.street}
+            onChangeText={(value) => handleInputChange("street", value)}
+          />
+          <SimpleTextField
+            placeholder="Street Number"
+            value={formData.number_int}
+            onChangeText={(value) => handleInputChange("number_int", value)}
+          />
+          <SimpleTextField
+            placeholder="Locality"
+            value={formData.locality}
+            onChangeText={(value) => handleInputChange("locality", value)}
+          />
+          <SimpleTextField
+            placeholder="City"
+            value={formData.city}
+            onChangeText={(value) => handleInputChange("city", value)}
+          />
+          <SimpleTextField
+            placeholder="Neighborhood"
+            value={formData.cologne}
+            onChangeText={(value) => handleInputChange("cologne", value)}
+          />
+          <SimpleTextField
+            placeholder="Postal Code"
+            value={formData.cp}
+            onChangeText={(value) => handleInputChange("cp", value)}
+          />
+        </FormContainer>
+      </StepLayout>,
+      <StepLayout key="step3">
+        <TipContainer height={200}>
+          <Text
+            style={{
+              textAlign: "center",
+              fontFamily: Fonts.PoppinsBold,
+              fontSize: 30,
+            }}
+          >
+            Almost done!
+          </Text>
+          <LottieView
+            source={require("@/assets/lottie/Checklist.json")}
+            autoPlay
+            loop
+            style={{ width: 125, height: 125 }}
+          />
+        </TipContainer>
+        <FormContainer>
+          <MultiPicker
+            title="Categories"
+            placeholder="Select categories"
+            value={formData.category}
+            onChange={(selectedItems) =>
+              handleInputChange("category", selectedItems)
+            }
+          >
+            {categories.map((cat) => (
+              <Picker.Item key={cat.id} label={cat.name} value={cat.name} />
+            ))}
+          </MultiPicker>
 
-        <MultiSelect
-          items={categories.map((cat) => ({ id: cat, name: cat }))}
-          uniqueKey="id"
-          onSelectedItemsChange={(selectedItems) => handleInputChange("category", selectedItems)}
-          selectedItems={formData.category}
-          selectText="Selecciona las categorías"
-          searchInputPlaceholderText="Buscar categorías..."
-          styleDropdownMenu={styles.multiSelectDropdown}
-        />
+          <MultiPicker
+            title="Work days"
+            placeholder="Select work days"
+            value={formData.diasSemana}
+            onChange={(selectedItems) =>
+              handleInputChange("diasSemana", selectedItems)
+            }
+          >
+            {daysOfWeek.map((day) => (
+              <Picker.Item key={day.id} label={day.name} value={day.id} />
+            ))}
+          </MultiPicker>
 
-        <MultiSelect
-          items={daysOfWeek}
-          uniqueKey="id"
-          onSelectedItemsChange={(selectedItems) => handleInputChange("diasSemana", selectedItems)}
-          selectedItems={formData.diasSemana}
-          selectText="Selecciona los días de la semana"
-          searchInputPlaceholderText="Buscar días..."
-          styleDropdownMenu={styles.multiSelectDropdown}
-        />
+          <HourPicker
+            label="Opening time"
+            value={parseTimeToDate(formData.horaInicio)}
+            onChange={(date) =>
+              handleInputChange("horaInicio", formatTime(date))
+            }
+            dateTimeFormatter={(date) => formatTime(date)}
+          />
 
-        <TextField
-          placeholder="Hora de Inicio"
-          value={formData.horaInicio}
-          onChangeText={(value) => handleInputChange("horaInicio", value)}
-          style={styles.input}
-        />
-        <TextField
-          placeholder="Hora de Fin"
-          value={formData.horaFin}
-          onChangeText={(value) => handleInputChange("horaFin", value)}
-          style={styles.input}
-        />
-        <TouchableOpacity onPress={pickImage} style={styles.imageButton}>
-          <Text style={styles.imageButtonText}>Seleccionar Imagen</Text>
-        </TouchableOpacity>
-        {formData.img && <Text style={styles.imageText}>Imagen seleccionada</Text>}
-      </View>,
+          <HourPicker
+            label="Closing time"
+            value={parseTimeToDate(formData.horaFin)}
+            onChange={(date) => handleInputChange("horaFin", formatTime(date))}
+            dateTimeFormatter={(date) => formatTime(date)}
+          />
+
+          <PictureInput image={formData.img} onPress={pickImage} />
+        </FormContainer>
+      </StepLayout>,
     ];
 
-    return <View style={styles.stepContainer}>{stepComponents[activeIndex]}</View>;
+    return (
+      <View style={styles.stepContainer}>{stepComponents[activeIndex]}</View>
+    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push("/signUp")}>
-        <MaterialCommunityIcons name="arrow-left" size={24} color={ColorPalette.medium} />
-        <Text style={styles.backText}>Back to Login</Text>
-      </TouchableOpacity>
-      
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-      >
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.wizardContainer}>
-          <Wizard activeIndex={activeIndex} onActiveIndexChanged={setActiveIndex}>
-            <Wizard.Step state={Wizard.States.ENABLED} label="Paso 1" />
-            <Wizard.Step state={Wizard.States.ENABLED} label="Paso 2" />
-            <Wizard.Step state={Wizard.States.ENABLED} label="Paso 3" />
+          <Wizard
+            activeIndex={activeIndex}
+            onActiveIndexChanged={setActiveIndex}
+            containerStyle={{
+              shadowOpacity: 0,
+              borderBottomWidth: 0,
+            }}
+          >
+            <Wizard.Step
+              state={
+                activeIndex === 0
+                  ? Wizard.States.ENABLED
+                  : isPart1Complete()
+                  ? Wizard.States.COMPLETED
+                  : Wizard.States.DISABLED
+              }
+              label="Personal details"
+            />
+            <Wizard.Step
+              state={
+                activeIndex === 1
+                  ? Wizard.States.ENABLED
+                  : isPart1Complete() && isPart2Complete()
+                  ? Wizard.States.COMPLETED
+                  : Wizard.States.DISABLED
+              }
+              label="Location"
+            />
+            <Wizard.Step
+              state={
+                activeIndex === 2
+                  ? Wizard.States.ENABLED
+                  : isFormComplete()
+                  ? Wizard.States.COMPLETED
+                  : Wizard.States.DISABLED
+              }
+              label="Picture"
+            />
           </Wizard>
           {renderCurrentStep()}
         </View>
 
         <View style={styles.navigationButtons}>
-          {activeIndex > 0 && <Button label="Anterior" onPress={goToPrevStep} style={styles.navButton} />}
-          <Button label={activeIndex < 2 ? "Siguiente" : "Finalizar"} onPress={goToNextStep} style={styles.navButton} />
+          {activeIndex == 0 && (
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => router.navigate("/signUp")}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
+          {activeIndex > 0 && (
+            <Button
+              label="Back"
+              onPress={goToPrevStep}
+              backgroundColor="transparent"
+              color={ColorPalette.medium}
+              style={styles.backButton}
+            />
+          )}
+          {activeIndex < 2 ? (
+            <Button
+              label="Next"
+              onPress={goToNextStep}
+              style={styles.nextButton}
+              backgroundColor={ColorPalette.bluePalette}
+              disabled={
+                (activeIndex == 0 && !isPart1Complete()) ||
+                (activeIndex == 1 && !isPart2Complete())
+              }
+            />
+          ) : (
+            <Button
+              label="Done"
+              onPress={handleSubmit}
+              backgroundColor={ColorPalette.bluePalette}
+              style={styles.nextButton}
+              disabled={!isFormComplete()}
+            />
+          )}
         </View>
-      </KeyboardAvoidingView>
-
-      {toastMessage && <Toast visible position="bottom" message={toastMessage} />}
+      </ScrollView>
+      <Dialog
+        visible={isDialogVisible}
+        onDismiss={() => setIsDialogVisible(false)}
+        useSafeArea
+        containerStyle={{
+          borderRadius: 8,
+          backgroundColor: ColorPalette.background,
+          padding: 30,
+        }}
+      >
+        <View
+          marginB-20
+          paddingB-10
+          width="100%"
+          style={{
+            borderBottomWidth: 1,
+            borderColor: ColorPalette.grey,
+            justifyContent: "space-between",
+            flexDirection: "row",
+          }}
+        >
+          <Text>Whoops... an error occurred :c</Text>
+          <TouchableOpacity>
+            <Ionicons
+              name="close"
+              size={24}
+              color={ColorPalette.medium}
+              onPress={() => setIsDialogVisible(false)}
+            />
+          </TouchableOpacity>
+        </View>
+        <Text bold>{dialogMessage}</Text>
+        <Image
+          source={require("@/assets/images/seriousDog.png")}
+          style={{ width: 200, height: 200, alignSelf: "center", margin: 20 }}
+        />
+      </Dialog>
     </SafeAreaView>
   );
 };
@@ -266,60 +493,81 @@ const VetGreeting = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: ColorPalette.graphitePalette,
+    backgroundColor: ColorPalette.background,
   },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 40,
-    marginLeft: 20,
+  cancelButton: {
+    width: "20%",
+    justifyContent: "center",
   },
-  backText: {
+  cancelText: {
     marginLeft: 5,
     fontSize: 16,
     color: ColorPalette.medium,
   },
   wizardContainer: {
+    flex: 1,
     paddingHorizontal: 20,
     marginTop: 20,
   },
+  wizardComponent: {
+    backgroundColor: ColorPalette.background,
+    borderBottomWidth: 0,
+  },
   stepContainer: {
-    marginTop: 30,
-  },
-  input: {
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: ColorPalette.medium,
-    borderRadius: 5,
-    padding: 10,
-    color: ColorPalette.lightGrey,
-  },
-  navButton: {
+    borderRadius: 8,
     marginVertical: 10,
   },
-  imageButton: {
-    backgroundColor: ColorPalette.medium,
+  input: {
+    marginBottom: 15,
+    backgroundColor: ColorPalette.background,
+    borderRadius: 8,
     padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 20,
+    borderWidth: 1,
+    borderColor: ColorPalette.medium,
   },
-  imageButtonText: {
-    color: "#fff",
+  textFieldContainer: {
+    width: "100%",
+    marginBottom: 15,
+    backgroundColor: ColorPalette.background,
+    borderRadius: 8,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: ColorPalette.medium,
   },
-  imageText: {
-    marginTop: 10,
-    color: ColorPalette.medium,
+  nextButton: {
+    borderRadius: 8,
   },
-  multiSelectDropdown: {
-    marginBottom: 20,
+  backButton: {
+    borderRadius: 8,
+    borderColor: ColorPalette.medium,
+  },
+  navButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   navigationButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 60,
+  },
+  imageButton: {
+    backgroundColor: ColorPalette.medium,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginVertical: 10,
+  },
+  imageButtonText: {
+    color: "#ffffff",
+    fontWeight: "bold",
+  },
+  imageText: {
+    color: ColorPalette.lightGrey,
+    fontSize: 14,
+    marginTop: 10,
   },
 });
 
-export default VetGreeting;
+export default VetRegister;

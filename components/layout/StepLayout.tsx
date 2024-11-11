@@ -7,7 +7,7 @@ const StepLayout = ({ children }: { children: ReactNode }) => {
   return (
     <View
       flex
-      padding-20
+      paddingH-20
       centerH
       backgroundColor={ColorPalette.background}
       style={styles.stepContainer}

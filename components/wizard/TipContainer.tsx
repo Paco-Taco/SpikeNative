@@ -10,7 +10,7 @@ const TipContainer = ({
   height: DimensionValue;
 }) => {
   return (
-    <View marginV-20 centerV padding-20 centerH height={height}>
+    <View marginV-20 padding-10 centerH height={height} width={'100%'}>
       {children}
     </View>
   );

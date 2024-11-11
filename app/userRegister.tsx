@@ -26,6 +26,9 @@ import ValidationTextField from "@/components/wizard/ValidationTextField";
 import PictureInput from "@/components/wizard/PictureInput";
 import StepLayout from "@/components/layout/StepLayout";
 import FormContainer from "@/components/wizard/FormContainer";
+import { isValidEmail } from "@/utils/isValidEmail";
+import { isValidPassword } from "@/utils/isValidPassword";
+import { isValidPhoneNumber } from "@/utils/isValidPhoneNumber";
 
 const UserRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -56,22 +59,6 @@ const UserRegister = () => {
     if (!result.canceled) {
       setFormData({ ...formData, img: result.assets[0] });
     }
-  };
-
-  const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const isValidPassword = (password: string): boolean => {
-    const passwordRegex =
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return passwordRegex.test(password);
-  };
-
-  const isValidPhoneNumber = (phone: string): boolean => {
-    const phoneRegex = /^\d{10}$/;
-    return phoneRegex.test(phone);
   };
 
   const isPart1Complete = () => {
@@ -260,10 +247,7 @@ const UserRegister = () => {
                 style={{ width: 200, height: 200, flex: 1 }}
               />
             </TipContainer>
-          <PictureInput
-            onPress={pickImage}
-            image={formData.img}
-          />  
+            <PictureInput onPress={pickImage} image={formData.img} />
           </StepLayout>
         );
       default:
@@ -338,7 +322,7 @@ const UserRegister = () => {
           )}
           {activeIndex < 2 ? (
             <Button
-              label="Siguiente"
+              label="Next"
               onPress={goToNextStep}
               style={styles.nextButton}
               backgroundColor={ColorPalette.bluePalette}
@@ -349,10 +333,11 @@ const UserRegister = () => {
             />
           ) : (
             <Button
-              label="Finalizar"
+              label="Done"
               onPress={handleSubmit}
               backgroundColor={ColorPalette.bluePalette}
               style={styles.nextButton}
+              disabled={!isFormComplete()}
             />
           )}
         </View>
