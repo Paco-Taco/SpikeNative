@@ -1,5 +1,5 @@
 {
-  "name": "spiketest2",
+  "name": "spike",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -9,7 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build": "eas build --profile preview --platform android"
   },
   "jest": {
     "preset": "jest-expo"
