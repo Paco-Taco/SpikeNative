@@ -49,7 +49,6 @@ const UserRegister = () => {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false)
 
   const handleInputChange = (name: string, value: string) => {
     setFormData({ ...formData, [name]: value });
@@ -116,7 +115,7 @@ const UserRegister = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setSuccess(true);
+      router.replace("/(app)/(shared)/successScreen");
     } catch (error) {
       if (isAxiosError(error)) {
         console.log(error.response?.data);
@@ -372,8 +371,7 @@ const UserRegister = () => {
           dialogMessage={dialogMessage}
           onDismiss={() => setIsDialogVisible(false)}
         />
-      ) :
-       null}
+      ) : null}
     </SafeAreaView>
   );
 };
