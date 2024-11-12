@@ -115,7 +115,7 @@ const UserRegister = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      router.replace("/(app)/(shared)/successScreen");
+      router.replace("/(app)/(shared)/userSuccessScreen");
     } catch (error) {
       if (isAxiosError(error)) {
         console.log(error.response?.data);

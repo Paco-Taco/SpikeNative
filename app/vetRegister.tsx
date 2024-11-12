@@ -146,6 +146,7 @@ const VetRegister = () => {
 
       const response = await VeterinaryService.createVeterinary(data);
       console.log(response);
+      router.replace("/(shared)/vetSuccessScreen")
     } catch (error) {
       if (isAxiosError(error)) {
         console.log(error.response?.data);

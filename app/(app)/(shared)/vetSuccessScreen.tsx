@@ -2,13 +2,13 @@ import { View, Text, Button } from "react-native-ui-lib";
 import LottieView from "lottie-react-native";
 import { Fonts } from "@/constants/Fonts";
 import { Link } from "expo-router";
-import { ColorPalette, Colors } from "@/constants/Colors";
+import { ColorPalette } from "@/constants/Colors";
 
-const successScreen = () => {
+const vetSuccessScreen = () => {
   return (
     <View flex centerH centerV padding-40 useSafeArea>
       <LottieView
-        source={require("@/assets/lottie/EmailSuccess.json")}
+        source={require("@/assets/lottie/Success.json")}
         autoPlay
         loop={false}
         style={{ width: 200, height: 200 }}
@@ -20,7 +20,7 @@ const successScreen = () => {
           fontFamily: Fonts.PoppinsBold,
         }}
       >
-        You're almost there!
+        You're in! 🎉
       </Text>
       <Text
         style={{
@@ -30,7 +30,8 @@ const successScreen = () => {
           marginBottom: 20,
         }}
       >
-        Please, check the email we sent you and log in
+        You have successfully signed up as a veterinary. Please, log in to
+        continue.
       </Text>
       <Link href={"/login"} asChild>
         <Button
@@ -47,4 +48,4 @@ const successScreen = () => {
   );
 };
 
-export default successScreen;
+export default vetSuccessScreen;
