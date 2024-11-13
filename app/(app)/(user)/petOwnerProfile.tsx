@@ -44,7 +44,7 @@ const PetOwnerProfile = () => {
         });
       }
 
-      const response = await fetch(`https://your-api-url.com/users/${user.id}`, {
+      const response = await axiosInstanceSpikeCore.get(`/users/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -82,11 +82,6 @@ const PetOwnerProfile = () => {
           <TouchableOpacity onPress={() => router.push("/editPetOwnerProfile")} style={styles.optionButton}>
             <Text style={styles.optionText}>Editar perfil</Text>
             <Ionicons name="chevron-forward-outline" size={20} color="#000" />
-          </TouchableOpacity>
-
-          {/* Guardar cambios */}
-          <TouchableOpacity onPress={handleSaveChanges} style={styles.saveButton} disabled={loading}>
-            <Text style={styles.saveButtonText}>{loading ? "Guardando..." : "Guardar cambios"}</Text>
           </TouchableOpacity>
 
           {/* Otras opciones */}

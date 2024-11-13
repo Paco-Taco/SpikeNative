@@ -16,44 +16,43 @@ const EditPetOwnerProfile = () => {
 
   const [isEditing, setIsEditing] = useState(true);
   const [formData, setFormData] = useState({
-    ownerName: "",
+    firstName: "",
     email: "",
     phone: "",
-    address: "",
+    number_int: "",
     city: "",
     locality: "",
-    postalCode: "",
+    cp: "",
     img: "",
     img_public_id: null,
   });
 
   useEffect(() => {
     const fetchOwnerProfile = async () => {
-        try {
-          setLoading(true);
-          const response = await axiosInstanceSpikeCore.get(`/updateowner/${userId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const data = response.data; // Ensure that the data is correctly parsed
-      
-          setFormData({
-            ownerName: data.ownerName,
-            email: data.email,
-            phone: data.phone,
-            address: data.address,
-            city: data.city,
-            locality: data.locality,
-            postalCode: data.postalCode,
-            img: data.img || "",
-            img_public_id: data.img_public_id || null,
-          });
-        } catch (error) {
-          console.error("Error fetching profile data:", error.response?.data || error.message);
-          Alert.alert("Error", "No se pudo cargar el perfil.");
-        } finally {
-          setLoading(false);
-        }
-      };      
+      try {
+        setLoading(true);
+        const response = await axiosInstanceSpikeCore.get(`/getUsers/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = response.data;
+        setFormData({
+          firstName: data.firstName,
+          email: data.email,
+          phone: data.phone,
+          number_int: data.number_int,
+          city: data.city,
+          locality: data.locality,
+          cp: data.cp,
+          img: data.img || "",
+          img_public_id: data.img_public_id || null,
+        });
+      } catch (error) {
+        console.error("Error fetching profile data:", error.response?.data || error.message);
+        Alert.alert("Error", "No se pudo cargar el perfil.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     if (userId && token) {
       fetchOwnerProfile();
@@ -92,7 +91,7 @@ const EditPetOwnerProfile = () => {
         data.append("img", {
           uri: formData.img,
           name: "owner_image.jpg",
-          type: "image/jpeg",  // Ensure the MIME type is correct
+          type: "image/jpeg",
         });
       } else {
         data.append(key, formData[key]);
@@ -104,7 +103,7 @@ const EditPetOwnerProfile = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       useLoginStore.getState().updateProfile({
-        ownerName: formData.ownerName,
+        firstName: formData.firstName,
         img: formData.img,
       });
       Alert.alert("Success", response.data.message);
@@ -113,7 +112,7 @@ const EditPetOwnerProfile = () => {
       console.error("Error updating profile:", error.response?.data || error);
       Alert.alert("Error", `Unable to update profile. Details: ${error.response?.data?.message || error.message}`);
     }
-};
+  };
 
   const handleCancel = () => {
     router.push("../");
@@ -130,39 +129,57 @@ const EditPetOwnerProfile = () => {
               <Image source={formData.img ? { uri: formData.img } : require("@/assets/images/catbox.png")} style={styles.profileImage} />
             </TouchableOpacity>
 
-            <Text style={styles.profileName}>{formData.ownerName}</Text>
+            <Text style={styles.profileName}>{formData.firstName}</Text>
 
             {isEditing && (
               <View style={styles.formContainer}>
+
+                <Text>Nombre</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nombre del dueño"
+                  value={formData.firstName}
+                  onChangeText={(text) => handleChange("firstName", text)}
+                />
+              
+                <Text>Correo electrónico</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Correo electrónico"
+                  value={formData.email}
+                  onChangeText={(text) => handleChange("email", text)}
+                />
+
+                <Text>Telefono</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Teléfono"
                   value={formData.phone}
                   onChangeText={(text) => handleChange("phone", text)}
                 />
+
+                <Text style={styles.subtext}>DATOS DE DIRECCION</Text>
+                <Text>Numero de casa</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Dirección"
-                  value={formData.address}
-                  onChangeText={(text) => handleChange("address", text)}
+                  value={"#" + formData.number_int}
+                  onChangeText={(text) => handleChange("number_int", text)}
                 />
+                <Text>Numero de casa</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Ciudad"
                   value={formData.city}
                   onChangeText={(text) => handleChange("city", text)}
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Localidad"
-                  value={formData.locality}
-                  onChangeText={(text) => handleChange("locality", text)}
-                />
+        
+                <Text>Codigo postal</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Código Postal"
-                  value={formData.postalCode}
-                  onChangeText={(text) => handleChange("postalCode", text)}
+                  value={formData.cp}
+                  onChangeText={(text) => handleChange("cp", text)}
                 />
               </View>
             )}
@@ -213,12 +230,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginVertical: 5,
-    color: '#333',
+    marginBottom: 25,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -240,6 +252,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
+  subtext: {
+    marginTop: 20,
+    alignSelf: "center",
+    fontWeight: "bold", // Aplica negrita
+    marginBottom: 20,
+  }  
 });
 
 export default EditPetOwnerProfile;
