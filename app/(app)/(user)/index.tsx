@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Redirect, router } from "expo-router";
+import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -8,7 +8,7 @@ import {
   Dialog,
   SegmentedControl,
 } from "react-native-ui-lib";
-import { FlatList } from "react-native";
+import { FlatList, Platform } from "react-native";
 import { ColorPalette } from "@/constants/Colors";
 import { useUserStore } from "@/stores/user.store";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
@@ -62,6 +62,8 @@ const Index = () => {
     fetchPets();
   }, [idOwner, getVets]);
 
+  const categories = ["all", "NUTRITION", "RECREATION", "CARE"];
+
   const filteredVeterinaryClinics = veterinaryClinics
     .filter(
       (clinic) =>
@@ -75,8 +77,8 @@ const Index = () => {
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: ColorPalette.graphitePalette,
-        paddingTop: 50,
+        backgroundColor: ColorPalette.offWhite,
+        paddingTop: Platform.OS === "android" ? 90 : 60,
       }}
     >
       {/* Barra de filtros de categoría */}
@@ -89,11 +91,18 @@ const Index = () => {
             { label: "Care" },
           ]}
           onChangeIndex={(index) => {
-            const category = ["all", "NUTRITION", "RECREATION", "CARE"][index];
-            setSelectedCategory(category);
+            setSelectedCategory(categories[index]);
           }}
-          activeColor={ColorPalette.medium}
-          backgroundColor={ColorPalette.dark}
+          activeColor='white'
+          activeBackgroundColor={
+            selectedCategory === "all"
+              ? ColorPalette.darkGrayPalette
+              : selectedCategory === "NUTRITION"
+              ? ColorPalette.green
+              : selectedCategory === "RECREATION"
+              ? ColorPalette.yellowPalette
+              : ColorPalette.bluePalette
+          }
         />
       </View>
 
@@ -109,7 +118,7 @@ const Index = () => {
       <Dialog
         visible={showModal}
         onDismiss={() => setShowModal(false)}
-        style={{
+        containerStyle={{
           backgroundColor: ColorPalette.medium,
           padding: 20,
           borderRadius: 8,

@@ -30,9 +30,9 @@ const Login = () => {
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
+  
   useEffect(() => {
     const loadSession = () => {
-      setIsLoading(true);
       const role = dataLogin?.user.role;
 
       if (
@@ -45,9 +45,6 @@ const Login = () => {
         } else if (role === Roles.veterinary) {
           router.replace("/(app)/(vet)/");
         }
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 2000)
       }
     };
     loadSession();

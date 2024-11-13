@@ -1,4 +1,4 @@
-import React,{useEffect, useRef} from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ColorPalette, Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { Link, useRouter } from "expo-router"; 
+import { Link, useRouter } from "expo-router";
 import BottomSheet from "./BottomSheet";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useAuth } from "@/app/context/AuthContext";
@@ -46,10 +46,10 @@ const SearchBar = () => {
 
 const CustomHeader = () => {
   const { dataLogin } = useLoginStore((state) => state);
-  const role = dataLogin?.user.role;  
+  const role = dataLogin?.user.role;
   const { onLogout } = useAuth();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const router = useRouter();  
+  const router = useRouter();
 
   const openModal = () => {
     bottomSheetRef.current?.present();
@@ -62,7 +62,7 @@ const CustomHeader = () => {
         <TouchableOpacity onPress={onLogout}>
           <Ionicons
             name="location-outline"
-            color={ColorPalette.medium}
+            color={ColorPalette.bluePalette}
             size={20}
           />
         </TouchableOpacity>
@@ -83,9 +83,9 @@ const CustomHeader = () => {
           style={styles.profileButton}
           onPress={() => {
             if (role === "VETERINARY_OWNER") {
-              router.push('/vetProfile'); 
+              router.push("/vetProfile");
             } else if (role === "PET_OWNER") {
-              // router.navigate('/(app)/...');  
+              // router.navigate('/(app)/...');
               console.log(role);
             } else {
               console.error("Role not recognized:", role);
@@ -105,14 +105,14 @@ const CustomHeader = () => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: ColorPalette.darkGrayPalette,
+    backgroundColor: ColorPalette.bluePalette,
     flex: 1,
   },
   container: {
     height: 60,
     flexDirection: "row",
     gap: 20,
-    backgroundColor: ColorPalette.darkGrayPalette,
+    backgroundColor: ColorPalette.background,
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    color: Colors.dark.text,
+    color: Colors.light.text,
   },
   profileButton: {
     width: 30,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: ColorPalette.lightGrey,
+    color: Colors.light.text,
   },
   locationName: {
     flexDirection: "row",
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     height: 60,
-    backgroundColor: ColorPalette.darkGrayPalette,
+    backgroundColor: ColorPalette.background,
   },
   searchSection: {
     flexDirection: "row",
@@ -159,7 +159,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-    backgroundColor: ColorPalette.graphitePalette,
+    backgroundColor: ColorPalette.background,
+    borderWidth: 1,
+    borderColor: ColorPalette.medium,
     borderRadius: 8,
   },
   input: {

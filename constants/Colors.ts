@@ -18,7 +18,13 @@ export const ColorPalette = {
   medium: "#9F9AA1",
   mediumDark: "#424242",
   green: "#437919",
-  background: '#fff'
+  background: '#fff',
+  offWhite: '#f0f2f2',
+  yellowText: '#D8AC00',
+  yellowLow: '#FFF0B5',
+  blueLow: '#CAE2FE',
+  greenLow: '#D3E5C6',
+  white: '#fff',
 };
 
 export const Colors = {

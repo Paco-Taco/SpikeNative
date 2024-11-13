@@ -33,34 +33,6 @@ export default function AppLayout() {
               header: () => <CustomHeader />,
             }}
           />
-          {/* <Stack.Screen
-            name="(modal)/filter"
-            options={{
-              presentation: "modal",
-              headerTitle: "Filter",
-              headerTitleAlign: "center",
-              headerTitleStyle: {
-                color: "white",
-              },
-              headerShadowVisible: false,
-              headerStyle: {
-                backgroundColor: ColorPalette.graphitePalette,
-              },
-              headerLeft: () => (
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.goBack();
-                  }}
-                >
-                  <Ionicons
-                    name="close-outline"
-                    size={28}
-                    color={ColorPalette.medium}
-                  />
-                </TouchableOpacity>
-              ),
-            }} */}
-          {/* /> */}
         </Stack>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
