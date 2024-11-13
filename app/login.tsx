@@ -6,6 +6,7 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
+  InteractionManager,
 } from "react-native";
 import { useAuth } from "./context/AuthContext";
 import { router } from "expo-router";
@@ -13,20 +14,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
 import { useLoginStore } from "@/stores/login.store";
 import { Roles } from "@/constants/Roles";
-import { Svg, Polygon } from "react-native-svg";
 import { Text, View, Image } from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import KeyBoardAvoidWrapper from "@/components/KeyBoardAvoidWrapper";
-
-const FiveSidedShape = () => {
-  const points = "0,900 0,400 200,300 500,440 400,900";
-
-  return (
-    <Svg height="100%" width="100%">
-      <Polygon points={points} fill="#4C526A" />
-    </Svg>
-  );
-};
+import LoadingCat from "@/components/shared/LoadingCat";
 
 const Login = () => {
   const { onLogin, authState } = useAuth();
@@ -34,13 +25,14 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
-
   useEffect(() => {
     const loadSession = () => {
+      setIsLoading(true);
       const role = dataLogin?.user.role;
 
       if (
@@ -53,22 +45,37 @@ const Login = () => {
         } else if (role === Roles.veterinary) {
           router.replace("/(app)/(vet)/");
         }
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 2000)
       }
     };
     loadSession();
   }, [authState?.authenticated, dataLogin]);
 
   const login = async () => {
-    const result = await onLogin!({ email, password });
-    if (result && result.error) {
-      alert(result.msg);
-    } else {
+    try {
+      setIsLoading(true);
+      await onLogin!({ email, password });
+
       const role = dataLogin?.user.role;
       if (role === Roles.user) {
         router.replace("/(app)/(user)/");
       } else if (role === Roles.veterinary) {
         router.replace("/(app)/(vet)/");
       }
+      
+      InteractionManager.runAfterInteractions(() => {
+        setIsLoading(false)
+      })
+    } catch (error) {
+      setTimeout(() => {
+        alert(error);
+      }, 2000);
+    } finally {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
     }
   };
 
@@ -76,69 +83,73 @@ const Login = () => {
     <SafeAreaView
       style={{ flex: 2, backgroundColor: ColorPalette.darkGrayPalette }}
     >
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps={"handled"}
+      {isLoading ? (
+        <LoadingCat />
+      ) : (
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <View flex style={styles.imageContainer}>
-            <Image
-              source={require("@/assets/images/logo.png")}
-              style={styles.logo}
-            />
-            <Text semiBold style={styles.title}>
-              Spike
-            </Text>
-          </View>
-          <View flex padding-20 style={styles.formContainer}>
-            <Text bold style={styles.title}>
-              Login
-            </Text>
-            <View centerV flex>
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor={ColorPalette.medium}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps={"handled"}
+          >
+            <View flex style={styles.imageContainer}>
+              <Image
+                source={require("@/assets/images/logo.png")}
+                style={styles.logo}
               />
-              <View style={styles.passwordContainer}>
+              <Text semiBold style={styles.title}>
+                Spike
+              </Text>
+            </View>
+            <View flex padding-20 style={styles.formContainer}>
+              <Text bold style={styles.title}>
+                Login
+              </Text>
+              <View centerV flex>
                 <TextInput
-                  style={styles.inputPassword}
-                  placeholder="Password"
+                  style={styles.input}
+                  placeholder="Email"
                   placeholderTextColor={ColorPalette.medium}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!passwordVisible}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
                 />
-                <TouchableOpacity
-                  style={styles.eyeIcon}
-                  onPress={togglePasswordVisibility}
-                >
-                  <MaterialCommunityIcons
-                    name={passwordVisible ? "eye-off" : "eye"}
-                    size={24}
-                    color={ColorPalette.medium}
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={styles.inputPassword}
+                    placeholder="Password"
+                    placeholderTextColor={ColorPalette.medium}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!passwordVisible}
                   />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.button} onPress={login}>
-                  <Text style={styles.buttonText}>Continue</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.push("/signUp")}>
-                  <Text style={styles.linkText}>Sign up</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.eyeIcon}
+                    onPress={togglePasswordVisibility}
+                  >
+                    <MaterialCommunityIcons
+                      name={passwordVisible ? "eye-off" : "eye"}
+                      size={24}
+                      color={ColorPalette.medium}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity style={styles.button} onPress={login}>
+                    <Text style={styles.buttonText}>Continue</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => router.push("/signUp")}>
+                    <Text style={styles.linkText}>Sign up</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      )}
     </SafeAreaView>
   );
 };

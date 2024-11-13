@@ -40,7 +40,9 @@ export const AuthProvider = ({ children }: any) => {
       // console.log("stored: ", token);
 
       if (token) {
-        axiosInstanceSpikeCore.defaults.headers.common["authorization"] = `Bearer ${token}`;
+        axiosInstanceSpikeCore.defaults.headers.common[
+          "authorization"
+        ] = `Bearer ${token}`;
 
         setAuthState({
           token: token,
@@ -61,21 +63,24 @@ export const AuthProvider = ({ children }: any) => {
           authenticated: true,
         });
 
-        axiosInstanceSpikeCore.defaults.headers.common["authorization"] = `Bearer ${result.token}`;
+        axiosInstanceSpikeCore.defaults.headers.common[
+          "authorization"
+        ] = `Bearer ${result.token}`;
 
         await SecureStore.setItemAsync(TOKEN_KEY, result.token);
 
         return result;
       }
     } catch (e) {
-      return { error: true, msg: (e as any) || "An unknown error occured" };
+      throw new Error(`Couldn\'t login ${e}`);
+      // return { error: true, msg: (e as any) || "An unknown error occured" };
     }
   };
 
   const logout = async () => {
     // Delete token from storage
     await SecureStore.deleteItemAsync(TOKEN_KEY);
-    cleanLoginStore()
+    cleanLoginStore();
     // Update HTTP headers
     axiosInstanceSpikeCore.defaults.headers.common["authorization"] = "";
 

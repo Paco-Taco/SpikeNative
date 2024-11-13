@@ -31,6 +31,7 @@ import { isValidEmail } from "@/utils/isValidEmail";
 import { isValidPassword } from "@/utils/isValidPassword";
 import { isValidPhoneNumber } from "@/utils/isValidPhoneNumber";
 import ErrorDialog from "@/components/wizard/ErrorDialog";
+import LoadingCat from "@/components/shared/LoadingCat";
 
 const UserRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -351,20 +352,7 @@ const UserRegister = () => {
         </View>
       </ScrollView>
       {loading ? (
-        <LoaderScreen
-          message="Loading..."
-          overlay
-          backgroundColor="white"
-          messageStyle={{ fontFamily: Fonts.PoppinsRegular }}
-          customLoader={
-            <LottieView
-              source={require("@/assets/lottie/LoadingCat.json")}
-              autoPlay
-              loop
-              style={{ width: 125, height: 125 }}
-            />
-          }
-        />
+        <LoadingCat />
       ) : !loading && isDialogVisible ? (
         <ErrorDialog
           visible={isDialogVisible}
