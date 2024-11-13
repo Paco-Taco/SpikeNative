@@ -16,6 +16,7 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoginStore } from "@/stores/login.store";
 import { useSearch } from "@/app/context/SearchContext"; // Importa el hook del contexto
+import { TextField } from "react-native-ui-lib";
 
 const SearchBar = () => {
   const { searchQuery, setSearchQuery } = useSearch(); // Usa el contexto
@@ -30,11 +31,12 @@ const SearchBar = () => {
             size={20}
             color={ColorPalette.medium}
           />
-          <TextInput
+          <TextField
             placeholder="Veterinaries, care services, products"
+            padding-10
             style={styles.input}
             placeholderTextColor={ColorPalette.medium}
-            cursorColor={ColorPalette.yellowPalette}
+            cursorColor={ColorPalette.bluePalette}
             value={searchQuery} // Enlaza el valor con el contexto
             onChangeText={setSearchQuery} // Actualiza el valor en el contexto
           />
@@ -165,8 +167,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   input: {
-    padding: 10,
-    color: ColorPalette.lightGrey,
+    color: ColorPalette.mediumDark,
   },
   searchIcon: {
     paddingLeft: 10,
