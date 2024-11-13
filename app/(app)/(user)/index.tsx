@@ -17,6 +17,7 @@ import { Veterinary } from "@/types/userTypes.types";
 import CardVeterinary from "@/components/CardVeterinary";
 import { useSearch } from "@/app/context/SearchContext";
 import { useAuth } from "@/app/context/AuthContext";
+import { Fonts } from "@/constants/Fonts";
 
 const Index = () => {
   const { getVets } = useUserStore((state) => state);
@@ -93,7 +94,7 @@ const Index = () => {
           onChangeIndex={(index) => {
             setSelectedCategory(categories[index]);
           }}
-          activeColor='white'
+          activeColor="white"
           activeBackgroundColor={
             selectedCategory === "all"
               ? ColorPalette.darkGrayPalette
@@ -119,33 +120,40 @@ const Index = () => {
         visible={showModal}
         onDismiss={() => setShowModal(false)}
         containerStyle={{
-          backgroundColor: ColorPalette.medium,
+          backgroundColor: ColorPalette.background,
           padding: 20,
           borderRadius: 8,
           opacity: 1,
         }}
         overlayBackgroundColor="rgba(0, 0, 0, 0.7)"
       >
-        <Text text60 marginB-20 color={ColorPalette.light}>
+        <Text
+          marginB-20
+          color={ColorPalette.black}
+          style={{ fontFamily: Fonts.PoppinsBold, fontSize: 20 }}
+        >
           Registra tu primer mascota
         </Text>
-        <Text marginB-20 color={ColorPalette.lightGrey}>
+        <Text marginB-20 color={ColorPalette.mediumDark}>
           Aún no tienes mascotas registradas. Registra tu primera mascota para
           empezar.
         </Text>
         <View row spread marginT-10>
           <Button
             label="Omitir"
+            labelStyle={{fontFamily: Fonts.PoppinsRegular}}
             onPress={() => setShowModal(false)}
-            backgroundColor={ColorPalette.grey}
+            backgroundColor={ColorPalette.white}
+            color={ColorPalette.medium}
           />
           <Button
             label="Registrar Mascota"
+            labelStyle={{fontFamily: Fonts.PoppinsRegular}}
             onPress={() => {
               setShowModal(false);
               router.push("/petRegister");
             }}
-            backgroundColor={ColorPalette.lightGrey}
+            backgroundColor={ColorPalette.bluePalette}
           />
         </View>
       </Dialog>

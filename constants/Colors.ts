@@ -25,6 +25,7 @@ export const ColorPalette = {
   blueLow: '#CAE2FE',
   greenLow: '#D3E5C6',
   white: '#fff',
+  black: '#000',
 };
 
 export const Colors = {
