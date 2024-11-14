@@ -52,7 +52,7 @@ const ErrorDialog = ({
       </View>
       <Text bold>{dialogMessage}</Text>
       <Image
-        source={require("@/assets/images/seriousDog.png")}
+        source={require("@/assets/images/seriousDog1.webp")}
         style={{ width: 200, height: 200, alignSelf: "center", margin: 20 }}
       />
     </Dialog>
