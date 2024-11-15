@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ColorPalette, Colors } from "@/constants/Colors";
@@ -59,6 +60,10 @@ const CustomHeader = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar
+        barStyle={"dark-content"}
+        backgroundColor={ColorPalette.white}
+      />
       <BottomSheet ref={bottomSheetRef} />
       <View style={styles.container}>
         <TouchableOpacity onPress={onLogout}>
@@ -107,7 +112,7 @@ const CustomHeader = () => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: ColorPalette.bluePalette,
+    backgroundColor: ColorPalette.white,
     flex: 1,
   },
   container: {
