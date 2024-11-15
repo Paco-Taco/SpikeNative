@@ -141,14 +141,14 @@ const Index = () => {
         <View row spread marginT-10>
           <Button
             label="Omitir"
-            labelStyle={{fontFamily: Fonts.PoppinsRegular}}
+            labelStyle={{ fontFamily: Fonts.PoppinsRegular }}
             onPress={() => setShowModal(false)}
             backgroundColor={ColorPalette.white}
             color={ColorPalette.medium}
           />
           <Button
             label="Registrar Mascota"
-            labelStyle={{fontFamily: Fonts.PoppinsRegular}}
+            labelStyle={{ fontFamily: Fonts.PoppinsRegular }}
             onPress={() => {
               setShowModal(false);
               router.push("/petRegister");
