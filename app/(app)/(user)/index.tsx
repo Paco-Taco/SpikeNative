@@ -79,7 +79,7 @@ const Index = () => {
       style={{
         flex: 1,
         backgroundColor: ColorPalette.offWhite,
-        paddingTop: Platform.OS === "android" ? 90 : 60,
+        paddingTop: Platform.OS === "android" ? 140 : 60,
       }}
     >
       {/* Barra de filtros de categoría */}
