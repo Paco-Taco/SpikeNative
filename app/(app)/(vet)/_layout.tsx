@@ -10,6 +10,8 @@ import * as SplashScreen from "expo-splash-screen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { useAuth } from "../../context/AuthContext";
+import CustomVetHeader from "@/components/vet/CustomVetHeader";
+import { Fonts } from "@/constants/Fonts";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -33,7 +35,13 @@ export default function AppLayout() {
           <Stack.Screen
             name="index"
             options={{
-              header: () => <CustomHeader />,
+              header: () => <CustomVetHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="vetProfile"
+            options={{
+              headerShown: false
             }}
           />
         </Stack>
