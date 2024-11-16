@@ -24,6 +24,17 @@ export interface User {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  appointments: any[];
+  category: string[];
+  dias: string[];
+  hora_ini: string;
+  hora_fin: string;
+  street: string;
+  locality: string;
+  rfc: string;
+  veterinarieName: string;
+  cologne: string;
+
 }
 
 export interface ErrorResponse {
