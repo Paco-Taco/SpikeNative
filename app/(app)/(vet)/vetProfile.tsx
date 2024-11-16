@@ -1,68 +1,106 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ColorPalette } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { useAuth } from "@/app/context/AuthContext";
-import { useLoginStore } from "@/stores/login.store";  
-import * as ImagePicker from 'expo-image-picker';
+import { useLoginStore } from "@/stores/login.store";
+import OptionButton from "@/components/vet/OptionButton";
+import LogOutButton from "@/components/vet/LogOutButton";
+import Modal from "react-native-modal";
+import { Button,Text, View } from "react-native-ui-lib";
+import { Fonts } from "@/constants/Fonts";
 
 const VetProfile = () => {
-  const { dataLogin } = useLoginStore((state) => state);  
-  const { user, token } = dataLogin || {};
-  const [loading, setLoading] = useState<boolean>(true); 
-  const userId = user?.id;
-
+  const { dataLogin } = useLoginStore((state) => state);
+  const { user } = dataLogin || {};
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { onLogout } = useAuth();
-  const router = useRouter();
-
-  const [isEditing, setIsEditing] = useState(false);
-
-  const [formData, setFormData] = useState({
-    veterinarieName: user?.veterinarieName || "",
-    img: user?.img || "",
-  });
-
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        veterinarieName: user.veterinarieName,
-        img: user.img,
-      });
-    }
-  }, [user]);  
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView>
         <View style={styles.container}>
           {/* Imagen de perfil */}
-          <TouchableOpacity>
-            <Image source={formData.img ? { uri: formData.img } : require("@/assets/images/catbox.png")} style={styles.profileImage} />
-          </TouchableOpacity>
+          <Image
+            source={
+              user?.img
+                ? { uri: user.img }
+                : require("@/assets/images/catbox.png")
+            }
+            style={styles.profileImage}
+          />
 
-          <Text style={styles.profileName}>{formData.veterinarieName}</Text>
+          <Text style={styles.profileName}>{user?.veterinarieName}</Text>
 
-          {/* Botón para editar perfil */}
-          <TouchableOpacity onPress={() => router.push("/editVetProfile")} style={styles.optionButton}>
-            <Text style={styles.optionText}>Editar perfil</Text>
-            <Ionicons name="chevron-forward-outline" size={20} color={ColorPalette.primary} />
-          </TouchableOpacity>
-
+          <OptionButton
+            text="Editar perfil"
+            icon={
+              <Ionicons
+                name="person-circle-outline"
+                size={20}
+                color={ColorPalette.mediumDark}
+              />
+            }
+            href="/editVetProfile"
+          />
           {/* Historial de citas */}
-          <TouchableOpacity onPress={() => router.push("/appointmentHistory")} style={styles.optionButton}>
-            <Text style={styles.optionText}>Historial de citas</Text>
-            <Ionicons name="chevron-forward-outline" size={20} color={ColorPalette.primary} />
-          </TouchableOpacity>
+          <OptionButton
+            text="Historial de citas"
+            icon={
+              <Ionicons
+                name="calendar-outline"
+                size={20}
+                color={ColorPalette.mediumDark}
+              />
+            }
+            href="/appointmentHistory"
+          />
 
           {/* Botón de cerrar sesión */}
-          <TouchableOpacity onPress={onLogout} style={styles.optionButton}>
-            <Text style={styles.optionText}>Cerrar sesión</Text>
-            <Ionicons name="log-out-outline" size={20} color={ColorPalette.primary} />
-          </TouchableOpacity>
+          <LogOutButton
+            text="Log out"
+            icon={
+              <Ionicons
+                name="log-out-outline"
+                size={20}
+                color={ColorPalette.mediumDark}
+              />
+            }
+            onPress={() => setShowLogoutModal(true)}
+          />
         </View>
       </ScrollView>
+      <Modal
+        isVisible={showLogoutModal}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        onBackdropPress={() => setShowLogoutModal(false)}
+        useNativeDriver
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Confirm log out</Text>
+          <Text style={styles.modalMessage}>
+            Are you sure you want to log out?
+          </Text>
+          <View style={styles.modalButtons}>
+            <Button
+              label="Cancel"
+              labelStyle={{ color: ColorPalette.white, fontFamily: Fonts.PoppinsRegular }}
+              onPress={() => setShowLogoutModal(false)}
+              style={styles.cancelButton}
+            />
+            <Button
+              label="Log out"
+              labelStyle={{ color: ColorPalette.lightGraphite, fontFamily: Fonts.PoppinsRegular }}
+              onPress={onLogout}
+              style={styles.confirmButton}
+            />
+          </View>
+        </View>
+      </Modal>
+
+
     </SafeAreaView>
   );
 };
@@ -70,50 +108,55 @@ const VetProfile = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: ColorPalette.lightGrey,
+    backgroundColor: ColorPalette.offWhite,
   },
   container: {
-    padding: 20,
+    padding: 30,
     alignItems: "center",
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
+    width: 150,
+    height: 150,
+    borderRadius: 100,
+    marginBottom: 20,
   },
   profileName: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "Poppins-Bold",
     color: ColorPalette.darkGrayPalette,
     marginBottom: 20,
   },
-  optionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-    padding: 15,
-    backgroundColor: ColorPalette.graphitePalette,
+  modalContent: {
+    backgroundColor: "white",
+    padding: 22,
     borderRadius: 8,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: Fonts.PoppinsBold,
     marginBottom: 10,
   },
-  optionText: {
+  modalMessage: {
     fontSize: 16,
-    color: ColorPalette.lightGrey,
-  },
-  formContainer: {
-    width: "100%",
     marginBottom: 20,
+    fontFamily: Fonts.PoppinsRegular,
+    textAlign: "center",
   },
-  input: {
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     width: "100%",
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor: ColorPalette.white,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: ColorPalette.medium,
+  },
+  cancelButton: {
+    backgroundColor: ColorPalette.primary,
+    flex: 1,
+    marginRight: 10,
+  },
+  confirmButton: {
+    backgroundColor: 'transparent',
+    flex: 1,
+    marginLeft: 10,
   },
 });
 

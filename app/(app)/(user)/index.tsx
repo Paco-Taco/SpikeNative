@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  View,
-  Text,
-  Button,
-  Dialog,
-  SegmentedControl,
-} from "react-native-ui-lib";
+import { View, Text, Button, SegmentedControl } from "react-native-ui-lib";
 import { FlatList, Platform } from "react-native";
 import { ColorPalette } from "@/constants/Colors";
 import { useUserStore } from "@/stores/user.store";
@@ -18,6 +12,8 @@ import CardVeterinary from "@/components/CardVeterinary";
 import { useSearch } from "@/app/context/SearchContext";
 import { useAuth } from "@/app/context/AuthContext";
 import { Fonts } from "@/constants/Fonts";
+import Modal from "react-native-modal";
+import NewPetModal from "@/components/user/NewPetModal";
 
 const Index = () => {
   const { getVets } = useUserStore((state) => state);
@@ -114,49 +110,15 @@ const Index = () => {
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 20 }}
         />
+        <NewPetModal
+          isVisible={showModal}
+          onDismiss={() => setShowModal(false)}
+          onOk={() => {
+            setShowModal(false);
+            router.navigate("/petRegister");
+          }}
+        />
       </View>
-
-      <Dialog
-        visible={showModal}
-        onDismiss={() => setShowModal(false)}
-        containerStyle={{
-          backgroundColor: ColorPalette.background,
-          padding: 20,
-          borderRadius: 8,
-          opacity: 1,
-        }}
-        overlayBackgroundColor="rgba(0, 0, 0, 0.7)"
-      >
-        <Text
-          marginB-20
-          color={ColorPalette.black}
-          style={{ fontFamily: Fonts.PoppinsBold, fontSize: 20 }}
-        >
-          Registra tu primer mascota
-        </Text>
-        <Text marginB-20 color={ColorPalette.mediumDark}>
-          Aún no tienes mascotas registradas. Registra tu primera mascota para
-          empezar.
-        </Text>
-        <View row spread marginT-10>
-          <Button
-            label="Omitir"
-            labelStyle={{ fontFamily: Fonts.PoppinsRegular }}
-            onPress={() => setShowModal(false)}
-            backgroundColor={ColorPalette.white}
-            color={ColorPalette.medium}
-          />
-          <Button
-            label="Registrar Mascota"
-            labelStyle={{ fontFamily: Fonts.PoppinsRegular }}
-            onPress={() => {
-              setShowModal(false);
-              router.push("/petRegister");
-            }}
-            backgroundColor={ColorPalette.bluePalette}
-          />
-        </View>
-      </Dialog>
     </SafeAreaView>
   );
 };
