@@ -1,4 +1,5 @@
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
+import { ResponseEditVet } from "@/types/userTypes.types";
 import { AxiosError } from "axios";
 
 export class VeterinaryService {

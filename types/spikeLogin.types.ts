@@ -10,6 +10,7 @@ export interface LoginResponse {
 
 export interface User {
   id: number;
+  vetId: number;
   firstName: string;
   lastName: string;
   email: string;
