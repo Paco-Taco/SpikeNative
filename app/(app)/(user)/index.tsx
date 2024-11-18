@@ -29,7 +29,12 @@ const Index = () => {
   const { searchQuery } = useSearch();
 
   const renderItem = ({ item }: { item: Veterinary }) => (
-    <CardVeterinary item={item} />
+    <CardVeterinary
+      item={item}
+      onPress={() =>
+        pets.length > 0 ? console.log("si tiene mascotas") : setShowModal(true)
+      }
+    />
   );
 
   useEffect(() => {
