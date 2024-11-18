@@ -2,6 +2,7 @@ import { TextField } from "react-native-ui-lib";
 import { ColorPalette } from "@/constants/Colors";
 import { StyleSheet } from "react-native";
 import { Validator } from "react-native-ui-lib/src/components/textField/types";
+import { ReactNode } from "react";
 
 const ValidationTextField = ({
   placeholder,
@@ -11,6 +12,8 @@ const ValidationTextField = ({
   validationMessage,
   secureTextEntry,
   keyboardType,
+  trailingAccessory,
+  maxLength,
 }: {
   placeholder: string;
   value: string;
@@ -19,6 +22,10 @@ const ValidationTextField = ({
   validationMessage: string[];
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
+  trailingAccessory?:
+    | React.ReactElement<any, string | React.JSXElementConstructor<any>>
+    | undefined;
+  maxLength?: number;
 }) => {
   return (
     <TextField
@@ -34,6 +41,8 @@ const ValidationTextField = ({
       retainValidationSpace={false}
       secureTextEntry={secureTextEntry}
       keyboardType={keyboardType}
+      trailingAccessory={trailingAccessory}
+      maxLength={maxLength}
     />
   );
 };

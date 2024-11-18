@@ -24,15 +24,14 @@ const VetProfile = () => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container} gap-20 padding-20>
         <View center width={"100%"}>
-          <Avatar
-            source={
-              user?.img
-                ? { uri: user.img }
-                : require("@/assets/images/catbox.png")
-            }
-            animate
-            size={100}
-          />
+          {user?.img ? (
+            <Avatar source={{ uri: user?.img }} animate size={100} />
+          ) : (
+            <Avatar
+              source={{ uri: require("@/assets/images/catbox.png") }}
+              size={100}
+            />
+          )}
 
           <Text style={styles.profileName} marginT-20>
             {user?.veterinarieName}
@@ -79,7 +78,6 @@ const VetProfile = () => {
           ))}
         </View> */}
 
-        
         <View>
           {/* Historial de citas */}
           <OptionButton

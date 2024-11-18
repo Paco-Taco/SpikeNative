@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, TextInput, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginStore } from "@/stores/login.store";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import axios from "axios";
 import * as ImagePicker from 'expo-image-picker';
 import { VeterinaryService } from "@/services/vetServices";
@@ -13,7 +13,6 @@ const VetProfile = () => {
   const { user, token } = dataLogin || {};
   const [loading, setLoading] = useState(true); 
   const userId = user?.id;
-  const router = useRouter();
 
   const [isEditing, setIsEditing] = useState(true);
   const [formData, setFormData] = useState({

@@ -42,6 +42,7 @@ const VetRegister = () => {
     email: "",
     phone: "",
     password: "",
+    confirmPassword: "",
     street: "",
     number_int: "",
     locality: "",
@@ -56,6 +57,7 @@ const VetRegister = () => {
     role: "VETERINARY_OWNER",
     img: null as ImagePicker.ImagePickerAsset | null,
   });
+  const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
 
@@ -63,6 +65,7 @@ const VetRegister = () => {
     name: string,
     value: string | number | PickerMultiValue | undefined
   ) => {
+    console.log(name, value);
     setFormData({ ...formData, [name]: value });
   };
 
@@ -97,6 +100,7 @@ const VetRegister = () => {
       isValidEmail(formData.email) &&
       isValidPhoneNumber(formData.phone) &&
       isValidPassword(formData.password) &&
+      formData.password === formData.confirmPassword &&
       formData.rfc
     );
   };
@@ -146,7 +150,7 @@ const VetRegister = () => {
 
       const response = await VeterinaryService.createVeterinary(data);
       console.log(response);
-      router.replace("/(shared)/vetSuccessScreen")
+      router.replace("/(app)/(shared)/vetSuccessScreen");
     } catch (error) {
       if (isAxiosError(error)) {
         console.log(error.response?.data);
@@ -225,12 +229,34 @@ const VetRegister = () => {
             placeholder="Password"
             value={formData.password}
             onChangeText={(value) => handleInputChange("password", value)}
-            secureTextEntry
+            secureTextEntry={!isPasswordVisible}
             validate={["required", (value) => isValidPassword(value || "")]}
             validationMessage={[
               "Field is required",
               "Password must contain at least 8 characters, one number and one special character",
             ]}
+            trailingAccessory={
+              formData.password.length > 0 ? (
+                <TouchableOpacity onPress={() => setPasswordVisible(!isPasswordVisible)}>
+                  <Ionicons
+                    name={isPasswordVisible ? "eye" : "eye-off"} 
+                    size={24}
+                    color="gray"
+                  />
+                </TouchableOpacity>
+              ) : undefined
+            }
+          />
+
+          <ValidationTextField
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChangeText={(value) =>
+              handleInputChange("confirmPassword", value)
+            }
+            secureTextEntry
+            validate={["required", (value) => value === formData.password]}
+            validationMessage={["Field is required", "Passwords do not match"]}
           />
           <ValidationTextField
             placeholder="RFC"
@@ -241,6 +267,7 @@ const VetRegister = () => {
               "Field is required",
               "RFC must be 12 characters",
             ]}
+            maxLength={12}
           />
           <ValidationTextField
             placeholder="Phone number"
@@ -249,6 +276,7 @@ const VetRegister = () => {
             keyboardType="phone-pad"
             validate={["required", (value) => isValidPhoneNumber(value || "")]}
             validationMessage={["Field is required", "Phone number is invalid"]}
+            maxLength={10}
           />
         </FormContainer>
       </StepLayout>,
@@ -300,6 +328,7 @@ const VetRegister = () => {
             placeholder="Postal Code"
             value={formData.cp}
             onChangeText={(value) => handleInputChange("cp", value)}
+            maxLength={5}
           />
         </FormContainer>
       </StepLayout>,

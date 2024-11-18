@@ -6,10 +6,12 @@ import { StyleSheet } from "react-native";
 const SimpleTextField = ({
   placeholder,
   value,
+  maxLength,
   onChangeText,
 }: {
   placeholder: string;
   value: string;
+  maxLength?: number;
   onChangeText: (value: string) => void;
 }) => {
   return (
@@ -19,6 +21,7 @@ const SimpleTextField = ({
       value={value}
       onChangeText={onChangeText}
       containerStyle={styles.textFieldContainer}
+      maxLength={maxLength}
     />
   );
 };
