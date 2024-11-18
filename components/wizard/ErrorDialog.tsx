@@ -4,6 +4,7 @@ import {
   Dialog,
   TouchableOpacity,
   Image,
+  Incubator,
 } from "react-native-ui-lib";
 import React from "react";
 import { ColorPalette } from "@/constants/Colors";
@@ -19,15 +20,17 @@ const ErrorDialog = ({
   dialogMessage: string;
 }) => {
   return (
-    <Dialog
+    <Incubator.Dialog
+      useSafeArea
       visible={visible}
       onDismiss={onDismiss}
-      // useSafeArea
+      center
       containerStyle={{
         borderRadius: 8,
         backgroundColor: ColorPalette.background,
         padding: 30,
       }}
+      width={350}
     >
       <View
         marginB-20
@@ -55,7 +58,7 @@ const ErrorDialog = ({
         source={require("@/assets/images/seriousDog1.webp")}
         style={{ width: 200, height: 200, alignSelf: "center", margin: 20 }}
       />
-    </Dialog>
+    </Incubator.Dialog>
   );
 };
 
