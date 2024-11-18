@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
 import {
   Wizard,
@@ -35,12 +35,14 @@ import LoadingCat from "@/components/shared/LoadingCat";
 
 const UserRegister = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
     password: "",
+    confirmPassword: "",
     role: Roles.user,
     city: "",
     number_int: "",
@@ -71,7 +73,8 @@ const UserRegister = () => {
       formData.firstName &&
       formData.lastName &&
       isValidEmail(formData.email) &&
-      isValidPassword(formData.password)
+      isValidPassword(formData.password) &&
+      formData.password === formData.confirmPassword
     );
   };
 
@@ -185,11 +188,38 @@ const UserRegister = () => {
                 placeholder="Password"
                 value={formData.password}
                 onChangeText={(value) => handleInputChange("password", value)}
-                secureTextEntry
+                secureTextEntry={!isPasswordVisible}
                 validate={["required", (value) => isValidPassword(value || "")]}
                 validationMessage={[
                   "Field is required",
                   "Password must contain at least 8 characters, one number and one special character",
+                ]}
+                trailingAccessory={
+                  formData.password.length > 0 ? (
+                    <TouchableOpacity
+                      onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                    >
+                      <Ionicons
+                        name={isPasswordVisible ? "eye" : "eye-off"}
+                        size={24}
+                        color="gray"
+                      />
+                    </TouchableOpacity>
+                  ) : undefined
+                }
+              />
+
+              <ValidationTextField
+                placeholder="Confirm Password"
+                value={formData.confirmPassword}
+                onChangeText={(value) =>
+                  handleInputChange("confirmPassword", value)
+                }
+                secureTextEntry
+                validate={["required", (value) => value === formData.password]}
+                validationMessage={[
+                  "Field is required",
+                  "Passwords do not match",
                 ]}
               />
             </FormContainer>

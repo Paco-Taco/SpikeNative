@@ -57,7 +57,7 @@ const VetRegister = () => {
     role: "VETERINARY_OWNER",
     img: null as ImagePicker.ImagePickerAsset | null,
   });
-  const [isPasswordVisible, setPasswordVisible] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
 
@@ -237,7 +237,7 @@ const VetRegister = () => {
             ]}
             trailingAccessory={
               formData.password.length > 0 ? (
-                <TouchableOpacity onPress={() => setPasswordVisible(!isPasswordVisible)}>
+                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
                   <Ionicons
                     name={isPasswordVisible ? "eye" : "eye-off"} 
                     size={24}
