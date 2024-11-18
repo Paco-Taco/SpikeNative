@@ -30,7 +30,6 @@ export default function AppLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <BottomSheetModalProvider>
         <Stack>
           <Stack.Screen
             name="index"
@@ -57,7 +56,6 @@ export default function AppLayout() {
             }}
           />
         </Stack>
-      </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
 }

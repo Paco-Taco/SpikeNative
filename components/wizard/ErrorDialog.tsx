@@ -22,7 +22,7 @@ const ErrorDialog = ({
     <Dialog
       visible={visible}
       onDismiss={onDismiss}
-      useSafeArea
+      // useSafeArea
       containerStyle={{
         borderRadius: 8,
         backgroundColor: ColorPalette.background,
