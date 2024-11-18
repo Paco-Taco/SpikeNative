@@ -1,7 +1,9 @@
+import NewPetModal from "@/components/user/NewPetModal";
 import { ColorPalette } from "@/constants/Colors";
 import { VeterinaryService } from "@/services/vetServices";
 import { useLoginStore } from "@/stores/login.store";
 import { CitasVet } from "@/types/vetTypes.types";
+import LottieView from "lottie-react-native";
 import React, { useEffect, useState } from "react";
 import { Alert, FlatList, StyleSheet } from "react-native";
 import {
@@ -13,21 +15,27 @@ import {
   Button,
   ListItem,
   AnimatedImage,
+  LoaderScreen,
 } from "react-native-ui-lib";
 
-const SimpleTabController = () => {
+const AppointmentHistory = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const [citas, setCitas] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const [formattedAppointmentDetails, setformattedAppointmentDetails] =
+    useState({});
 
   const loadCitas = async () => {
     try {
+      setLoading(true);
       const vetId = dataLogin?.user.vetId;
       const response = await VeterinaryService.getCitasVet(vetId);
       setCitas(response);
-      setLoading(false);
     } catch (error) {
       console.error("Error al cargar las citas:", error);
+      setLoading(false);
+    } finally {
       setLoading(false);
     }
   };
@@ -47,19 +55,26 @@ const SimpleTabController = () => {
       parseInt(cita.pet.animal) - 1
     ];
 
-    Alert.alert(
-      "Detalles de la Cita",
-      `Dueño: ${cita.user.firstName} ${cita.user.lastName}
-        \nMascota: ${cita.pet.name}
-        \nEdad: ${cita.pet.age}
-        \nGénero: ${genderText}
-        \nAnimal: ${animalText}
-        \nPeso: ${cita.pet.weight} kg
-        \nAltura: ${heightText}
-        \nFecha: ${new Date(cita.date).toLocaleDateString()}
-        \nHora: ${cita.hour.hour} - Día: ${cita.hour.day}
-        \nEstado: ${cita.done ? "Completada" : "Pendiente"}`
-    );
+    // Alert.alert(
+    //   "Detalles de la Cita",
+    //   `Dueño: ${cita.user.firstName} ${cita.user.lastName}
+    //     \nMascota: ${cita.pet.name}
+    //     \nEdad: ${cita.pet.age}
+    //     \nGénero: ${genderText}
+    //     \nAnimal: ${animalText}
+    //     \nPeso: ${cita.pet.weight} kg
+    //     \nAltura: ${heightText}
+    //     \nFecha: ${new Date(cita.date).toLocaleDateString()}
+    //     \nHora: ${cita.hour.hour} - Día: ${cita.hour.day}
+    //     \nEstado: ${cita.done ? "Completada" : "Pendiente"}`
+    // );
+    setformattedAppointmentDetails({
+      ...cita,
+      genderText,
+      heightText,
+      animalText,
+    });
+    setDetailsModalVisible(true);
   };
 
   // Función para marcar cita como completada
@@ -115,9 +130,10 @@ const SimpleTabController = () => {
       // </View>
       <View padding-10>
         <ListItem
-
           activeBackgroundColor={Colors.grey70}
           onPress={() => visualizarCita(item)}
+          style={{ borderRadius: 10, backgroundColor: ColorPalette.white }}
+          height={120}
         >
           <ListItem.Part left>
             <AnimatedImage
@@ -154,11 +170,11 @@ const SimpleTabController = () => {
   };
 
   return (
-    <View flex>
-      <TabController
+    <View useSafeArea flex>
+      {/* <TabController
         asCarousel
         initialIndex={0}
-        items={[{ label: "Citas Pendientes" }, { label: "Citas Completadas" }]}
+        items={[{ label: "Citas Pendientes", }, { label: "Citas Completadas" }]}
         useSafeArea
       >
         <TabController.TabBar
@@ -170,15 +186,27 @@ const SimpleTabController = () => {
         />
         <TabController.PageCarousel>
           <TabController.TabPage index={0}>
-            <View flex>
-              <Text style={styles.sectionTitle}>Citas Pendientes:</Text>
-              <FlatList
-                data={citas?.pendientes}
-                renderItem={renderCita}
-                keyExtractor={(item) => item.id.toString()}
-                ListEmptyComponent={<Text>No hay citas pendientes.</Text>}
-              />
-            </View>
+            {loading ? (
+              <View flex center>
+                <LottieView
+                  source={require("@/assets/lottie/LoadingCat.json")}
+                  autoPlay
+                  loop
+                  style={{ width: 100, height: 100 }}
+                />
+                <Text medium>Cargando...</Text>
+              </View>
+            ) : (
+              <View flex>
+                <Text style={styles.sectionTitle}>Citas Pendientes:</Text>
+                <FlatList
+                  data={citas?.pendientes}
+                  renderItem={renderCita}
+                  keyExtractor={(item) => item.id.toString()}
+                  ListEmptyComponent={<Text>No hay citas pendientes.</Text>}
+                />
+              </View>
+            )}
           </TabController.TabPage>
           <TabController.TabPage index={1}>
             <View flex>
@@ -192,12 +220,35 @@ const SimpleTabController = () => {
             </View>
           </TabController.TabPage>
         </TabController.PageCarousel>
-      </TabController>
+      </TabController> */}
+
+      {loading ? (
+        <View flex center>
+          <LottieView
+            source={require("@/assets/lottie/LoadingCat.json")}
+            autoPlay
+            loop
+            style={{ width: 100, height: 100 }}
+          />
+          <Text medium>Cargando...</Text>
+        </View>
+      ) : (
+        <View flex>
+          <Text style={styles.sectionTitle}>Citas Completadas:</Text>
+          <FlatList
+            data={citas?.completadas}
+            renderItem={renderCita}
+            keyExtractor={(item) => item.id.toString()}
+            ListEmptyComponent={<Text>No hay citas completadas.</Text>}
+          />
+        </View>
+      )}
+
     </View>
   );
 };
 
-export default SimpleTabController;
+export default AppointmentHistory;
 
 const styles = StyleSheet.create({
   labelStyle: {
@@ -235,9 +286,8 @@ const styles = StyleSheet.create({
   },
   petImage: {
     marginHorizontal: 10,
-    width: 80,
-    height: 80,
-    // marginVertical: 10,
+    width: 100,
+    height: 100,
     borderRadius: 10,
   },
 });
