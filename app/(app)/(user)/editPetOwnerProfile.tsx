@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, TextInput, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  TextInput,
+  Alert,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginStore } from "@/stores/login.store";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from "expo-image-picker";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 
 const EditPetOwnerProfile = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const { user, token } = dataLogin || {};
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const userId = user?.id;
   const router = useRouter();
 
@@ -26,14 +35,18 @@ const EditPetOwnerProfile = () => {
     img: "",
     img_public_id: null,
   });
+  const { updateProfile } = useLoginStore((state) => state);
 
   useEffect(() => {
     const fetchOwnerProfile = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstanceSpikeCore.get(`/getUsers/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axiosInstanceSpikeCore.get(
+          `/getUsers/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = response.data;
         setFormData({
           firstName: data.firstName,
@@ -47,7 +60,10 @@ const EditPetOwnerProfile = () => {
           img_public_id: data.img_public_id || null,
         });
       } catch (error) {
-        console.error("Error fetching profile data:", error.response?.data || error.message);
+        console.error(
+          "Error fetching profile data:",
+          error.response?.data || error.message
+        );
         Alert.alert("Error", "No se pudo cargar el perfil.");
       } finally {
         setLoading(false);
@@ -59,7 +75,7 @@ const EditPetOwnerProfile = () => {
     }
   }, [userId, token]);
 
-  const handleChange = (name, value) => {
+  const handleChange = (name: string, value: string) => {
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -68,7 +84,7 @@ const EditPetOwnerProfile = () => {
 
   const handleImagePick = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -85,7 +101,7 @@ const EditPetOwnerProfile = () => {
 
   const handleSubmit = async () => {
     const data = new FormData();
-  
+
     // Agregar datos al FormData solo si tienen un valor definido
     Object.keys(formData).forEach((key) => {
       if (formData[key] !== undefined && formData[key] !== null) {
@@ -100,22 +116,41 @@ const EditPetOwnerProfile = () => {
         }
       }
     });
-  
+
     console.log("Datos a enviar:", data);
-  
+
     try {
-      const response = await axiosInstanceSpikeCore.post(`/updateUser/${userId}`, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await axiosInstanceSpikeCore.post(
+        `/updateUser/${userId}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            // Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      updateProfile({
+        firstName: formData.firstName,
+        email: formData.email,
+        phone: formData.phone,
+        number_int: formData.number_int,
+        city: formData.city,
+        locality: formData.locality,
+        cp: formData.cp,
+        img: formData.img,
       });
+
       Alert.alert("Success", response.data.message);
     } catch (error) {
       console.error("Error updating profile:", error.response?.data || error);
-      Alert.alert("Error", "No se pudo actualizar el perfil. Intente nuevamente.");
+      Alert.alert(
+        "Error",
+        "No se pudo actualizar el perfil. Intente nuevamente."
+      );
     }
-  };  
+  };
 
   const handleCancel = () => {
     router.push("../");
@@ -129,14 +164,20 @@ const EditPetOwnerProfile = () => {
         ) : (
           <View style={styles.container}>
             <TouchableOpacity onPress={handleImagePick}>
-              <Image source={formData.img ? { uri: formData.img } : require("@/assets/images/catbox.png")} style={styles.profileImage} />
+              <Image
+                source={
+                  formData.img
+                    ? { uri: formData.img }
+                    : require("@/assets/images/catbox.png")
+                }
+                style={styles.profileImage}
+              />
             </TouchableOpacity>
 
             <Text style={styles.profileName}>{formData.firstName}</Text>
 
             {isEditing && (
               <View style={styles.formContainer}>
-
                 <Text>Nombre</Text>
                 <TextInput
                   style={styles.input}
@@ -144,7 +185,7 @@ const EditPetOwnerProfile = () => {
                   value={formData.firstName}
                   onChangeText={(text) => handleChange("firstName", text)}
                 />
-              
+
                 <Text>Correo electrónico</Text>
                 <TextInput
                   style={styles.input}
@@ -173,10 +214,16 @@ const EditPetOwnerProfile = () => {
             )}
 
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={handleCancel}
+              >
                 <Text style={styles.buttonText}>Cancelar</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={handleSubmit}
+              >
                 <Text style={styles.buttonText}>Guardar</Text>
               </TouchableOpacity>
             </View>
@@ -194,7 +241,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   profileImage: {
     width: 120,
@@ -216,28 +263,28 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
     marginBottom: 25,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
     marginTop: 20,
   },
   cancelButton: {
     padding: 10,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
     borderRadius: 5,
   },
   saveButton: {
     padding: 10,
-    backgroundColor: '#00f',
+    backgroundColor: "#00f",
     borderRadius: 5,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
   },
   subtext: {
@@ -245,7 +292,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     fontWeight: "bold", // Aplica negrita
     marginBottom: 20,
-  }  
+  },
 });
 
 export default EditPetOwnerProfile;

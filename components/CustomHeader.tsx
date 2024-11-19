@@ -93,7 +93,7 @@ const CustomHeader = () => {
               router.push("/vetProfile");
             } else if (role === "PET_OWNER") {
               router.navigate("/(app)/(user)/petOwnerProfile");
-              console.log(role);
+              // console.log(role);
             } else {
               console.error("Role not recognized:", role);
             }
@@ -101,7 +101,7 @@ const CustomHeader = () => {
         >
           <Image
             style={styles.profileButton}
-            source={require("@/assets/images/ic_pet.jpg")}
+            source={{ uri: dataLogin?.user.img }}
           />
         </TouchableOpacity>
       </View>
