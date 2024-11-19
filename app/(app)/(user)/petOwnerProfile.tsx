@@ -14,6 +14,10 @@ import { useRouter } from "expo-router";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoginStore } from "@/stores/login.store";
 import * as ImagePicker from "expo-image-picker";
+import ProfileLayout from "@/components/layout/ProfileLayout";
+import OptionButton from "@/components/shared/OptionButton";
+import LogOutButton from "@/components/shared/LogOutButton";
+import LogOutModal from "@/components/shared/LogOutModal";
 
 const PetOwnerProfile = () => {
   const { dataLogin } = useLoginStore((state) => state);
@@ -21,6 +25,7 @@ const PetOwnerProfile = () => {
   const { onLogout } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
   // const handleImagePick = async () => {
   //   const result = await ImagePicker.launchImageLibraryAsync({
@@ -72,72 +77,34 @@ const PetOwnerProfile = () => {
   // };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView>
-        <View style={styles.container}>
-          <Image
-            source={
-              user?.img
-                ? { uri: user?.img }
-                : require("@/assets/images/catbox.png")
-            }
-            style={styles.profileImage}
-          />
-          <Text style={styles.profileName}>{user?.firstName}</Text>
-
-          <TouchableOpacity
-            onPress={() => router.push("/editPetOwnerProfile")}
-            style={styles.optionButton}
-          >
-            <Text style={styles.optionText}>Editar perfil</Text>
-            <Ionicons name="chevron-forward-outline" size={20} color="#000" />
-          </TouchableOpacity>
-
-          {/* Otras opciones */}
-          <TouchableOpacity
-            // onPress={() => router.push("/appointmentHistory")}
-            style={styles.optionButton}
-          >
-            <Text style={styles.optionText}>Mis citas</Text>
-            <Ionicons name="chevron-forward-outline" size={20} color="#000" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.push("/petlist")}
-            style={styles.optionButton}
-          >
-            <Text style={styles.optionText}>Mis mascotas</Text>
-            <Ionicons name="chevron-forward-outline" size={20} color="#000" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onLogout} style={styles.optionButton}>
-            <Text style={styles.optionText}>Cerrar sesión</Text>
-            <Ionicons name="log-out-outline" size={20} color="#000" />
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <ProfileLayout
+      userName={
+        user?.firstName && user.lastName
+          ? `${user?.firstName} ${user?.lastName}`
+          : "No data"
+      }
+      email={user?.email ? user.email : "No data"}
+      userImg={user?.img ? user.img : ""}
+      editHref="/(app)/(user)/editPetOwnerProfile"
+    >
+      <OptionButton
+        text="Mis mascotas"
+        icon={<Ionicons name="paw-outline" size={24} color="#007BFF" />}
+        href="/petlist"
+      />
+      <LogOutButton
+        text="Log out"
+        icon={<Ionicons name="log-out-outline" size={24} color="#007BFF" />}
+        onPress={() => {
+          setIsLogoutModalVisible(true);
+        }}
+      />
+      <LogOutModal
+        isVisible={isLogoutModalVisible}
+        onDismiss={() => setIsLogoutModalVisible(false)}
+      />
+    </ProfileLayout>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  container: { alignItems: "center", padding: 20 },
-  profileImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 20 },
-  profileName: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
-  optionButton: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    padding: 15,
-    borderBottomWidth: 1,
-  },
-  optionText: { fontSize: 18 },
-  saveButton: {
-    backgroundColor: "#007BFF",
-    padding: 15,
-    marginVertical: 20,
-    borderRadius: 10,
-  },
-  saveButtonText: { color: "#FFF", fontSize: 18, textAlign: "center" },
-});
 
 export default PetOwnerProfile;

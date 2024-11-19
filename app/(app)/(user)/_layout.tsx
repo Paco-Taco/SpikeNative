@@ -18,9 +18,8 @@ export default function AppLayout() {
   const navigation = useNavigation();
   const { authState } = useAuth();
 
-
   if (!authState?.authenticated) {
-    return <Redirect href={"/login"}/>
+    return <Redirect href={"/login"} />;
   }
 
   return (
@@ -31,6 +30,12 @@ export default function AppLayout() {
             name="index"
             options={{
               header: () => <CustomHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="petOwnerProfile"
+            options={{
+              headerShown: false,
             }}
           />
         </Stack>
