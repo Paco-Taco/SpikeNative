@@ -1,11 +1,11 @@
-import { View, Text, Avatar, Button } from "react-native-ui-lib";
+import { View, Text, Avatar, Button, TouchableOpacity } from "react-native-ui-lib";
 import React, { ReactNode } from "react";
 import { ColorPalette } from "@/constants/Colors";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import LogOutButton from "../shared/LogOutButton";
-import { Link } from "expo-router";
+import { Link, useNavigation } from "expo-router";
 import { Fonts } from "@/constants/Fonts";
 import { useLoginStore } from "@/stores/login.store";
 
@@ -22,8 +22,16 @@ const ProfileLayout = ({
   editHref: string;
   children: ReactNode
 }) => {
+  const navigation = useNavigation()
   return (
   <SafeAreaView style={styles.safeArea}>
+    <View style={{top: 10, left: 20,}}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+      >
+        <Ionicons name="arrow-back" size={24} color={ColorPalette.medium} />  
+      </TouchableOpacity>
+    </View>
     <View style={styles.container} gap-20 padding-20>
       <View center width={"100%"}>
         {userImg ? (
