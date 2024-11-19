@@ -92,7 +92,7 @@ const CustomHeader = () => {
             if (role === "VETERINARY_OWNER") {
               router.push("/vetProfile");
             } else if (role === "PET_OWNER") {
-              // router.navigate('/(app)/...');
+              router.navigate("/(app)/(user)/petOwnerProfile");
               console.log(role);
             } else {
               console.error("Role not recognized:", role);
