@@ -5,6 +5,7 @@ import { useLoginStore } from '@/stores/login.store';
 import { VeterinaryService } from '@/services/vetServices';
 import { CitasVet, Pendiente } from '@/types/vetTypes.types';
 import CardAppointment from '@/components/CardAppointment';
+import AppointmentDetailModal from '@/components/AppointmentDetailModal';
 import { Alert } from 'react-native';
 import LottieView from 'lottie-react-native';
 
@@ -12,6 +13,8 @@ const Index = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const [appointments, setAppointments] = useState<CitasVet | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] = useState<Pendiente | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const loadAppointments = async () => {
     try {
@@ -52,25 +55,8 @@ const Index = () => {
   };
 
   const handlePressDetails = (appointment: Pendiente) => {
-    const genderText = appointment.pet.gender === "0" ? "Masculino" : "Femenino";
-    const heightText = ["Pequeño", "Mediano", "Grande", "Gigante"][
-      parseInt(appointment.pet.height) - 1
-    ];
-    const animalText = ["Perro", "Gato", "Conejo", "Aves", "Reptiles", "Otros"][
-      parseInt(appointment.pet.animal) - 1
-    ];
-
-    Alert.alert(
-      "Detalles de la Cita",
-      `Mascota: ${appointment.pet.name}
-      \nEdad: ${appointment.pet.age}
-      \nGénero: ${genderText}
-      \nAnimal: ${animalText}
-      \nPeso: ${appointment.pet.weight} kg
-      \nAltura: ${heightText}
-      \nFecha: ${new Date(appointment.date).toLocaleDateString()}
-      \nHora: ${appointment.hour.hour} - Día: ${appointment.hour.day}`
-    );
+    setSelectedAppointment(appointment);
+    setModalVisible(true);
   };
 
   if (loading) {
@@ -106,6 +92,17 @@ const Index = () => {
             No hay citas pendientes
           </Text>
         }
+      />
+
+      <AppointmentDetailModal
+        visible={modalVisible}
+        appointment={selectedAppointment}
+        onClose={() => {
+          setModalVisible(false);
+          setSelectedAppointment(null);
+        }}
+        onComplete={handleComplete}
+        onCancel={handleCancel}
       />
     </View>
   );
