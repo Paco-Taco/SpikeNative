@@ -42,6 +42,7 @@ const ValidationTextField = ({
       secureTextEntry={secureTextEntry}
       keyboardType={keyboardType}
       trailingAccessory={trailingAccessory}
+      validateOnStart={false}
       maxLength={maxLength}
     />
   );
