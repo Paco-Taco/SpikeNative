@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { StyleSheet, Image, ScrollView } from "react-native";
+// app/(app)/(vet)/vetProfile.tsx
+
+import React, { useState, useEffect } from "react";
+import { StyleSheet, TouchableOpacity, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ColorPalette } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
