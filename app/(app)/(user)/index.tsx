@@ -1,3 +1,5 @@
+// app/(app)/(user)/index.tsx
+
 import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,19 +30,27 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { searchQuery } = useSearch();
 
-  const renderItem = ({ item }: { item: Veterinary }) => (
-    <CardVeterinary
-      item={item}
-      onPress={() =>
-        pets.length > 0 ? console.log("si tiene mascotas") : setShowModal(true)
-      }
-    />
-  );
+  const renderItem = ({ item }: { item: Veterinary }) => {
+    console.log("Item ID:", item.id);  // Check if ID is valid
+    return (
+      <CardVeterinary
+        item={item}
+        onPress={() => {
+          if (pets.length > 0) {
+            router.push(`/appointmentBooking/${item.id}`);
+          } else {
+            setShowModal(true);
+          }
+        }}
+      />
+    );
+  };  
 
   useEffect(() => {
     if (!idOwner) {
       return;
     }
+
     const fetchVets = async () => {
       try {
         setLoadingVets(true);
@@ -95,12 +105,7 @@ const Index = () => {
       {/* Barra de filtros de categoría */}
       <View paddingH-20 marginB-20>
         <SegmentedControl
-          segments={[
-            { label: "All" },
-            { label: "Nutrition" },
-            { label: "Recreation" },
-            { label: "Care" },
-          ]}
+          segments={[{ label: "All" }, { label: "Nutrition" }, { label: "Recreation" }, { label: "Care" }]}
           onChangeIndex={(index) => {
             setSelectedCategory(categories[index]);
           }}
@@ -131,7 +136,7 @@ const Index = () => {
             onDismiss={() => setShowModal(false)}
             onOk={() => {
               setShowModal(false);
-              router.navigate("/petRegister");
+              router.push("/petRegister");
             }}
           />
         </View>
