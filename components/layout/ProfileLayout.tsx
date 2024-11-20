@@ -1,4 +1,10 @@
-import { View, Text, Avatar, Button, TouchableOpacity } from "react-native-ui-lib";
+import {
+  View,
+  Text,
+  Avatar,
+  Button,
+  TouchableOpacity,
+} from "react-native-ui-lib";
 import React, { ReactNode } from "react";
 import { ColorPalette } from "@/constants/Colors";
 import { StyleSheet } from "react-native";
@@ -8,6 +14,7 @@ import LogOutButton from "../shared/LogOutButton";
 import { Link, useNavigation } from "expo-router";
 import { Fonts } from "@/constants/Fonts";
 import { useLoginStore } from "@/stores/login.store";
+import BackArrow from "../shared/BackArrow";
 
 const ProfileLayout = ({
   userImg,
@@ -20,48 +27,42 @@ const ProfileLayout = ({
   userName: string;
   email: string;
   editHref: string;
-  children: ReactNode
+  children: ReactNode;
 }) => {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
   return (
-  <SafeAreaView style={styles.safeArea}>
-    <View style={{top: 10, left: 20,}}>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-      >
-        <Ionicons name="arrow-back" size={24} color={ColorPalette.medium} />  
-      </TouchableOpacity>
-    </View>
-    <View style={styles.container} gap-20 padding-20>
-      <View center width={"100%"}>
-        {userImg ? (
-          <Avatar source={{ uri: userImg }} animate size={100} />
-        ) : (
-          <Avatar
-            source={{ uri: require("@/assets/images/catbox.png") }}
-            size={100}
-          />
-        )}
+    <SafeAreaView style={styles.safeArea}>
+      <BackArrow />
+      <View style={styles.container} gap-20 padding-20>
+        <View center width={"100%"}>
+          {userImg ? (
+            <Avatar source={{ uri: userImg }} animate size={100} />
+          ) : (
+            <Avatar
+              source={{ uri: require("@/assets/images/catbox.png") }}
+              size={100}
+            />
+          )}
 
-        <Text style={styles.profileName} marginT-20>
-          {userName}
-        </Text>
+          <Text style={styles.profileName} marginT-20>
+            {userName}
+          </Text>
 
-        <Text style={{ fontFamily: Fonts.PoppinsLight }}>{email}</Text>
+          <Text style={{ fontFamily: Fonts.PoppinsLight }}>{email}</Text>
 
-        <Link asChild href={editHref as any}>
-          <Button
-            label="Edit profile"
-            backgroundColor={ColorPalette.white}
-            outlineColor={ColorPalette.black}
-            color={ColorPalette.black}
-            labelStyle={{ fontFamily: Fonts.PoppinsMedium }}
-            size="medium"
-            marginT-20
-          />
-        </Link>
-      </View>
-      {/* <View width={'100%'} center row padding-10>
+          <Link asChild href={editHref as any}>
+            <Button
+              label="Edit profile"
+              backgroundColor={ColorPalette.white}
+              outlineColor={ColorPalette.black}
+              color={ColorPalette.black}
+              labelStyle={{ fontFamily: Fonts.PoppinsMedium }}
+              size="medium"
+              marginT-20
+            />
+          </Link>
+        </View>
+        {/* <View width={'100%'} center row padding-10>
         {user?.category.map((category, index) => (
           <Badge
             key={index}
@@ -88,11 +89,9 @@ const ProfileLayout = ({
         ))}
       </View> */}
 
-      <View>
-        {children}
+        <View>{children}</View>
       </View>
-    </View>
-  </SafeAreaView>
+    </SafeAreaView>
   );
 };
 

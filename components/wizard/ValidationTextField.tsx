@@ -2,7 +2,7 @@ import { TextField } from "react-native-ui-lib";
 import { ColorPalette } from "@/constants/Colors";
 import { StyleSheet } from "react-native";
 import { Validator } from "react-native-ui-lib/src/components/textField/types";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 const ValidationTextField = ({
   placeholder,
@@ -27,13 +27,18 @@ const ValidationTextField = ({
     | undefined;
   maxLength?: number;
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
     <TextField
       placeholder={placeholder}
       placeholderTextColor={ColorPalette.medium}
       value={value}
       onChangeText={onChangeText}
-      containerStyle={styles.textFieldContainer}
+      containerStyle={{
+        ...styles.textFieldContainer,
+        borderColor: isFocused ? ColorPalette.primary : ColorPalette.medium,
+      }}
       enableErrors
       validateOnChange
       validate={validate}
@@ -44,6 +49,8 @@ const ValidationTextField = ({
       trailingAccessory={trailingAccessory}
       validateOnStart={false}
       maxLength={maxLength}
+      onBlur={() => setIsFocused(false)}
+      onFocus={() => setIsFocused(true)}
     />
   );
 };

@@ -1,29 +1,43 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  TextInput,
-  Alert,
-} from "react-native";
+import { StyleSheet, Image, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginStore } from "@/stores/login.store";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
+import LoadingCat from "@/components/shared/LoadingCat";
+import {
+  Avatar,
+  TextField,
+  View,
+  TouchableOpacity,
+  Text,
+  Incubator,
+} from "react-native-ui-lib";
+import { colorsPalette } from "react-native-ui-lib/src/style/colorsPalette";
+import { ColorPalette } from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
+import AbsoluteBackArrow from "@/components/shared/AbsoluteBackArrow";
+import SimpleTextField from "@/components/wizard/SimpleTextField";
+import BackArrow from "@/components/shared/BackArrow";
+import DoneCheckMark from "@/components/shared/DoneCheckMark";
+import { Fonts } from "@/constants/Fonts";
+import LottieView from "lottie-react-native";
+import ValidationTextField from "@/components/wizard/ValidationTextField";
+import { isValidEmail } from "@/utils/isValidEmail";
+import { isValidPhoneNumber } from "@/utils/isValidPhoneNumber";
 
 const EditPetOwnerProfile = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const { user, token } = dataLogin || {};
   const [loading, setLoading] = useState(true);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const userId = user?.id;
   const router = useRouter();
+  const editIcon = require("@/assets/images/edit.webp");
+  const navigation = useNavigation();
 
-  const [isEditing, setIsEditing] = useState(true);
   const [formData, setFormData] = useState({
     firstName: "",
     email: "",
@@ -42,10 +56,7 @@ const EditPetOwnerProfile = () => {
       try {
         setLoading(true);
         const response = await axiosInstanceSpikeCore.get(
-          `/getUsers/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          `/getUsers/${userId}`
         );
         const data = response.data;
         setFormData({
@@ -99,6 +110,17 @@ const EditPetOwnerProfile = () => {
     }
   };
 
+  const isFormValid = () => {
+    return (
+      formData.firstName.trim() !== "" &&
+      formData.city.trim() !== "" &&
+      formData.cp.trim() !== "" &&
+      isValidEmail(formData.email) &&
+      isValidPhoneNumber(formData.phone)
+    );
+  };
+  
+
   const handleSubmit = async () => {
     const data = new FormData();
 
@@ -120,6 +142,7 @@ const EditPetOwnerProfile = () => {
     console.log("Datos a enviar:", data);
 
     try {
+      setIsUpdatingProfile(true);
       const response = await axiosInstanceSpikeCore.post(
         `/updateUser/${userId}`,
         data,
@@ -142,13 +165,16 @@ const EditPetOwnerProfile = () => {
         img: formData.img,
       });
 
-      Alert.alert("Success", response.data.message);
+      // Alert.alert("Success", response.data.message);
+      router.push("../");
     } catch (error) {
       console.error("Error updating profile:", error.response?.data || error);
       Alert.alert(
         "Error",
         "No se pudo actualizar el perfil. Intente nuevamente."
       );
+    } finally {
+      setIsUpdatingProfile(false);
     }
   };
 
@@ -158,78 +184,129 @@ const EditPetOwnerProfile = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView>
-        {loading ? (
-          <Text>Cargando perfil...</Text>
-        ) : (
+      {loading ? (
+        <LoadingCat />
+      ) : (
+        <ScrollView>
+          <View row style={{ justifyContent: "space-between", padding: 10 }}>
+            <BackArrow />
+            <DoneCheckMark onPress={handleSubmit} disabled={!isFormValid()} />
+          </View>
           <View style={styles.container}>
-            <TouchableOpacity onPress={handleImagePick}>
-              <Image
-                source={
-                  formData.img
-                    ? { uri: formData.img }
-                    : require("@/assets/images/catbox.png")
-                }
-                style={styles.profileImage}
-              />
-            </TouchableOpacity>
+            {/* <TouchableOpacity onPress={handleImagePick}> */}
+            <Avatar
+              source={
+                formData.img
+                  ? { uri: formData.img }
+                  : require("@/assets/images/catbox.png")
+              }
+              onPress={handleImagePick}
+              animate
+              size={120}
+              containerStyle={{
+                marginBottom: 20,
+                shadowColor: ColorPalette.black,
+                shadowOffset: {
+                  width: 0,
+                  height: 2,
+                },
+                shadowOpacity: 0.25,
+                elevation: 5,
+              }}
+              badgePosition="BOTTOM_RIGHT"
+              badgeProps={{
+                icon: editIcon,
+                backgroundColor: ColorPalette.bluePalette,
+                size: 30,
+                iconStyle: {
+                  width: 20,
+                  height: 20,
+                  tintColor: ColorPalette.white,
+                },
+              }}
+            />
+            {/* </TouchableOpacity> */}
 
             <Text style={styles.profileName}>{formData.firstName}</Text>
 
-            {isEditing && (
-              <View style={styles.formContainer}>
-                <Text>Nombre</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Nombre del dueño"
-                  value={formData.firstName}
-                  onChangeText={(text) => handleChange("firstName", text)}
-                />
+            <View style={styles.formContainer}>
+              <Text bold>Nombre</Text>
+              <SimpleTextField
+                placeholder="Nombre del dueño"
+                value={formData.firstName}
+                onChangeText={(text) => handleChange("firstName", text)}
+              />
 
-                <Text>Correo electrónico</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Correo electrónico"
-                  value={formData.email}
-                  onChangeText={(text) => handleChange("email", text)}
-                />
+              <Text bold>Correo electrónico</Text>
+              <ValidationTextField
+                placeholder="Correo electrónico"
+                value={formData.email}
+                onChangeText={(text) => handleChange("email", text)}
+                validate={["required", (value) => isValidEmail(value || "")]}
+                validationMessage={["Field is required", "Email is invalid"]}
+              />
 
-                <Text>Telefono</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Teléfono"
-                  value={formData.phone}
-                  onChangeText={(text) => handleChange("phone", text)}
-                />
+              <Text bold>Telefono</Text>
+              <ValidationTextField
+                placeholder="Phone number"
+                value={formData.phone}
+                onChangeText={(value) => handleChange("phone", value)}
+                keyboardType="phone-pad"
+                validate={[
+                  "required",
+                  (value) => isValidPhoneNumber(value || ""),
+                ]}
+                validationMessage={[
+                  "Field is required",
+                  "Phone number is invalid",
+                ]}
+                maxLength={10}
+              />
 
-                <Text style={styles.subtext}>DATOS DE DIRECCION</Text>
-                <Text>Ciudad</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ciudad"
-                  value={formData.city}
-                  onChangeText={(text) => handleChange("city", text)}
-                />
-              </View>
-            )}
+              <Text style={styles.subtext}>DATOS DE DIRECCION</Text>
+              <Text bold>Ciudad</Text>
+              <SimpleTextField
+                placeholder="Ciudad"
+                value={formData.city}
+                onChangeText={(text) => handleChange("city", text)}
+              />
 
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={handleCancel}
-              >
-                <Text style={styles.buttonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSubmit}
-              >
-                <Text style={styles.buttonText}>Guardar</Text>
-              </TouchableOpacity>
+              <Text bold>Postal Code</Text>
+              <SimpleTextField
+                placeholder="CP"
+                value={formData.cp}
+                onChangeText={(text) => handleChange("cp", text)}
+                keyboardType="number-pad"
+              />
             </View>
           </View>
-        )}
-      </ScrollView>
+        </ScrollView>
+      )}
+      <Incubator.Dialog
+        useSafeArea
+        center
+        visible={isUpdatingProfile}
+        onDismiss={() => setIsUpdatingProfile(false)}
+        containerStyle={{
+          borderRadius: 8,
+          backgroundColor: ColorPalette.background,
+          padding: 30,
+        }}
+      >
+        <View center>
+          <LottieView
+            source={require("@/assets/lottie/LoadingCat.json")}
+            autoPlay
+            loop
+            style={{
+              width: 100,
+              height: 100,
+              margin: 10,
+            }}
+          />
+          <Text center>Guardando...</Text>
+        </View>
+      </Incubator.Dialog>
     </SafeAreaView>
   );
 };
@@ -237,21 +314,16 @@ const EditPetOwnerProfile = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: ColorPalette.white,
   },
   container: {
     padding: 20,
     flex: 1,
     alignItems: "center",
   },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 20,
-  },
   profileName: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: Fonts.PoppinsBold,
     marginBottom: 20,
   },
   formContainer: {
@@ -290,7 +362,7 @@ const styles = StyleSheet.create({
   subtext: {
     marginTop: 20,
     alignSelf: "center",
-    fontWeight: "bold", // Aplica negrita
+    fontFamily: Fonts.PoppinsBold,
     marginBottom: 20,
   },
 });

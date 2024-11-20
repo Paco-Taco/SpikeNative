@@ -11,6 +11,7 @@ import { Card, View, Text, Badge } from "react-native-ui-lib";
 import { Ionicons } from "@expo/vector-icons"; // Asegúrate de instalar este paquete si aún no lo tienes
 import { ColorPalette } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
+import AbsoluteBackArrow from "@/components/shared/AbsoluteBackArrow";
 
 const AppointmentDetails = () => {
   const params = useLocalSearchParams();
@@ -38,13 +39,10 @@ const AppointmentDetails = () => {
         backgroundColor={"transparent"}
         translucent
       />
-      {/* Flecha de retroceso fija */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
-        <Ionicons name="arrow-back" size={24} color={ColorPalette.white} />
-      </TouchableOpacity>
+      
+      <AbsoluteBackArrow
+        color={ColorPalette.white}
+      />
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}>
         <View>
           <ImageBackground
@@ -127,14 +125,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 10,
     right: 40,
-  },
-  backButton: {
-    position: "absolute",
-    top: 40,
-    left: 20,
-    padding: 10,
-    borderRadius: 20,
-    zIndex: 10, 
   },
 });
 

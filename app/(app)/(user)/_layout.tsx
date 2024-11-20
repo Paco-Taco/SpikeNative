@@ -38,6 +38,12 @@ export default function AppLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="editPetOwnerProfile"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
