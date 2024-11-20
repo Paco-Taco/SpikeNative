@@ -6,14 +6,20 @@ import { Veterinary } from "@/types/userTypes.types";
 import { ColorPalette } from "@/constants/Colors";
 import { Categories } from "@/constants/Categories";
 
-const CardVeterinary = ({ item }: { item: Veterinary }) => (
+const CardVeterinary = ({
+  item,
+  onPress,
+}: {
+  item: Veterinary;
+  onPress: () => void;
+}) => (
   <Card
     marginV-10
     padding-20
     borderRadius={10}
     backgroundColor={"white"}
     style={styles.cardStyles}
-    onPress={() => {}}
+    onPress={onPress}
   >
     <Image
       source={{ uri: item.img }}

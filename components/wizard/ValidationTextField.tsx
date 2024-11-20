@@ -2,6 +2,7 @@ import { TextField } from "react-native-ui-lib";
 import { ColorPalette } from "@/constants/Colors";
 import { StyleSheet } from "react-native";
 import { Validator } from "react-native-ui-lib/src/components/textField/types";
+import { ReactNode, useState } from "react";
 
 const ValidationTextField = ({
   placeholder,
@@ -11,6 +12,8 @@ const ValidationTextField = ({
   validationMessage,
   secureTextEntry,
   keyboardType,
+  trailingAccessory,
+  maxLength,
 }: {
   placeholder: string;
   value: string;
@@ -19,14 +22,23 @@ const ValidationTextField = ({
   validationMessage: string[];
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
+  trailingAccessory?:
+    | React.ReactElement<any, string | React.JSXElementConstructor<any>>
+    | undefined;
+  maxLength?: number;
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
     <TextField
       placeholder={placeholder}
       placeholderTextColor={ColorPalette.medium}
       value={value}
       onChangeText={onChangeText}
-      containerStyle={styles.textFieldContainer}
+      containerStyle={{
+        ...styles.textFieldContainer,
+        borderColor: isFocused ? ColorPalette.primary : ColorPalette.medium,
+      }}
       enableErrors
       validateOnChange
       validate={validate}
@@ -34,6 +46,11 @@ const ValidationTextField = ({
       retainValidationSpace={false}
       secureTextEntry={secureTextEntry}
       keyboardType={keyboardType}
+      trailingAccessory={trailingAccessory}
+      validateOnStart={false}
+      maxLength={maxLength}
+      onBlur={() => setIsFocused(false)}
+      onFocus={() => setIsFocused(true)}
     />
   );
 };

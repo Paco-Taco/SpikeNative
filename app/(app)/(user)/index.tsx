@@ -14,11 +14,13 @@ import { useAuth } from "@/app/context/AuthContext";
 import { Fonts } from "@/constants/Fonts";
 import Modal from "react-native-modal";
 import NewPetModal from "@/components/user/NewPetModal";
+import LoadingCat from "@/components/shared/LoadingCat";
 
 const Index = () => {
   const { getVets } = useUserStore((state) => state);
   const { dataLogin } = useLoginStore((state) => state);
   const idOwner = dataLogin?.user.id;
+  const [loadingVets, setLoadingVets] = useState(true);
 
   const [veterinaryClinics, setVeterinaryClinics] = useState<Veterinary[]>([]);
   const [pets, setPets] = useState([]);
@@ -27,7 +29,12 @@ const Index = () => {
   const { searchQuery } = useSearch();
 
   const renderItem = ({ item }: { item: Veterinary }) => (
-    <CardVeterinary item={item} />
+    <CardVeterinary
+      item={item}
+      onPress={() =>
+        pets.length > 0 ? console.log("si tiene mascotas") : setShowModal(true)
+      }
+    />
   );
 
   useEffect(() => {
@@ -35,8 +42,15 @@ const Index = () => {
       return;
     }
     const fetchVets = async () => {
-      const result = await getVets();
-      setVeterinaryClinics(result ? result.veterinaries : []);
+      try {
+        setLoadingVets(true);
+        const result = await getVets();
+        setVeterinaryClinics(result ? result.veterinaries : []);
+      } catch (error) {
+        console.error("Error al obtener veterinarias:", error);
+      } finally {
+        setLoadingVets(false);
+      }
     };
 
     const fetchPets = async () => {
@@ -102,23 +116,26 @@ const Index = () => {
           }
         />
       </View>
-
-      <View paddingH-20 flex>
-        <FlatList
-          data={filteredVeterinaryClinics}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
-        <NewPetModal
-          isVisible={showModal}
-          onDismiss={() => setShowModal(false)}
-          onOk={() => {
-            setShowModal(false);
-            router.navigate("/petRegister");
-          }}
-        />
-      </View>
+      {loadingVets ? (
+        <LoadingCat />
+      ) : (
+        <View paddingH-20 flex>
+          <FlatList
+            data={filteredVeterinaryClinics}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderItem}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+          <NewPetModal
+            isVisible={showModal}
+            onDismiss={() => setShowModal(false)}
+            onOk={() => {
+              setShowModal(false);
+              router.navigate("/petRegister");
+            }}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };

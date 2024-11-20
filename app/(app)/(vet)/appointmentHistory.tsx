@@ -1,11 +1,13 @@
 import NewPetModal from "@/components/user/NewPetModal";
 import { ColorPalette } from "@/constants/Colors";
+import { Fonts } from "@/constants/Fonts";
 import { VeterinaryService } from "@/services/vetServices";
 import { useLoginStore } from "@/stores/login.store";
 import { CitasVet } from "@/types/vetTypes.types";
+import { Link, Redirect, router } from "expo-router";
 import LottieView from "lottie-react-native";
 import React, { useEffect, useState } from "react";
-import { Alert, FlatList, StyleSheet } from "react-native";
+import { Alert, FlatList, StatusBar, StyleSheet } from "react-native";
 import {
   View,
   Text,
@@ -22,9 +24,6 @@ const AppointmentHistory = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const [citas, setCitas] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
-  const [formattedAppointmentDetails, setformattedAppointmentDetails] =
-    useState({});
 
   const loadCitas = async () => {
     try {
@@ -47,34 +46,32 @@ const AppointmentHistory = () => {
   // Función para visualizar detalles de la cita
   const visualizarCita = (cita: any) => {
     // console.log(cita);
-    const genderText = cita.pet.gender === "0" ? "Masculino" : "Femenino";
-    const heightText = ["Pequeño", "Mediano", "Grande", "Gigante"][
+    const genderText = cita.pet.gender === "0" ? "Male" : "Female";
+    const heightText = ["Small", "Medium", "Big", "Very big"][
       parseInt(cita.pet.height) - 1
     ];
-    const animalText = ["Perro", "Gato", "Conejo", "Aves", "Reptiles", "Otros"][
+    const animalText = ["Dog", "Cat", "Rabbit", "Bird", "Reptile", "Other"][
       parseInt(cita.pet.animal) - 1
     ];
+    const status = cita.done ? "Completed" : "Pending";
 
-    // Alert.alert(
-    //   "Detalles de la Cita",
-    //   `Dueño: ${cita.user.firstName} ${cita.user.lastName}
-    //     \nMascota: ${cita.pet.name}
-    //     \nEdad: ${cita.pet.age}
-    //     \nGénero: ${genderText}
-    //     \nAnimal: ${animalText}
-    //     \nPeso: ${cita.pet.weight} kg
-    //     \nAltura: ${heightText}
-    //     \nFecha: ${new Date(cita.date).toLocaleDateString()}
-    //     \nHora: ${cita.hour.hour} - Día: ${cita.hour.day}
-    //     \nEstado: ${cita.done ? "Completada" : "Pendiente"}`
-    // );
-    setformattedAppointmentDetails({
-      ...cita,
-      genderText,
-      heightText,
-      animalText,
+    router.push({
+      pathname: "/appointmentDetails",
+      params: {
+        owner: `${cita.user.firstName} ${cita.user.lastName}`,
+        petImg: cita.pet.img,
+        petname: cita.pet.name,
+        age: cita.pet.age,
+        weight: cita.pet.weight,
+        date: new Date(cita.date).toLocaleDateString(),
+        hour: cita.hour.hour,
+        day: cita.hour.day,
+        status: status,
+        genderText,
+        heightText,
+        animalText,
+      },
     });
-    setDetailsModalVisible(true);
   };
 
   // Función para marcar cita como completada
@@ -161,7 +158,7 @@ const AppointmentHistory = () => {
           </ListItem.Part>
           <ListItem.Part right containerStyle={{ paddingRight: 20 }}>
             <Text color={statusColor}>
-              {item.done ? "Completada" : "Pendiente"}
+              {item.done ? "Completed" : "Pending"}
             </Text>
           </ListItem.Part>
         </ListItem>
@@ -171,57 +168,6 @@ const AppointmentHistory = () => {
 
   return (
     <View useSafeArea flex>
-      {/* <TabController
-        asCarousel
-        initialIndex={0}
-        items={[{ label: "Citas Pendientes", }, { label: "Citas Completadas" }]}
-        useSafeArea
-      >
-        <TabController.TabBar
-          spreadItems
-          enableShadow
-          labelStyle={styles.labelStyle}
-          selectedLabelStyle={styles.selectedLabelStyle}
-          activeBackgroundColor={Colors.blue30}
-        />
-        <TabController.PageCarousel>
-          <TabController.TabPage index={0}>
-            {loading ? (
-              <View flex center>
-                <LottieView
-                  source={require("@/assets/lottie/LoadingCat.json")}
-                  autoPlay
-                  loop
-                  style={{ width: 100, height: 100 }}
-                />
-                <Text medium>Cargando...</Text>
-              </View>
-            ) : (
-              <View flex>
-                <Text style={styles.sectionTitle}>Citas Pendientes:</Text>
-                <FlatList
-                  data={citas?.pendientes}
-                  renderItem={renderCita}
-                  keyExtractor={(item) => item.id.toString()}
-                  ListEmptyComponent={<Text>No hay citas pendientes.</Text>}
-                />
-              </View>
-            )}
-          </TabController.TabPage>
-          <TabController.TabPage index={1}>
-            <View flex>
-              <Text style={styles.sectionTitle}>Citas Completadas:</Text>
-              <FlatList
-                data={citas?.completadas}
-                renderItem={renderCita}
-                keyExtractor={(item) => item.id.toString()}
-                ListEmptyComponent={<Text>No hay citas completadas.</Text>}
-              />
-            </View>
-          </TabController.TabPage>
-        </TabController.PageCarousel>
-      </TabController> */}
-
       {loading ? (
         <View flex center>
           <LottieView
@@ -234,7 +180,7 @@ const AppointmentHistory = () => {
         </View>
       ) : (
         <View flex>
-          <Text style={styles.sectionTitle}>Citas Completadas:</Text>
+          <Text style={styles.sectionTitle}>Citas Completadas</Text>
           <FlatList
             data={citas?.completadas}
             renderItem={renderCita}
@@ -243,7 +189,6 @@ const AppointmentHistory = () => {
           />
         </View>
       )}
-
     </View>
   );
 };
@@ -259,35 +204,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.blue10,
   },
-  pageText: {
-    fontSize: 18,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
   sectionTitle: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  citaContainer: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
-  },
-  boldText: {
-    fontWeight: "bold",
+    fontSize: 28,
+    paddingHorizontal: 20,
+    fontFamily: Fonts.PoppinsBold,
+    textAlign: "center",
+    marginVertical: 40,
   },
   petImage: {
     marginHorizontal: 10,
     width: 100,
     height: 100,
     borderRadius: 10,
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  closeButton: {
+    marginTop: 20,
   },
 });

@@ -1,38 +1,43 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity, SafeAreaView } from "react-native";
-import { Text } from 'react-native-ui-lib'
+import { StyleSheet, SafeAreaView } from "react-native";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
+import { View, Text, TouchableOpacity, Card, Image } from "react-native-ui-lib";
+import { Fonts } from "@/constants/Fonts";
+import CardSignUp from "@/components/shared/CardSignUp";
 
 const SignUp = () => {
   return (
     <SafeAreaView style={styles.container}>
-      {/* Botón de regreso al login */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push("/login")}>
-        <MaterialCommunityIcons name="arrow-left" size={24} color={ColorPalette.medium} />
-        <Text style={styles.backText}>Back to Login</Text>
-      </TouchableOpacity>
-      
-      {/* Contenido de la pantalla de registro */}
-      <Text style={styles.title}>Sign Up</Text>
-      
-      {/* Botones de selección de tipo de usuario */}
-      <View style={styles.buttonContainer}>
-      <TouchableOpacity
-      style={styles.userButton}
-      onPress={() => router.push("/userRegister")}
-    >
-      <Text style={styles.buttonText}>Usuario de Mascota</Text>
-    </TouchableOpacity>
-    
-    <TouchableOpacity
-      style={styles.vetButton}
-      onPress={() => router.push("/vetRegister")}
-    >
-      <Text style={styles.buttonText}>Veterinaria</Text>
-    </TouchableOpacity>
-
+      <View style={{ position: "absolute", left: 20, top: 50, }}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.navigate("/login")}
+        >
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={34}
+            color={ColorPalette.medium}
+          />
+        </TouchableOpacity>
+      </View>
+      <View flex center gap-30>
+        <Text style={{ fontFamily: Fonts.PoppinsBold, fontSize: 40 }}>
+          Sign Up
+        </Text>
+        <View row width={"100%"} style={{ justifyContent: "space-around" }}>
+          <CardSignUp
+            source={require("@/assets/images/user.webp")}
+            text={"User"}
+            onPress={() => router.navigate("/userRegister")}
+          />
+          <CardSignUp
+            source={require("@/assets/images/veterinary.webp")}
+            text={"Vet"}
+            onPress={() => router.navigate("/vetRegister")}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -42,13 +47,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    backgroundColor: ColorPalette.graphitePalette,
+    backgroundColor: ColorPalette.white,
   },
   backButton: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 60,
-    marginLeft: 5,
   },
   backText: {
     marginLeft: 5,
@@ -73,7 +76,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 10,
     marginBottom: 20,
-    width: '80%',
+    width: "80%",
     alignItems: "center",
   },
   vetButton: {
@@ -81,7 +84,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
-    width: '80%',
+    width: "80%",
     alignItems: "center",
   },
   buttonText: {
