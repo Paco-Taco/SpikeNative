@@ -29,6 +29,7 @@ const VetProfile = () => {
       userName={user?.veterinarieName ? user.veterinarieName : "No data"}
       email={user?.email ? user.email : "No data"}
       editHref="/editVetProfile"
+      onPressLogoutButton={() => setShowLogoutModal(true)}
     >
       {/* Historial de citas */}
       <OptionButton
@@ -43,18 +44,6 @@ const VetProfile = () => {
         href="/appointmentHistory"
       />
 
-      {/* Botón de cerrar sesión */}
-      <LogOutButton
-        text="Log out"
-        icon={
-          <Ionicons
-            name="log-out-outline"
-            size={20}
-            color={ColorPalette.mediumDark}
-          />
-        }
-        onPress={() => setShowLogoutModal(true)}
-      />
       <LogOutModal
         isVisible={showLogoutModal}
         onDismiss={() => setShowLogoutModal(false)}

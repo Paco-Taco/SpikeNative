@@ -18,6 +18,8 @@ import ProfileLayout from "@/components/layout/ProfileLayout";
 import OptionButton from "@/components/shared/OptionButton";
 import LogOutButton from "@/components/shared/LogOutButton";
 import LogOutModal from "@/components/shared/LogOutModal";
+import { ColorPalette } from "@/constants/Colors";
+import Divider from "@/components/shared/Divider";
 
 const PetOwnerProfile = () => {
   const { dataLogin } = useLoginStore((state) => state);
@@ -86,19 +88,20 @@ const PetOwnerProfile = () => {
       email={user?.email ? user.email : "No data"}
       userImg={user?.img ? user.img : ""}
       editHref="/(app)/(user)/editPetOwnerProfile"
+      onPressLogoutButton={() => setIsLogoutModalVisible(true)}
     >
       <OptionButton
         text="Mis mascotas"
-        icon={<Ionicons name="paw-outline" size={24} color="#007BFF" />}
+        icon={<Ionicons name="paw-outline" size={24} color={ColorPalette.black} />}
         href="/petlist"
       />
-      <LogOutButton
-        text="Log out"
-        icon={<Ionicons name="log-out-outline" size={24} color="#007BFF" />}
-        onPress={() => {
-          setIsLogoutModalVisible(true);
-        }}
+      <Divider />
+      <OptionButton
+        text="Mis citas"
+        icon={<Ionicons name="list-outline" size={24} color={ColorPalette.black} />}
+        href=""
       />
+
       <LogOutModal
         isVisible={isLogoutModalVisible}
         onDismiss={() => setIsLogoutModalVisible(false)}

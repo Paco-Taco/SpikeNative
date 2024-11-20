@@ -4,6 +4,7 @@ import {
   Avatar,
   Button,
   TouchableOpacity,
+  Colors,
 } from "react-native-ui-lib";
 import React, { ReactNode } from "react";
 import { ColorPalette } from "@/constants/Colors";
@@ -15,6 +16,7 @@ import { Link, useNavigation } from "expo-router";
 import { Fonts } from "@/constants/Fonts";
 import { useLoginStore } from "@/stores/login.store";
 import BackArrow from "../shared/BackArrow";
+import { useAuth } from "@/app/context/AuthContext";
 
 const ProfileLayout = ({
   userImg,
@@ -22,18 +24,20 @@ const ProfileLayout = ({
   email,
   editHref,
   children,
+  onPressLogoutButton
 }: {
   userImg: string;
   userName: string;
   email: string;
   editHref: string;
   children: ReactNode;
+  onPressLogoutButton: () => void;
 }) => {
-  const navigation = useNavigation();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <BackArrow />
-      <View style={styles.container} gap-20 padding-20>
+      <View style={styles.container} gap-20 padding-20 height="100%">
         <View center width={"100%"}>
           {userImg ? (
             <Avatar source={{ uri: userImg }} animate size={100} />
@@ -89,7 +93,31 @@ const ProfileLayout = ({
         ))}
       </View> */}
 
-        <View>{children}</View>
+        <View
+          padding-20
+          backgroundColor={Colors.grey70}
+          style={{ borderRadius: 8 }}
+        >
+          {children}
+        </View>
+
+        <View
+          padding-10
+          backgroundColor={Colors.grey70}
+          style={{ borderRadius: 8, bottom: 10 }}
+        >
+          <LogOutButton
+            text="Log out"
+            icon={
+              <Ionicons
+                name="log-out-outline"
+                size={24}
+                color={ColorPalette.black}
+              />
+            }
+            onPress={onPressLogoutButton}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );

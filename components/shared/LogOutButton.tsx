@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   Button,
   Dialog,
+  Colors,
 } from "react-native-ui-lib";
 import React, { ReactNode, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -35,9 +36,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
     padding: 15,
-    backgroundColor: ColorPalette.white,
-    borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: 1.5,
   },
   optionText: {
     fontSize: 16,

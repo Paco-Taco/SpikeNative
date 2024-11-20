@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native-ui-lib";
+import { View, Text, TouchableOpacity, Colors } from "react-native-ui-lib";
 import React, { ReactNode } from "react";
 import { ExternalPathString, Link, RelativePathString, router } from "expo-router";
 import { StyleSheet } from "react-native";
@@ -22,9 +22,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
     padding: 15,
-    backgroundColor: ColorPalette.offWhite,
-    borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: 1.5,
+    borderColor: Colors.grey50
   },
   optionText: {
     fontSize: 16,
