@@ -37,7 +37,7 @@ const AppointmentDetailModal = ({
       overlayBackgroundColor={ColorPalette.mediumDark + '80'}
     >
       <View flex center padding-20>
-        <Card flex-1 width="100%" padding-20 borderRadius={10}>
+        <Card  width="100%" padding-20 borderRadius={10}>
           <View row spread>
             <Text text50 color={ColorPalette.mediumDark}>
               Detalles de la Cita

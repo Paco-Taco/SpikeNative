@@ -75,7 +75,7 @@ const Index = () => {
 
   return (
     <View flex padding-20>
-      <Text text40 marginB-20>Citas Pendientes</Text>
+      <Text text40 marginB-50>Citas Pendientes</Text>
       <FlatList
         data={appointments?.pendientes}
         renderItem={({ item }) => (
@@ -88,7 +88,7 @@ const Index = () => {
         )}
         keyExtractor={(item) => item.id.toString()}
         ListEmptyComponent={
-          <Text text70 center marginT-20>
+          <Text text70 center marginT-60>
             No hay citas pendientes
           </Text>
         }
