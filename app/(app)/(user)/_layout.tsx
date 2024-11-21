@@ -44,6 +44,12 @@ export default function AppLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="petlist"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>

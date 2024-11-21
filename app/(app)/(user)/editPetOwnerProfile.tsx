@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Image, ScrollView, Alert, ToastAndroid } from "react-native";
+import {
+  StyleSheet,
+  Image,
+  ScrollView,
+  Alert,
+  ToastAndroid,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginStore } from "@/stores/login.store";
 import { useNavigation, useRouter } from "expo-router";
@@ -27,6 +33,8 @@ import LottieView from "lottie-react-native";
 import ValidationTextField from "@/components/wizard/ValidationTextField";
 import { isValidEmail } from "@/utils/isValidEmail";
 import { isValidPhoneNumber } from "@/utils/isValidPhoneNumber";
+import EditableAvatar from "@/components/shared/EditableAvatar";
+import EditProfileLayout from "@/components/layout/EditProfileLayout";
 
 const EditPetOwnerProfile = () => {
   const { dataLogin } = useLoginStore((state) => state);
@@ -35,12 +43,12 @@ const EditPetOwnerProfile = () => {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const userId = user?.id;
   const router = useRouter();
-  const editIcon = require("@/assets/images/edit.webp");
   const navigation = useNavigation();
-  const [isToastSuccesShown, setIsToastSuccesShown] = useState(false)
+  const [isToastSuccesShown, setIsToastSuccesShown] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     number_int: "",
@@ -62,6 +70,7 @@ const EditPetOwnerProfile = () => {
         const data = response.data;
         setFormData({
           firstName: data.firstName,
+          lastName: data.lastName,
           email: data.email,
           phone: data.phone,
           number_int: data.number_int,
@@ -120,12 +129,12 @@ const EditPetOwnerProfile = () => {
       isValidPhoneNumber(formData.phone)
     );
   };
-  
+
   const showToastWithGravity = () => {
     ToastAndroid.showWithGravity(
-      'All changes saved',
+      "All changes saved",
       ToastAndroid.SHORT,
-      ToastAndroid.CENTER,
+      ToastAndroid.CENTER
     );
   };
 
@@ -164,6 +173,7 @@ const EditPetOwnerProfile = () => {
 
       updateProfile({
         firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
         number_int: formData.number_int,
@@ -191,106 +201,61 @@ const EditPetOwnerProfile = () => {
     router.push("../");
   };
 
+  if (loading) {
+    return <LoadingCat />;
+  }
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {loading ? (
-        <LoadingCat />
-      ) : (
-        <ScrollView>
-          <View row style={{ justifyContent: "space-between", padding: 10 }}>
-            <BackArrow />
-            <DoneCheckMark onPress={handleSubmit} disabled={!isFormValid()} />
-          </View>
-          <View style={styles.container}>
-            {/* <TouchableOpacity onPress={handleImagePick}> */}
-            <Avatar
-              source={
-                formData.img
-                  ? { uri: formData.img }
-                  : require("@/assets/images/catbox.png")
-              }
-              onPress={handleImagePick}
-              animate
-              size={120}
-              containerStyle={{
-                marginBottom: 20,
-                shadowColor: ColorPalette.black,
-                shadowOffset: {
-                  width: 0,
-                  height: 2,
-                },
-                shadowOpacity: 0.25,
-                elevation: 5,
-              }}
-              badgePosition="BOTTOM_RIGHT"
-              badgeProps={{
-                icon: editIcon,
-                backgroundColor: ColorPalette.bluePalette,
-                size: 30,
-                iconStyle: {
-                  width: 20,
-                  height: 20,
-                  tintColor: ColorPalette.white,
-                },
-              }}
-            />
-            {/* </TouchableOpacity> */}
+    <EditProfileLayout
+      disabledWhen={!isFormValid()}
+      handleSubmit={handleSubmit}
+    >
+      <EditableAvatar img={formData.img} onPress={handleImagePick} />
 
-            <Text style={styles.profileName}>{formData.firstName}</Text>
+      <Text style={styles.profileName}>{formData.firstName} {formData.lastName}</Text>
 
-            <View style={styles.formContainer}>
-              <Text bold>Nombre</Text>
-              <SimpleTextField
-                placeholder="Nombre del dueño"
-                value={formData.firstName}
-                onChangeText={(text) => handleChange("firstName", text)}
-              />
+      <View style={styles.formContainer}>
+        <Text bold>First Name</Text>
+        <SimpleTextField
+          placeholder="First name"
+          value={formData.firstName}
+          onChangeText={(text) => handleChange("firstName", text)}
+        />
 
-              <Text bold>Correo electrónico</Text>
-              <ValidationTextField
-                placeholder="Correo electrónico"
-                value={formData.email}
-                onChangeText={(text) => handleChange("email", text)}
-                validate={["required", (value) => isValidEmail(value || "")]}
-                validationMessage={["Field is required", "Email is invalid"]}
-              />
+        <Text bold>Last name</Text>
+        <SimpleTextField
+          placeholder="Last name"
+          value={formData.lastName}
+          onChangeText={(text) => handleChange("lastName", text)}
+        />
 
-              <Text bold>Telefono</Text>
-              <ValidationTextField
-                placeholder="Phone number"
-                value={formData.phone}
-                onChangeText={(value) => handleChange("phone", value)}
-                keyboardType="phone-pad"
-                validate={[
-                  "required",
-                  (value) => isValidPhoneNumber(value || ""),
-                ]}
-                validationMessage={[
-                  "Field is required",
-                  "Phone number is invalid",
-                ]}
-                maxLength={10}
-              />
+        <Text bold>Telefono</Text>
+        <ValidationTextField
+          placeholder="Phone number"
+          value={formData.phone}
+          onChangeText={(value) => handleChange("phone", value)}
+          keyboardType="phone-pad"
+          validate={["required", (value) => isValidPhoneNumber(value || "")]}
+          validationMessage={["Field is required", "Phone number is invalid"]}
+          maxLength={10}
+        />
 
-              <Text style={styles.subtext}>DATOS DE DIRECCION</Text>
-              <Text bold>Ciudad</Text>
-              <SimpleTextField
-                placeholder="Ciudad"
-                value={formData.city}
-                onChangeText={(text) => handleChange("city", text)}
-              />
+        <Text style={styles.subtext}>DATOS DE DIRECCION</Text>
+        <Text bold>Ciudad</Text>
+        <SimpleTextField
+          placeholder="Ciudad"
+          value={formData.city}
+          onChangeText={(text) => handleChange("city", text)}
+        />
 
-              <Text bold>Postal Code</Text>
-              <SimpleTextField
-                placeholder="CP"
-                value={formData.cp}
-                onChangeText={(text) => handleChange("cp", text)}
-                keyboardType="number-pad"
-              />
-            </View>
-          </View>
-        </ScrollView>
-      )}
+        <Text bold>Postal Code</Text>
+        <SimpleTextField
+          placeholder="CP"
+          value={formData.cp}
+          onChangeText={(text) => handleChange("cp", text)}
+          keyboardType="number-pad"
+        />
+      </View>
       <Incubator.Dialog
         useSafeArea
         center
@@ -316,7 +281,7 @@ const EditPetOwnerProfile = () => {
           <Text center>Guardando...</Text>
         </View>
       </Incubator.Dialog>
-    </SafeAreaView>
+    </EditProfileLayout>
   );
 };
 

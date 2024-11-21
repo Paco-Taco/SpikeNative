@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Alert, FlatList } from "react-native";
+import { StyleSheet, TextInput, Alert, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginStore } from "@/stores/login.store";
 import { useRouter } from "expo-router";
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from "expo-image-picker";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
+import LoadingCat from "@/components/shared/LoadingCat";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Colors,
+  Button,
+} from "react-native-ui-lib";
+import AbsoluteBackArrow from "@/components/shared/AbsoluteBackArrow";
+import PetsNotFoundScreen from "@/components/user/PetsNotFoundScreen";
 
 const PetListAndEdit = () => {
   const { dataLogin } = useLoginStore((state) => state);
@@ -22,12 +33,18 @@ const PetListAndEdit = () => {
     const fetchPets = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstanceSpikeCore.get(`/getpets/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axiosInstanceSpikeCore.get(
+          `/getpets/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setPets(response.data);
       } catch (error) {
-        console.error("Error fetching pets:", error.response?.data || error.message);
+        console.error(
+          "Error fetching pets:",
+          error.response?.data || error.message
+        );
         Alert.alert("Error", "No se pudo cargar la lista de mascotas.");
       } finally {
         setLoading(false);
@@ -84,15 +101,19 @@ const PetListAndEdit = () => {
       }
     });
 
-    console.log("Datos a actualizar:", formData);  // Verificar datos en la consola
+    console.log("Datos a actualizar:", formData); // Verificar datos en la consola
 
     try {
-      const response = await axiosInstanceSpikeCore.post(`/updatepet/${selectedPet.id}`, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axiosInstanceSpikeCore.post(
+        `/updatepet/${selectedPet.id}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       // Actualizar la lista de mascotas localmente después de la actualización
       setPets((prevPets) => {
@@ -104,10 +125,16 @@ const PetListAndEdit = () => {
       // Verificar respuesta del servidor
       console.log("Respuesta del servidor:", response.data);
       Alert.alert("Éxito", response.data.message);
-      setSelectedPet(null);  // Volver a la lista de mascotas
+      setSelectedPet(null); // Volver a la lista de mascotas
     } catch (error) {
-      console.error("Error actualizando la mascota:", error.response?.data || error);
-      Alert.alert("Error", "No se pudo actualizar la mascota. Intente nuevamente.");
+      console.error(
+        "Error actualizando la mascota:",
+        error.response?.data || error
+      );
+      Alert.alert(
+        "Error",
+        "No se pudo actualizar la mascota. Intente nuevamente."
+      );
     }
   };
 
@@ -118,15 +145,23 @@ const PetListAndEdit = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <AbsoluteBackArrow color={Colors.grey30} />
       {loading ? (
-        <Text>Cargando datos...</Text>
+        <LoadingCat />
       ) : pets.length === 0 ? (
-        <Text>No se encontraron mascotas</Text>
+        <PetsNotFoundScreen />
       ) : selectedPet ? (
         // Vista de edición de mascota
         <View style={styles.container}>
           <TouchableOpacity onPress={handleImagePick}>
-            <Image source={formData.img ? { uri: formData.img } : require("@/assets/images/catbox.png")} style={styles.profileImage} />
+            <Image
+              source={
+                formData.img
+                  ? { uri: formData.img }
+                  : require("@/assets/images/catbox.png")
+              }
+              style={styles.profileImage}
+            />
           </TouchableOpacity>
 
           <TextInput
@@ -151,7 +186,10 @@ const PetListAndEdit = () => {
           />
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleCancel}
+            >
               <Text style={styles.buttonText}>Cancelar</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
@@ -177,7 +215,14 @@ const PetListAndEdit = () => {
                 });
               }}
             >
-              <Image source={item.img ? { uri: item.img } : require("@/assets/images/catbox.png")} style={styles.petImage} />
+              <Image
+                source={
+                  item.img
+                    ? { uri: item.img }
+                    : require("@/assets/images/catbox.png")
+                }
+                style={styles.petImage}
+              />
               <Text style={styles.petName}>{item.name}</Text>
             </TouchableOpacity>
           )}
@@ -191,14 +236,31 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   container: { padding: 20, alignItems: "center" },
   profileImage: { width: 120, height: 120, borderRadius: 60, marginBottom: 20 },
-  input: { width: "100%", padding: 10, borderWidth: 1, borderRadius: 5, marginVertical: 10 },
-  buttonContainer: { flexDirection: "row", justifyContent: "space-between", width: "100%", marginTop: 20 },
+  input: {
+    width: "100%",
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 20,
+  },
   cancelButton: { padding: 10, backgroundColor: "#ccc", borderRadius: 5 },
   saveButton: { padding: 10, backgroundColor: "#00f", borderRadius: 5 },
   buttonText: { color: "#fff" },
-  petItem: { flexDirection: "row", alignItems: "center", padding: 10, borderBottomWidth: 1, borderColor: "#ccc" },
+  petItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },
   petImage: { width: 50, height: 50, borderRadius: 25, marginRight: 10 },
-  petName: { fontSize: 18 }
+  petName: { fontSize: 18 },
 });
 
 export default PetListAndEdit;
