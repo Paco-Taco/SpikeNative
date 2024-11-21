@@ -1,6 +1,14 @@
-import { StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet } from "react-native";
 import React from "react";
-import { Badge, Card, Image, Text, View } from "react-native-ui-lib";
+import {
+  AnimatedImage,
+  Badge,
+  Card,
+  Colors,
+  Image,
+  Text,
+  View,
+} from "react-native-ui-lib";
 import { Ionicons } from "@expo/vector-icons";
 import { Veterinary } from "@/types/userTypes.types";
 import { ColorPalette } from "@/constants/Colors";
@@ -21,9 +29,11 @@ const CardVeterinary = ({
     style={styles.cardStyles}
     onPress={onPress}
   >
-    <Image
+    <AnimatedImage
+      loader={<ActivityIndicator />}
       source={{ uri: item.img }}
-      style={{ height: 110, width: "30%", borderRadius: 10 }}
+      style={{ borderRadius: 10, resizeMode: "cover", height: 110, }}
+      containerStyle={{ height: 110, width: "30%", backgroundColor: Colors.grey70, borderRadius: 10,  }}
     />
 
     <View style={styles.infoAreaStyles}>

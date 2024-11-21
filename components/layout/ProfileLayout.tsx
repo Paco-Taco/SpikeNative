@@ -37,7 +37,7 @@ const ProfileLayout = ({
   return (
     <SafeAreaView style={styles.safeArea}>
       <BackArrow />
-      <View style={styles.container} gap-20 padding-20 height="100%">
+      <View style={styles.container} gap-30 padding-20 height="100%">
         <View center width={"100%"}>
           {userImg ? (
             <Avatar source={{ uri: userImg }} animate size={100} />
@@ -94,7 +94,7 @@ const ProfileLayout = ({
       </View> */}
 
         <View
-          padding-20
+          padding-10
           backgroundColor={Colors.grey70}
           style={{ borderRadius: 8 }}
         >

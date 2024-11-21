@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Image, ScrollView, Alert } from "react-native";
+import { StyleSheet, Image, ScrollView, Alert, ToastAndroid } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginStore } from "@/stores/login.store";
 import { useNavigation, useRouter } from "expo-router";
@@ -37,6 +37,7 @@ const EditPetOwnerProfile = () => {
   const router = useRouter();
   const editIcon = require("@/assets/images/edit.webp");
   const navigation = useNavigation();
+  const [isToastSuccesShown, setIsToastSuccesShown] = useState(false)
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -120,6 +121,13 @@ const EditPetOwnerProfile = () => {
     );
   };
   
+  const showToastWithGravity = () => {
+    ToastAndroid.showWithGravity(
+      'All changes saved',
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER,
+    );
+  };
 
   const handleSubmit = async () => {
     const data = new FormData();
@@ -166,6 +174,7 @@ const EditPetOwnerProfile = () => {
       });
 
       // Alert.alert("Success", response.data.message);
+      showToastWithGravity();
       router.push("../");
     } catch (error) {
       console.error("Error updating profile:", error.response?.data || error);

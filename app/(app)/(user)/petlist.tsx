@@ -50,7 +50,7 @@ const PetListAndEdit = () => {
   // Manejo de selección de imagen
   const handleImagePick = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -120,6 +120,8 @@ const PetListAndEdit = () => {
     <SafeAreaView style={styles.safeArea}>
       {loading ? (
         <Text>Cargando datos...</Text>
+      ) : pets.length === 0 ? (
+        <Text>No se encontraron mascotas</Text>
       ) : selectedPet ? (
         // Vista de edición de mascota
         <View style={styles.container}>

@@ -4,9 +4,9 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   TextInput,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ColorPalette, Colors } from "@/constants/Colors";
@@ -17,7 +17,7 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoginStore } from "@/stores/login.store";
 import { useSearch } from "@/app/context/SearchContext"; // Importa el hook del contexto
-import { TextField } from "react-native-ui-lib";
+import { TextField, Image, AnimatedImage, LoaderScreen } from "react-native-ui-lib";
 
 const SearchBar = () => {
   const { searchQuery, setSearchQuery } = useSearch(); // Usa el contexto
@@ -99,7 +99,8 @@ const CustomHeader = () => {
             }
           }}
         >
-          <Image
+          <AnimatedImage
+            loader={<ActivityIndicator />}
             style={styles.profileButton}
             source={{ uri: dataLogin?.user.img }}
           />
