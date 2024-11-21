@@ -33,7 +33,7 @@ elimination of services, clients and pets.
 - **Database:**
   **PostgreSQL** with **Supabase** hosting for flexible and efficient storage of client, pet and clinic data.
 - **Cloud Services:**  
-  - API hosted on **Vercel**: [https://api-spike-five.vercel.app](https://api-spike-five.vercel.app). For more information, consult the API documentation [API Sike](https://github.com/MartinFitS/api_spike) 
+  - API hosted on **Vercel**: [https://api-spike-five.vercel.app](https://api-spike-five.vercel.app). For more information, consult the API documentation [API Spike](https://github.com/MartinFitS/api_spike) 
   - Images and other assets hosted on **Cloudinary** for efficient media management.
 
 ## Impact:
