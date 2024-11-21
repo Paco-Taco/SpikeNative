@@ -21,6 +21,9 @@ const NewPetModal = ({
       onDismiss={onDismiss}
       onBackdropPress={onDismiss}
       useNativeDriver
+      hideModalContentWhileAnimating
+      supportedOrientations={["portrait", "landscape"]}
+      coverScreen={false}
     >
       <View
         backgroundColor={ColorPalette.white}

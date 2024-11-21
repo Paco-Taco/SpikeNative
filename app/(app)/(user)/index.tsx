@@ -31,7 +31,7 @@ const Index = () => {
   const { searchQuery } = useSearch();
 
   const renderItem = ({ item }: { item: Veterinary }) => {
-    console.log("Item ID:", item.id);  // Check if ID is valid
+    // console.log("Item ID:", item.id);  // Check if ID is valid
     return (
       <CardVeterinary
         item={item}
@@ -44,7 +44,7 @@ const Index = () => {
         }}
       />
     );
-  };  
+  };
 
   useEffect(() => {
     if (!idOwner) {
@@ -95,17 +95,31 @@ const Index = () => {
     );
 
   return (
-    <SafeAreaView
+    <View
+      useSafeArea
       style={{
         flex: 1,
         backgroundColor: ColorPalette.offWhite,
         paddingTop: Platform.OS === "android" ? 140 : 60,
       }}
     >
+      <NewPetModal
+        isVisible={showModal}
+        onDismiss={() => setShowModal(false)}
+        onOk={() => {
+          setShowModal(false);
+          router.push("/petRegister");
+        }}
+      />
       {/* Barra de filtros de categoría */}
       <View paddingH-20 marginB-20>
         <SegmentedControl
-          segments={[{ label: "All" }, { label: "Nutrition" }, { label: "Recreation" }, { label: "Care" }]}
+          segments={[
+            { label: "All" },
+            { label: "Nutrition" },
+            { label: "Recreation" },
+            { label: "Care" },
+          ]}
           onChangeIndex={(index) => {
             setSelectedCategory(categories[index]);
           }}
@@ -131,17 +145,9 @@ const Index = () => {
             renderItem={renderItem}
             contentContainerStyle={{ paddingBottom: 20 }}
           />
-          <NewPetModal
-            isVisible={showModal}
-            onDismiss={() => setShowModal(false)}
-            onOk={() => {
-              setShowModal(false);
-              router.push("/petRegister");
-            }}
-          />
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
