@@ -18,8 +18,6 @@ import { useLoginStore } from "@/stores/login.store";
 const SearchBar = () => {
   const { searchQuery, setSearchQuery } = useSearch(); // Usa el contexto
 
-  
-
   return (
     <View style={styles.searchContainer}>
       <View style={styles.searchSection}>
