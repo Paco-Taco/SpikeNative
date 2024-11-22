@@ -54,13 +54,14 @@ const UserAppointments = () => {
       });
   
       Alert.alert("Éxito", "Cita cancelada correctamente", [
-        { text: "OK", onPress: () => router.push("/(app)/(user)/") }
+        { text: "OK", onPress: () => fetchAppointments() }
       ]);
     } catch (error) {
       console.error("Error al cancelar cita", error);
       Alert.alert("Error", error.response?.data?.error || "La cita solo se puede cancelar con al menos 3 días de anticipación");
     }
   };
+ 
 
   const renderAppointment = ({ item }) => (
     <View style={styles.appointmentCard}>
