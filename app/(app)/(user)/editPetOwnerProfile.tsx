@@ -260,7 +260,7 @@ const EditPetOwnerProfile = () => {
         useSafeArea
         center
         visible={isUpdatingProfile}
-        onDismiss={() => setIsUpdatingProfile(false)}
+        ignoreBackgroundPress
         containerStyle={{
           borderRadius: 8,
           backgroundColor: ColorPalette.background,

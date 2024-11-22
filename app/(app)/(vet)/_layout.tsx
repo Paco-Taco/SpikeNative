@@ -55,6 +55,12 @@ export default function AppLayout() {
               headerShown: false
             }}
           />
+          <Stack.Screen
+            name="editVetProfile"
+            options={{
+              headerShown: false
+            }}
+          />
         </Stack>
     </GestureHandlerRootView>
   );

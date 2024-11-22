@@ -95,8 +95,7 @@ const Index = () => {
     );
 
   return (
-    <View
-      useSafeArea
+    <SafeAreaView
       style={{
         flex: 1,
         backgroundColor: ColorPalette.offWhite,
@@ -147,7 +146,7 @@ const Index = () => {
           />
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
