@@ -50,6 +50,7 @@ const Login = () => {
   useEffect(() => {
     const loadSession = () => {
       const role = dataLogin?.user.role;
+      console.log(role)
 
       if (
         authState?.authenticated !== null &&
