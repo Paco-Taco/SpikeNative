@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   TextInput,
   TouchableOpacity,
@@ -7,6 +7,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   InteractionManager,
+  StatusBar,
 } from "react-native";
 import { useAuth } from "./context/AuthContext";
 import { router } from "expo-router";
@@ -14,10 +15,20 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
 import { useLoginStore } from "@/stores/login.store";
 import { Roles } from "@/constants/Roles";
-import { Text, View, Image } from "react-native-ui-lib";
+import {
+  Text,
+  View,
+  Image,
+  Colors,
+  TextField,
+  Button,
+} from "react-native-ui-lib";
 import { SafeAreaView } from "react-native-safe-area-context";
 import KeyBoardAvoidWrapper from "@/components/KeyBoardAvoidWrapper";
 import LoadingCat from "@/components/shared/LoadingCat";
+import LottieView from "lottie-react-native";
+import { Fonts } from "@/constants/Fonts";
+import { isValidEmail } from "@/utils/isValidEmail";
 
 const Login = () => {
   const { onLogin, authState } = useAuth();
@@ -27,10 +38,15 @@ const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Animación de lottie
+  const animationRef = useRef<LottieView>(null);
+  const [progress, setProgress] = useState(0);
+  const [direction, setDirection] = useState(1); // 1 para adelante, -1 para atrás
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
-  
+
   useEffect(() => {
     const loadSession = () => {
       const role = dataLogin?.user.role;
@@ -41,9 +57,9 @@ const Login = () => {
         authState?.token
       ) {
         if (role === Roles.user) {
-          router.replace("/(app)/(user)/");
+          router.replace("/(app)/(user)");
         } else if (role === Roles.veterinary) {
-          router.replace("/(app)/(vet)/");
+          router.replace("/(app)/(vet)");
         }
       }
     };
@@ -57,14 +73,14 @@ const Login = () => {
 
       const role = dataLogin?.user.role;
       if (role === Roles.user) {
-        router.replace("/(app)/(user)/");
+        router.replace("/(app)/(user)");
       } else if (role === Roles.veterinary) {
-        router.replace("/(app)/(vet)/");
+        router.replace("/(app)/(vet)");
       }
-      
+
       InteractionManager.runAfterInteractions(() => {
-        setIsLoading(false)
-      })
+        setIsLoading(false);
+      });
     } catch (error) {
       setTimeout(() => {
         alert(error);
@@ -76,10 +92,36 @@ const Login = () => {
     }
   };
 
+  // Efecto boomerang
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        const nextProgress = prev + direction * 0.01; // Cambiar progreso por iteración
+        if (nextProgress >= 1) {
+          setDirection(-1); // Cambiar dirección hacia atrás
+          return 1; // Límite superior
+        } else if (nextProgress <= 0) {
+          setDirection(1); // Cambiar dirección hacia adelante
+          return 0; // Límite inferior
+        }
+        return nextProgress;
+      });
+    }, 16); // Aproximadamente 60fps
+
+    return () => clearInterval(interval); // Limpiar intervalo al desmontar
+  }, [direction]);
+
+  const isFormValid = () => {
+    return email.length > 0 && password.length > 0 && password.length >= 6;
+  };
+
   return (
-    <SafeAreaView
-      style={{ flex: 2, backgroundColor: ColorPalette.darkGrayPalette }}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: ColorPalette.background }}>
+      <StatusBar
+        barStyle={"dark-content"}
+        backgroundColor={ColorPalette.white}
+      />
+
       {isLoading ? (
         <LoadingCat />
       ) : (
@@ -100,12 +142,23 @@ const Login = () => {
                 Spike
               </Text>
             </View>
-            <View flex padding-20 style={styles.formContainer}>
+            <LottieView
+              ref={animationRef}
+              source={require("@/assets/lottie/CatHiding.json")}
+              style={{
+                height: 200,
+                marginTop: "50%",
+                width: 200,
+                alignSelf: "center",
+              }}
+              progress={progress}
+            />
+            <View flex padding-30 style={styles.formContainer}>
               <Text bold style={styles.title}>
                 Login
               </Text>
               <View centerV flex>
-                <TextInput
+                <TextField
                   style={styles.input}
                   placeholder="Email"
                   placeholderTextColor={ColorPalette.medium}
@@ -135,9 +188,14 @@ const Login = () => {
                   </TouchableOpacity>
                 </View>
                 <View style={styles.buttonContainer}>
-                  <TouchableOpacity style={styles.button} onPress={login}>
+                  <Button
+                    disabled={!isFormValid()}
+                    style={styles.button}
+                    onPress={login}
+                    backgroundColor={ColorPalette.primary}
+                  >
                     <Text style={styles.buttonText}>Continue</Text>
-                  </TouchableOpacity>
+                  </Button>
                   <TouchableOpacity onPress={() => router.push("/signUp")}>
                     <Text style={styles.linkText}>Sign up</Text>
                   </TouchableOpacity>
@@ -159,6 +217,9 @@ const styles = StyleSheet.create({
   imageContainer: {
     justifyContent: "center",
     alignItems: "center",
+    position: "absolute",
+    alignSelf: "center",
+    top: 60,
   },
   logo: {
     width: 100,
@@ -166,25 +227,26 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   formContainer: {
-    backgroundColor: ColorPalette.graphitePalette,
+    backgroundColor: Colors.grey60,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
   },
   title: {
     fontSize: 24,
+    fontFamily: Fonts.PoppinsBold,
     textAlign: "center",
     padding: 10,
-    color: ColorPalette.lightGrey,
+    color: ColorPalette.darkGrayPalette,
   },
   input: {
     height: 50,
-    borderColor: ColorPalette.lightGraphite,
+    borderColor: Colors.grey50,
     borderWidth: 1,
     paddingHorizontal: 15,
     borderRadius: 10,
     marginBottom: 15,
-    backgroundColor: ColorPalette.lightGraphite,
-    color: ColorPalette.lightGrey,
+    backgroundColor: ColorPalette.white,
+    color: ColorPalette.mediumDark,
   },
   passwordContainer: {
     flexDirection: "row",
@@ -194,12 +256,12 @@ const styles = StyleSheet.create({
   inputPassword: {
     flex: 1,
     height: 50,
-    borderColor: ColorPalette.lightGraphite,
+    borderColor: Colors.grey50,
     borderWidth: 1,
     paddingHorizontal: 15,
     borderRadius: 10,
-    backgroundColor: ColorPalette.lightGraphite,
-    color: ColorPalette.lightGrey,
+    backgroundColor: ColorPalette.white,
+    color: ColorPalette.mediumDark,
   },
   eyeIcon: {
     position: "absolute",
@@ -210,7 +272,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: ColorPalette.bluePalette,
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: "center",
@@ -219,7 +280,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: ColorPalette.lightGrey,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: Fonts.PoppinsBold,
   },
   linkText: {
     color: ColorPalette.medium,

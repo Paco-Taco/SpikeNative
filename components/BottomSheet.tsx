@@ -39,8 +39,8 @@ const BottomSheet = forwardRef<Ref>((props, ref) => {
       enableDynamicSizing={false}
       snapPoints={snapPoints}
       backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: ColorPalette.graphitePalette }}
-      handleIndicatorStyle={{ backgroundColor: "white" }}
+      backgroundStyle={{ backgroundColor: ColorPalette.grey }}
+      handleIndicatorStyle={{ backgroundColor: ColorPalette.medium }}
     >
       <BottomSheetView style={styles.contentContainer}>
         <View>
@@ -61,23 +61,6 @@ const BottomSheet = forwardRef<Ref>((props, ref) => {
               color={ColorPalette.primary}
             />
           </View>
-
-          <Text style={styles.subheader}>Text 2</Text>
-          <TouchableOpacity>
-            <View style={styles.item}>
-              <Ionicons
-                name="analytics"
-                size={20}
-                color={ColorPalette.medium}
-              />
-              <Text style={styles.itemText}>Subtext 2</Text>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={ColorPalette.primary}
-              />
-            </View>
-          </TouchableOpacity>
         </View>
 
         <View style={styles.buttonContainer}>
@@ -100,7 +83,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     margin: 16,
-    color: "white",
+    color: ColorPalette.medium,
   },
   button: {
     backgroundColor: ColorPalette.primary,
@@ -118,9 +101,8 @@ const styles = StyleSheet.create({
     gap: 8,
     alignItems: "center",
     padding: 16,
-    backgroundColor: ColorPalette.lightGraphite,
+    backgroundColor: ColorPalette.white,
     borderColor: "#434e5b",
-    borderWidth: 1,
   },
   itemText: {
     color: "white",

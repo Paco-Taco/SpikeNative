@@ -22,6 +22,8 @@ export interface Veterinary {
   img_public_id: null | string;
   createdAt: Date;
   updatedAt: Date;
+  hora_ini: string;
+  hora_fin: string;
 }
 
 // types/userTypes.types.ts

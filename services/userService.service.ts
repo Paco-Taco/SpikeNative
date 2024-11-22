@@ -12,12 +12,13 @@ export class UserService {
       
       return data;
     } catch (error) {
-      if (error instanceof AxiosError) {
-        console.log('GetVets E:', error.message);
-        throw new Error("Error: getvets");
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.error;
+        console.error("Detalles del error:", error.response?.data);
+        throw errorMessage;
       }
       console.log(error);
-      throw new Error("Error: getvets");
+    throw new Error("An unexpected error occurred");
     }
   };
   

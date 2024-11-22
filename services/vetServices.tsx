@@ -27,7 +27,7 @@ export class VeterinaryService {
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.error || error.message;
         console.error("Detalles del error:", error.response?.data);
-        throw new Error(errorMessage);
+        throw errorMessage;
       }
       throw new Error(
         "VeterinaryService: No se pudo actualizar el perfil de la veterinaria."

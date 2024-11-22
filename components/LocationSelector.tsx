@@ -10,6 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { ColorPalette } from "@/constants/Colors";
+import FontSize from "@/constants/FontSize";
 
 const LocationSelector = ({ onLocationSelect, currentLocation = "Manzanillo" }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +60,7 @@ const LocationSelector = ({ onLocationSelect, currentLocation = "Manzanillo" }) 
       <TouchableOpacity
         style={styles.spinnerButton}
         onPress={() => setIsModalVisible(true)}
+        
       >
         <Text style={styles.spinnerButtonText}>
           {selectedLocation ? selectedLocation : "Select Location"}
@@ -68,7 +70,7 @@ const LocationSelector = ({ onLocationSelect, currentLocation = "Manzanillo" }) 
       {/* Spinner Modal */}
       <Modal
         visible={isModalVisible}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setIsModalVisible(false)}
       >
@@ -112,13 +114,12 @@ const LocationSelector = ({ onLocationSelect, currentLocation = "Manzanillo" }) 
 
 const styles = StyleSheet.create({
   spinnerButton: {
-    backgroundColor: ColorPalette.lightGraphite,
-    padding: 12,
     borderRadius: 4,
     alignItems: "center",
   },
   spinnerButtonText: {
-    color: "#fff",
+    color: ColorPalette.medium,
+    fontSize: FontSize.medium,
     fontWeight: "bold",
   },
   modalOverlay: {
