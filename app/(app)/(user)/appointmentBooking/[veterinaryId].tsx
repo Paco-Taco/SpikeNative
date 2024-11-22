@@ -5,6 +5,7 @@ import { View, Text, Button, Alert, TouchableOpacity, Image } from "react-native
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { useLoginStore } from "@/stores/login.store";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { ScrollView } from "react-native-gesture-handler";
 
 const AppointmentBooking = () => { 
   const router = useRouter();
@@ -20,13 +21,36 @@ const AppointmentBooking = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [availableHours, setAvailableHours] = useState([]);
 
+  const calculateAvailableHours = (startTime, endTime) => {
+    const hours = [];
+    const [startHour] = startTime.split(":").map(Number);
+    const [endHour] = endTime.split(":").map(Number);
 
-  // Fetch veterinary details
+    for (let hour = startHour; hour < endHour; hour++) {
+      hours.push(`${hour.toString().padStart(2, "0")}:00`);
+    }
+    return hours;
+  };
+
+  const isDateAllowed = (date) => {
+    if (!veterinaryDetails || !veterinaryDetails.dias) return false;
+
+    // Map day names to numbers
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const allowedDays = veterinaryDetails.dias.map((day) => dayNames.indexOf(day));
+
+    return allowedDays.includes(date.getDay());
+  };
+
   useEffect(() => {
     const fetchVeterinaryDetails = async () => {
       try {
         const response = await axiosInstanceSpikeCore.get(`/getveterinary/${veterinaryId}`);
-        setVeterinaryDetails(response.data.veterinary);
+        const veterinaryData = response.data.veterinary;
+        setVeterinaryDetails(veterinaryData);
+
+        const hours = calculateAvailableHours(veterinaryData.hora_ini, veterinaryData.hora_fin);
+        setAvailableHours(hours);
       } catch (error) {
         console.error("Error al obtener detalles de la veterinaria", error);
       }
@@ -49,8 +73,16 @@ const AppointmentBooking = () => {
     }
   }, [veterinaryId, userId]);
 
+  const handleDateChange = (event, date) => {
+    if (date && isDateAllowed(date)) {
+      setSelectedDate(date);
+    } else {
+      Alert.alert("Fecha no permitida", "Por favor selecciona una fecha válida.");
+    }
+    setShowDatePicker(false);
+  };
+
   const handleBookAppointment = async () => {
-    // Validate inputs
     if (!selectedPet) {
       Alert.alert("Error", "Por favor selecciona una mascota");
       return;
@@ -84,26 +116,26 @@ const AppointmentBooking = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 20 }}>
-        <View>
+      <ScrollView>
+      <View>
         {veterinaryDetails.img && (
-            <Image
+          <Image
             source={{ uri: veterinaryDetails.img }}
             style={{ 
-                height: 110, 
-                width: "100%", 
-                borderRadius: 10,
-                marginBottom: 10 // Added margin for spacing
+              height: 110, 
+              width: "100%", 
+              borderRadius: 10,
+              marginBottom: 10
             }}
-            resizeMode="cover" // Added to ensure image fits nicely
-            />
+            resizeMode="cover" 
+          />
         )}
         <Text style={{ fontSize: 24, fontWeight: "bold" }}>{veterinaryDetails.veterinarieName}</Text>
         <Text>Dirección: {`${veterinaryDetails.street}, ${veterinaryDetails.locality}, ${veterinaryDetails.city}`}</Text>
         <Text>Teléfono: {veterinaryDetails.phone}</Text>
         <Text>Horario: {`${veterinaryDetails.hora_ini} - ${veterinaryDetails.hora_fin}`}</Text>
-        <Text>Días disponibles: {veterinaryDetails.dias.join(', ')}</Text>
+        <Text>Días disponibles: {veterinaryDetails.dias.join(", ")}</Text>
 
-        {/* Selector de Mascota */}
         <View>
           <Text>Selecciona tu mascota:</Text>
           {pets.map((pet) => (
@@ -116,7 +148,6 @@ const AppointmentBooking = () => {
           ))}
         </View>
 
-        {/* Botón para abrir Selector de Fecha */}
         <TouchableOpacity 
           onPress={() => setShowDatePicker(true)}
           style={{ 
@@ -131,35 +162,32 @@ const AppointmentBooking = () => {
           </Text>
         </TouchableOpacity>
 
-        {/* Selector de Fecha */}
         {showDatePicker && (
           <DateTimePicker
             value={selectedDate}
             mode="date"
-            onChange={(event, date) => {
+            minimumDate={new Date()} // Evita seleccionar fechas anteriores
+             onChange={(event, date) => {
+              if (date && isDateAllowed(date)) {
+                setSelectedDate(date);
+              } else {
+                Alert.alert("Fecha no permitida", "Por favor selecciona una fecha válida.");
+              }
               setShowDatePicker(false);
-              setSelectedDate(date);
             }}
-          />
+/>
         )}
 
-        {/* Selector de Hora */}
         <View>
           <Text>Selecciona una hora:</Text>
-          {veterinaryDetails.hora_ini && veterinaryDetails.hora_fin && (
-            <>
-              <Button 
-                title={`${veterinaryDetails.hora_ini}`} 
-                onPress={() => setSelectedHour(veterinaryDetails.hora_ini)}
-                color={selectedHour === veterinaryDetails.hora_ini ? 'green' : undefined}
-              />
-              <Button 
-                title={`${veterinaryDetails.hora_fin}`} 
-                onPress={() => setSelectedHour(veterinaryDetails.hora_fin)}
-                color={selectedHour === veterinaryDetails.hora_fin ? 'green' : undefined}
-              />
-            </>
-          )}
+          {availableHours.map((hour) => (
+            <Button 
+              key={hour} 
+              title={hour} 
+              onPress={() => setSelectedHour(hour)}
+              color={selectedHour === hour ? 'green' : undefined}
+            />
+          ))}
         </View>
 
         <Button 
@@ -168,6 +196,7 @@ const AppointmentBooking = () => {
           disabled={!selectedPet || !selectedHour}
         />
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
