@@ -18,6 +18,8 @@ import { useLoginStore } from "@/stores/login.store";
 const SearchBar = () => {
   const { searchQuery, setSearchQuery } = useSearch(); // Usa el contexto
 
+  
+
   return (
     <View style={styles.searchContainer}>
       <View style={styles.searchSection}>
@@ -47,7 +49,6 @@ const CustomVetHeader = () => {
   const { onLogout } = useAuth();
   const { dataLogin } = useLoginStore((state) => state);
   const veterinaryName = dataLogin?.user.veterinarieName;
-  const userImg = dataLogin?.user.img 
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -79,7 +80,7 @@ const CustomVetHeader = () => {
         >
           <Image
             style={styles.profileButton}
-            source={{ uri: userImg }}
+            source={require("@/assets/images/ic_pet.jpg")}
           />
         </TouchableOpacity>
       </View>
