@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, SafeAreaView } from "react-native";
+import { StyleSheet, SafeAreaView, StatusBar } from "react-native";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
@@ -10,6 +10,8 @@ import CardSignUp from "@/components/shared/CardSignUp";
 const SignUp = () => {
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle={"dark-content"} backgroundColor={ColorPalette.white} />
+
       <View style={{ position: "absolute", left: 20, top: 50, }}>
         <TouchableOpacity
           style={styles.backButton}

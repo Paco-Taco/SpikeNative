@@ -71,9 +71,8 @@ export const AuthProvider = ({ children }: any) => {
 
         return result;
       }
-    } catch (e) {
-      throw new Error(`Couldn\'t login ${e}`);
-      // return { error: true, msg: (e as any) || "An unknown error occured" };
+    } catch (error) {
+      throw error;
     }
   };
 

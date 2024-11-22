@@ -3,7 +3,7 @@ import { LoginRequest, LoginResponse } from "@/types/spikeLogin.types";
 import { create, StateCreator } from "zustand";
 import * as SecureStore from 'expo-secure-store';
 
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
 const SECURE_STORE_KEY = "dataLogin";
 
@@ -29,9 +29,8 @@ const storeApi: StateCreator<LoginState> = (set, get) => ({
       return data;
     } catch (error) {  
       set({ dataLogin: null });
-
-      console.log(error);
-      throw new Error(`LoginStore: Unable to login`);
+      console.log(error)
+      throw error
     }
   },
 

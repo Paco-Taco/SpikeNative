@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  StatusBar,
+} from "react-native";
 import { router } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
@@ -237,9 +242,11 @@ const VetRegister = () => {
             ]}
             trailingAccessory={
               formData.password.length > 0 ? (
-                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+                <TouchableOpacity
+                  onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                >
                   <Ionicons
-                    name={isPasswordVisible ? "eye" : "eye-off"} 
+                    name={isPasswordVisible ? "eye" : "eye-off"}
                     size={24}
                     color="gray"
                   />
@@ -405,6 +412,11 @@ const VetRegister = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle={"dark-content"}
+        backgroundColor={ColorPalette.white}
+      />
+
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.wizardContainer}>
           <Wizard

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, ScrollView, Alert } from "react-native";
+import { StyleSheet, ScrollView, Alert, StatusBar } from "react-native";
 import { router } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
@@ -296,6 +296,7 @@ const UserRegister = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle={"dark-content"} backgroundColor={ColorPalette.white} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.wizardContainer}>
           <Wizard
