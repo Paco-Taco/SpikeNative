@@ -134,7 +134,7 @@ const VetProfile = () => {
 
   const handleImagePick = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -198,19 +198,13 @@ const VetProfile = () => {
       Alert.alert("Éxito", response.message);
       router.push("../");
     } catch (error) {
-      console.error(
-        "Error al actualizar perfil:",
-        error.response?.data || error
-      );
+      console.error("Error al actualizar perfil: ", error);
       Alert.alert(
         "Error",
-        `No se pudo actualizar el perfil. Detalles: ${
-          error.response?.data?.message || error.message
-        }`
+        `${error}`
       );
     }
   };
-
   const handleCancel = () => {
     router.navigate("/(app)/(vet)/vetProfile");
   };
@@ -280,20 +274,20 @@ const VetProfile = () => {
           value={formData.category}
           onChange={(value) => handleChange("category", value)}
         >
-          {categories.map((cat) => (
-            <Picker.Item label={cat} value={cat} />
+          {categories.map((cat, index) => (
+            <Picker.Item key={index} label={cat} value={cat} />
           ))}
         </MultiPicker>
 
         <Text bold>Work days</Text>
-        <MultiPicker 
+        <MultiPicker
           title="Work days"
           placeholder="Select work days"
           value={formData.diasSemana}
           onChange={(value) => handleChange("diasSemana", value)}
         >
-          {dias.map((dia) => (
-            <Picker.Item label={dia} value={dia} />
+          {dias.map((dia, index) => (
+            <Picker.Item key={index} label={dia} value={dia} />
           ))}
         </MultiPicker>
 
