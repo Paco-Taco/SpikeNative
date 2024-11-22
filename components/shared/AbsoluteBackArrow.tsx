@@ -4,12 +4,19 @@ import { useNavigation } from "expo-router";
 import { StyleSheet } from "react-native";
 import { View, Text, TouchableOpacity } from "react-native-ui-lib";
 
-const AbsoluteBackArrow = ({ color }: { color: string }) => {
+const AbsoluteBackArrow = ({
+  color,
+  background,
+}: {
+  color: string;
+  background?: boolean;
+}) => {
   const navigation = useNavigation();
   return (
     <TouchableOpacity
       style={styles.backButton}
       onPress={() => navigation.goBack()}
+      backgroundColor={background ? 'rgba(0, 0, 0, 0.4)' : "transparent"}
     >
       <Ionicons name="arrow-back" size={24} color={color} />
     </TouchableOpacity>
