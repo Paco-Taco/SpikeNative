@@ -15,6 +15,8 @@ import {
   Button,
 } from "react-native-ui-lib";
 import AbsoluteBackArrow from "@/components/shared/AbsoluteBackArrow";
+import { Fonts } from "@/constants/Fonts";
+import { ColorPalette } from "@/constants/Colors";
 import PetsNotFoundScreen from "@/components/user/PetsNotFoundScreen";
 
 const PetListAndEdit = () => {

@@ -16,6 +16,14 @@ const HourPicker = ({
   onChange: (value: Date) => void;
   dateTimeFormatter: (date: Date) => string;
 }) => {
+  const handleChange = (newDate: Date) => {
+    const roundedDate = new Date(newDate);
+    roundedDate.setMinutes(0); 
+    roundedDate.setSeconds(0); 
+    roundedDate.setMilliseconds(0); 
+    onChange(roundedDate); 
+  };
+
   return (
     <TouchableOpacity
       style={{
@@ -33,9 +41,10 @@ const HourPicker = ({
         placeholderTextColor={ColorPalette.medium}
         labelColor={ColorPalette.medium}
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
         mode="time"
         dateTimeFormatter={dateTimeFormatter}
+        minuteInterval={60}
       />
     </TouchableOpacity>
   );
