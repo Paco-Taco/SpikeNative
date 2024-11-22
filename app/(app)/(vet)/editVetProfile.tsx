@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, Alert } from "react-native";
+import { ScrollView, Alert, StyleSheet } from "react-native";
 import {
   Button,
   TextField,
@@ -7,6 +7,7 @@ import {
   Checkbox,
   DateTimePicker,
   View,
+  Text,
   Avatar,
   LoaderScreen,
   PickerModes,
@@ -16,6 +17,15 @@ import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { VeterinaryService } from "@/services/vetServices";
 import { useLoginStore } from "@/stores/login.store";
 import { router } from "expo-router";
+import LoadingCat from "@/components/shared/LoadingCat";
+import EditProfileLayout from "@/components/layout/EditProfileLayout";
+import { isValidPhoneNumber } from "@/utils/isValidPhoneNumber";
+import EditableAvatar from "@/components/shared/EditableAvatar";
+import { Fonts } from "@/constants/Fonts";
+import SimpleTextField from "@/components/wizard/SimpleTextField";
+import ValidationTextField from "@/components/wizard/ValidationTextField";
+import MultiPicker from "@/components/wizard/MultiPicker";
+import HourPicker from "@/components/wizard/HourPicker";
 
 const VetProfile = () => {
   const { dataLogin } = useLoginStore((state) => state);
@@ -140,9 +150,17 @@ const VetProfile = () => {
   };
 
   const handleSubmit = async () => {
-    const validDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-    const filteredDays = Array.isArray(formData.diasSemana) 
-      ? formData.diasSemana.filter(day => validDays.includes(day)) 
+    const validDays = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ];
+    const filteredDays = Array.isArray(formData.diasSemana)
+      ? formData.diasSemana.filter((day) => validDays.includes(day))
       : [];
 
     const data = new FormData();
@@ -161,14 +179,18 @@ const VetProfile = () => {
       } else if (key === "horaFin") {
         data.append("horaFin", formData.horaFin);
       } else if (key === "category") {
-        formData.category.forEach(cat => data.append("category[]", cat)); 
+        formData.category.forEach((cat) => data.append("category[]", cat));
       } else {
         data.append(key, formData[key]);
       }
     });
 
     try {
-      const response = await VeterinaryService.updateVeterinary(userId, data, token);
+      const response = await VeterinaryService.updateVeterinary(
+        userId,
+        data,
+        token
+      );
       useLoginStore.getState().updateProfile({
         veterinarieName: formData.veterinarieName,
         img: formData.img,
@@ -176,87 +198,138 @@ const VetProfile = () => {
       Alert.alert("Éxito", response.message);
       router.push("../");
     } catch (error) {
-      console.error("Error al actualizar perfil:", error.response?.data || error);
-      Alert.alert("Error", `No se pudo actualizar el perfil. Detalles: ${error.response?.data?.message || error.message}`);
+      console.error(
+        "Error al actualizar perfil:",
+        error.response?.data || error
+      );
+      Alert.alert(
+        "Error",
+        `No se pudo actualizar el perfil. Detalles: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   };
-
 
   const handleCancel = () => {
     router.navigate("/(app)/(vet)/vetProfile");
   };
 
+  const isFormValid = () => {
+    return (
+      formData.veterinarieName.trim() !== "" &&
+      formData.phone.trim() !== "" &&
+      formData.street.trim() !== "" &&
+      formData.city.trim() !== "" &&
+      formData.category.length > 0 &&
+      formData.diasSemana.length > 0 &&
+      formData.horaInicio !== "0:00" &&
+      formData.horaFin !== "0:00" &&
+      isValidPhoneNumber(formData.phone)
+    );
+  };
+
   if (loading) {
-    return <LoaderScreen message="Cargando..." />;
+    return <LoadingCat />;
   }
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16 }}>
-      <Avatar
-        source={{ uri: formData.img || "https://via.placeholder.com/150" }}
-        size={100}
-        onPress={handleImagePick}
-      />
-      <TextField
-        label="Nombre de la Veterinaria"
-        value={formData.veterinarieName}
-        onChangeText={(value) => handleChange("veterinarieName", value)}
-      />
-      <TextField
-        label="Email"
-        value={formData.email}
-        onChangeText={(value) => handleChange("email", value)}
-      />
-      <TextField
-        label="Teléfono"
-        value={formData.phone}
-        onChangeText={(value) => handleChange("phone", value)}
-      />
-      <TextField
-        label="Calle"
-        value={formData.street}
-        onChangeText={(value) => handleChange("street", value)}
-      />
-      <TextField
-        label="Ciudad"
-        value={formData.city}
-        onChangeText={(value) => handleChange("city", value)}
-      />
-      <Picker
-        label="Categorías"
-        value={formData.category}
-        onChange={(value) => handleChange("category", value)}
-        mode={PickerModes.MULTI}
-        items={categories.map((cat) => ({ label: cat, value: cat }))}
-      />
-      <Picker
-        label="Días de la Semana"
-        value={formData.diasSemana}
-        onChange={(value) => handleChange("diasSemana", value)}
-        mode={PickerModes.MULTI}
-        items={dias.map((dia) => ({ label: dia, value: dia }))}
-      />
-      <DateTimePicker
-        label="Hora de Inicio"
-        value={parseTimeToDate(formData.horaInicio)}
-        mode="time"
-        onChange={(value) => handleChange("horaInicio", formatTime(value))}
-        dateTimeFormatter={(date) => formatTime(date)}
-      />
+    <EditProfileLayout
+      disabledWhen={!isFormValid()}
+      handleSubmit={handleSubmit}
+    >
+      <EditableAvatar img={formData.img} onPress={handleImagePick} />
+      <Text style={styles.profileName}>{formData.veterinarieName}</Text>
+      <View style={styles.formContainer}>
+        <Text bold>Veterinary name</Text>
+        <SimpleTextField
+          placeholder="Nombre de la Veterinaria"
+          value={formData.veterinarieName}
+          onChangeText={(value) => handleChange("veterinarieName", value)}
+        />
 
-      <DateTimePicker
-        label="Hora de Fin"
-        value={parseTimeToDate(formData.horaFin)}
-        mode="time"
-        onChange={(value) => handleChange("horaFin", formatTime(value))}
-        dateTimeFormatter={(date) => formatTime(date)}
-      />
-      <View row spread marginT-16>
+        <Text bold>Phone number</Text>
+        <ValidationTextField
+          placeholder="Phone number"
+          value={formData.phone}
+          onChangeText={(value) => handleChange("phone", value)}
+          keyboardType="phone-pad"
+          validate={["required", (value) => isValidPhoneNumber(value || "")]}
+          validationMessage={["Field is required", "Phone number is invalid"]}
+          maxLength={10}
+        />
+
+        <Text bold>Street name</Text>
+        <SimpleTextField
+          placeholder="Street"
+          value={formData.street}
+          onChangeText={(value) => handleChange("street", value)}
+        />
+
+        <Text bold>City</Text>
+        <SimpleTextField
+          placeholder="City"
+          value={formData.city}
+          onChangeText={(value) => handleChange("city", value)}
+        />
+
+        <Text bold>Categories</Text>
+        <MultiPicker
+          title="Categories"
+          placeholder="Select categories"
+          value={formData.category}
+          onChange={(value) => handleChange("category", value)}
+        >
+          {categories.map((cat) => (
+            <Picker.Item label={cat} value={cat} />
+          ))}
+        </MultiPicker>
+
+        <Text bold>Work days</Text>
+        <MultiPicker 
+          title="Work days"
+          placeholder="Select work days"
+          value={formData.diasSemana}
+          onChange={(value) => handleChange("diasSemana", value)}
+        >
+          {dias.map((dia) => (
+            <Picker.Item label={dia} value={dia} />
+          ))}
+        </MultiPicker>
+
+        <Text bold>Work hours</Text>
+        <HourPicker
+          label="Opening time"
+          value={parseTimeToDate(formData.horaInicio)}
+          onChange={(value) => handleChange("horaInicio", formatTime(value))}
+          dateTimeFormatter={(date) => formatTime(date)}
+        />
+
+        <HourPicker
+          label="Closing time"
+          value={parseTimeToDate(formData.horaFin)}
+          onChange={(value) => handleChange("horaFin", formatTime(value))}
+          dateTimeFormatter={(date) => formatTime(date)}
+        />
+      </View>
+      {/* <View row spread marginT-16>
         <Button label="Cancelar" onPress={handleCancel} />
         <Button label="Guardar" onPress={handleSubmit} />
-      </View>
-    </ScrollView>
+      </View> */}
+    </EditProfileLayout>
   );
 };
+
+const styles = StyleSheet.create({
+  profileName: {
+    fontSize: 24,
+    fontFamily: Fonts.PoppinsBold,
+    marginBottom: 20,
+  },
+  formContainer: {
+    width: "100%",
+    marginBottom: 20,
+  },
+});
 
 export default VetProfile;

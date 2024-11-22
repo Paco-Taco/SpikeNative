@@ -34,7 +34,9 @@ const AppointmentDetailModal = ({
     <Modal
       visible={visible}
       onBackgroundPress={onClose}
-      overlayBackgroundColor={ColorPalette.mediumDark + '80'}
+      animationType='fade'
+      overlayBackgroundColor='rgba(0, 0, 0, 0.5)'
+      transparent
     >
       <View flex center padding-20>
         <Card  width="100%" padding-20 borderRadius={10}>
