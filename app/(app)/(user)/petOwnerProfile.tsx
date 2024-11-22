@@ -99,7 +99,7 @@ const PetOwnerProfile = () => {
       <OptionButton
         text="Mis citas"
         icon={<Ionicons name="list-outline" size={24} color={ColorPalette.black} />}
-        href=""
+        href="/citasUsuario"
       />
 
       <LogOutModal
