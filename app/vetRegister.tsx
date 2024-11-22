@@ -204,7 +204,7 @@ const VetRegister = () => {
             Let's start
           </Text>
           <LottieView
-            source={require("@/assets/lottie/BrownDogWalking.json")}
+            source={require("@/assets/lottie/VetAnimation.json")}
             autoPlay
             loop
             style={{ width: 125, height: 125 }}

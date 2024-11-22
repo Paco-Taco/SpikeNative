@@ -25,7 +25,7 @@ const storeApi: StateCreator<LoginState> = (set, get) => ({
       set({ dataLogin: data });
 
       // Guarda el login data en SecureStore
-      await SecureStore.setItemAsync(SECURE_STORE_KEY, JSON.stringify(data));
+      // await SecureStore.setItemAsync(SECURE_STORE_KEY, JSON.stringify(data));
       return data;
     } catch (error) {  
       set({ dataLogin: null });
@@ -40,7 +40,7 @@ const storeApi: StateCreator<LoginState> = (set, get) => ({
     set({ dataLogin: null });
     
     // Elimina el login data del SecureStore
-    await SecureStore.deleteItemAsync(SECURE_STORE_KEY);
+    // await SecureStore.deleteItemAsync(SECURE_STORE_KEY);
   },
 
   // Función para cargar los datos de login desde SecureStore
@@ -71,7 +71,7 @@ const storeApi: StateCreator<LoginState> = (set, get) => ({
     set({ dataLogin: updatedData });
 
     // Guarda los nuevos datos actualizados en SecureStore
-    await SecureStore.setItemAsync(SECURE_STORE_KEY, JSON.stringify(updatedData));
+    // await SecureStore.setItemAsync(SECURE_STORE_KEY, JSON.stringify(updatedData));
   }
 });
 

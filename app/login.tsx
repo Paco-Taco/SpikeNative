@@ -41,9 +41,9 @@ const Login = () => {
         authState?.token
       ) {
         if (role === Roles.user) {
-          router.replace("/(app)/(user)/");
+          router.replace("/(app)/(user)");
         } else if (role === Roles.veterinary) {
-          router.replace("/(app)/(vet)/");
+          router.replace("/(app)/(vet)");
         }
       }
     };
