@@ -1,19 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native-ui-lib';
-import { FlatList } from 'react-native';
-import { useLoginStore } from '@/stores/login.store';
-import { VeterinaryService } from '@/services/vetServices';
-import { CitasVet, Pendiente } from '@/types/vetTypes.types';
-import CardAppointment from '@/components/CardAppointment';
-import AppointmentDetailModal from '@/components/AppointmentDetailModal';
-import { Alert } from 'react-native';
-import LottieView from 'lottie-react-native';
+import React, { useEffect, useState } from "react";
+import { View, Text } from "react-native-ui-lib";
+import { FlatList, StatusBar } from "react-native";
+import { useLoginStore } from "@/stores/login.store";
+import { VeterinaryService } from "@/services/vetServices";
+import { CitasVet, Pendiente } from "@/types/vetTypes.types";
+import CardAppointment from "@/components/CardAppointment";
+import AppointmentDetailModal from "@/components/AppointmentDetailModal";
+import { Alert } from "react-native";
+import LottieView from "lottie-react-native";
+import { Fonts } from "@/constants/Fonts";
+import { ColorPalette } from "@/constants/Colors";
 
 const Index = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const [appointments, setAppointments] = useState<CitasVet | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedAppointment, setSelectedAppointment] = useState<Pendiente | null>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Pendiente | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
   const loadAppointments = async () => {
@@ -23,8 +26,8 @@ const Index = () => {
       const response = await VeterinaryService.getCitasVet(vetId);
       setAppointments(response);
     } catch (error) {
-      console.error('Error loading appointments:', error);
-      Alert.alert('Error', 'No se pudieron cargar las citas');
+      console.error("Error loading appointments:", error);
+      Alert.alert("Error", "No se pudieron cargar las citas");
     } finally {
       setLoading(false);
     }
@@ -37,20 +40,20 @@ const Index = () => {
   const handleComplete = async (appointmentId: number) => {
     try {
       await VeterinaryService.marcarCitaCompletada(appointmentId);
-      Alert.alert('Éxito', 'Cita marcada como completada');
+      Alert.alert("Éxito", "Cita marcada como completada");
       loadAppointments();
     } catch (error) {
-      Alert.alert('Error', 'No se pudo completar la cita');
+      Alert.alert("Error", "No se pudo completar la cita");
     }
   };
 
   const handleCancel = async (appointmentId: number) => {
     try {
       await VeterinaryService.cancelarCita(appointmentId);
-      Alert.alert('Éxito', 'Cita cancelada');
+      Alert.alert("Éxito", "Cita cancelada");
       loadAppointments();
     } catch (error) {
-      Alert.alert('Error', 'No se pudo cancelar la cita');
+      Alert.alert("Error", "No se pudo cancelar la cita");
     }
   };
 
@@ -74,8 +77,17 @@ const Index = () => {
   }
 
   return (
-    <View flex padding-20>
-      <Text text40 marginB-50>Citas Pendientes</Text>
+    <View flex paddingH-20 style={{ paddingTop: "30%" }}>
+      <Text
+        marginB-20
+        style={{
+          fontSize: 30,
+          fontFamily: Fonts.PoppinsBold,
+          textAlign: "center",
+        }}
+      >
+        Citas Pendientes
+      </Text>
       <FlatList
         data={appointments?.pendientes}
         renderItem={({ item }) => (

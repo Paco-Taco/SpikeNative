@@ -47,7 +47,7 @@ const CustomVetHeader = () => {
   const { onLogout } = useAuth();
   const { dataLogin } = useLoginStore((state) => state);
   const veterinaryName = dataLogin?.user.veterinarieName;
-  const userImg = dataLogin?.user.img 
+  const userImg = dataLogin?.user.img;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -77,24 +77,21 @@ const CustomVetHeader = () => {
             router.navigate("/vetProfile");
           }}
         >
-          <Image
-            style={styles.profileButton}
-            source={{ uri: userImg }}
-          />
+          <Image style={styles.profileButton} source={{ uri: userImg }} />
         </TouchableOpacity>
       </View>
-      <SearchBar />
+
+      {/* <SearchBar /> */}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: ColorPalette.white,
     flex: 1,
   },
   container: {
-    height: 60,
+    height: 100,
     flexDirection: "row",
     gap: 20,
     backgroundColor: ColorPalette.background,
