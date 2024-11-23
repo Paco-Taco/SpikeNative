@@ -1,10 +1,9 @@
-// app/(app)/(user)/index.tsx
-
 import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, Button, SegmentedControl } from "react-native-ui-lib";
-import { FlatList, Platform } from "react-native";
+import { View, Button, SegmentedControl } from "react-native-ui-lib";
+import { FlatList, Platform, TextInput } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons"; // Usando los íconos incluidos con Expo
 import { ColorPalette } from "@/constants/Colors";
 import { useUserStore } from "@/stores/user.store";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
@@ -12,26 +11,23 @@ import { useLoginStore } from "@/stores/login.store";
 import { Veterinary } from "@/types/userTypes.types";
 import CardVeterinary from "@/components/CardVeterinary";
 import { useSearch } from "@/app/context/SearchContext";
-import { useAuth } from "@/app/context/AuthContext";
-import { Fonts } from "@/constants/Fonts";
-import Modal from "react-native-modal";
-import NewPetModal from "@/components/user/NewPetModal";
 import LoadingCat from "@/components/shared/LoadingCat";
+import NewPetModal from "@/components/user/NewPetModal";
 
 const Index = () => {
   const { getVets } = useUserStore((state) => state);
   const { dataLogin } = useLoginStore((state) => state);
   const idOwner = dataLogin?.user.id;
   const [loadingVets, setLoadingVets] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   const [veterinaryClinics, setVeterinaryClinics] = useState<Veterinary[]>([]);
   const [pets, setPets] = useState([]);
-  const [showModal, setShowModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [postalCodeFilter, setPostalCodeFilter] = useState(""); // Estado para el código postal
   const { searchQuery } = useSearch();
 
   const renderItem = ({ item }: { item: Veterinary }) => {
-    // console.log("Item ID:", item.id);  // Check if ID is valid
     return (
       <CardVeterinary
         item={item}
@@ -92,6 +88,10 @@ const Index = () => {
     )
     .filter((clinic) =>
       clinic.veterinarieName.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter(
+      (clinic) =>
+        postalCodeFilter === "" || clinic.cp === postalCodeFilter
     );
 
   return (
@@ -102,7 +102,7 @@ const Index = () => {
         paddingTop: Platform.OS === "android" ? 140 : 60,
       }}
     >
-      <NewPetModal
+    <NewPetModal
         isVisible={showModal}
         onDismiss={() => setShowModal(false)}
         onOk={() => {
@@ -110,8 +110,7 @@ const Index = () => {
           router.push("/petRegister");
         }}
       />
-      {/* Barra de filtros de categoría */}
-      <View paddingH-20 marginB-20>
+      <View paddingH-20 marginB-10>
         <SegmentedControl
           segments={[
             { label: "All" },
@@ -132,8 +131,41 @@ const Index = () => {
               ? ColorPalette.yellowPalette
               : ColorPalette.bluePalette
           }
+          style={{ width: "100%" }}
         />
       </View>
+
+      <View row paddingH-20 marginB-20 centerV>
+        <TextInput
+             style={{
+              flex: 1,
+              backgroundColor: "#f8f9fb", 
+              borderRadius: 8,
+              padding: 10,
+              marginRight: 10,
+              borderWidth: 1,
+              borderColor: "#e0e0e0", 
+              shadowColor: "#000", 
+              shadowOffset: { width: 0, height: 2 }, 
+              shadowOpacity: 0.1, 
+              shadowRadius: 4, 
+              elevation: 2, 
+            }}
+          placeholder="Buscar por CP"
+          value={postalCodeFilter}
+          keyboardType="numeric"
+          onChangeText={setPostalCodeFilter}
+        />
+        <Button
+          iconSource={() => (
+            <MaterialIcons name="clear" size={18} color="white" />
+          )}
+          size={Button.sizes.small} 
+          backgroundColor={ColorPalette.darkGrayPalette}
+          onPress={() => setPostalCodeFilter("")} 
+        />
+      </View>
+
       {loadingVets ? (
         <LoadingCat />
       ) : (
