@@ -17,6 +17,7 @@ import { Fonts } from "@/constants/Fonts";
 import Modal from "react-native-modal";
 import NewPetModal from "@/components/user/NewPetModal";
 import LoadingCat from "@/components/shared/LoadingCat";
+import { RefreshControl } from "react-native-gesture-handler";
 
 const Index = () => {
   const { getVets } = useUserStore((state) => state);
@@ -46,22 +47,26 @@ const Index = () => {
     );
   };
 
+  const fetchVets = async () => {
+    try {
+      setLoadingVets(true);
+      const result = await getVets();
+      setVeterinaryClinics(result ? result.veterinaries : []);
+    } catch (error) {
+      console.error("Error al obtener veterinarias:", error);
+    } finally {
+      setLoadingVets(false);
+    }
+  };
+
+  const onRefresh = () => {
+    fetchVets();
+  };
+
   useEffect(() => {
     if (!idOwner) {
       return;
     }
-
-    const fetchVets = async () => {
-      try {
-        setLoadingVets(true);
-        const result = await getVets();
-        setVeterinaryClinics(result ? result.veterinaries : []);
-      } catch (error) {
-        console.error("Error al obtener veterinarias:", error);
-      } finally {
-        setLoadingVets(false);
-      }
-    };
 
     const fetchPets = async () => {
       try {
@@ -154,6 +159,9 @@ const Index = () => {
               >
                 No clinics found
               </Text>
+            }
+            refreshControl={
+              <RefreshControl refreshing={loadingVets} onRefresh={onRefresh} />
             }
           />
         </View>
