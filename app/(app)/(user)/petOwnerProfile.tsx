@@ -101,6 +101,12 @@ const PetOwnerProfile = () => {
         icon={<Ionicons name="list-outline" size={24} color={ColorPalette.black} />}
         href="/citasUsuario"
       />
+      <Divider />
+      <OptionButton
+        text="Conmemoraciones"
+        icon={<Ionicons name="flower-outline" size={24} color={ColorPalette.black} />}
+        href="/conmemoraciones"
+      />
 
       <LogOutModal
         isVisible={isLogoutModalVisible}
