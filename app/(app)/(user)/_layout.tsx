@@ -74,6 +74,12 @@ export default function AppLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="conmemoraciones"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
