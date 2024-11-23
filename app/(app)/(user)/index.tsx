@@ -13,6 +13,9 @@ import CardVeterinary from "@/components/CardVeterinary";
 import { useSearch } from "@/app/context/SearchContext";
 import LoadingCat from "@/components/shared/LoadingCat";
 import NewPetModal from "@/components/user/NewPetModal";
+import { Text } from "react-native-ui-lib";
+import { Fonts } from "@/constants/Fonts";
+
 
 const Index = () => {
   const { getVets } = useUserStore((state) => state);

@@ -49,7 +49,7 @@ const UserAppointments = () => {
 
   const handleCancelAppointment = async (appointmentId) => {
     try {
-      const response = await axiosInstanceSpikeCore.post('/cancelarCita', {
+      const response = await axiosInstanceSpikeCore.post('/cancelarcita/usuario', {
         appointmentId: appointmentId,
       });
   
