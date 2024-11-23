@@ -143,6 +143,18 @@ const Index = () => {
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
             contentContainerStyle={{ paddingBottom: 20 }}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontFamily: Fonts.PoppinsRegular,
+                  color: ColorPalette.medium,
+                }}
+              >
+                No clinics found
+              </Text>
+            }
           />
         </View>
       )}

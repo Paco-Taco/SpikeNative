@@ -26,7 +26,7 @@ const AbsoluteBackArrow = ({
 const styles = StyleSheet.create({
   backButton: {
     position: "absolute",
-    top: 40,
+    top: 50,
     left: 20,
     padding: 10,
     borderRadius: 20,

@@ -99,6 +99,7 @@ const Index = () => {
           />
         )}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <Text text70 center marginT-60>
             No hay citas pendientes
