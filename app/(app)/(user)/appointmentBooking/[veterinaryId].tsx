@@ -150,7 +150,7 @@ const AppointmentBooking = () => {
       });
 
       Alert.alert("Éxito", "Cita agendada correctamente", [
-        { text: "OK", onPress: () => router.push("/(app)/(user)/citasUsuario") },
+        { text: "OK", onPress: () => router.replace("/(app)/(user)/citasUsuario") },
       ]);
     } catch (error) {
       console.error("Error al crear cita", error);

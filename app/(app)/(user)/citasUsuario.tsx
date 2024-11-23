@@ -20,6 +20,7 @@ import {
 import { Fonts } from "@/constants/Fonts";
 import LottieView from "lottie-react-native";
 import { ColorPalette } from "@/constants/Colors";
+import AbsoluteBackArrow from "@/components/shared/AbsoluteBackArrow";
 
 const UserAppointments = () => {
   const { dataLogin } = useLoginStore((state) => state);
@@ -149,6 +150,7 @@ const UserAppointments = () => {
 
   return (
     <View useSafeArea flex>
+      <AbsoluteBackArrow color={Colors.grey30} />
       {loading ? (
         <View flex center>
           <LottieView
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     fontFamily: Fonts.PoppinsBold,
     textAlign: "center",
-    marginVertical: 40,
+    marginVertical: 50,
   },
   petImage: {
     marginHorizontal: 10,
