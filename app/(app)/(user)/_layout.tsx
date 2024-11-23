@@ -62,6 +62,18 @@ export default function AppLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="citasUsuario"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="appointmentDetails"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>

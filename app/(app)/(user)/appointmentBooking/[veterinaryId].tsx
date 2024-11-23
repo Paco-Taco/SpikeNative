@@ -30,6 +30,7 @@ import FontSize from "@/constants/FontSize";
 import { Ionicons } from "@expo/vector-icons";
 import NewPetModal from "@/components/user/NewPetModal";
 import Divider from "@/components/shared/Divider";
+import LoadingCat from "@/components/shared/LoadingCat";
 
 const AppointmentBooking = () => {
   const router = useRouter();
@@ -149,7 +150,7 @@ const AppointmentBooking = () => {
       });
 
       Alert.alert("Éxito", "Cita agendada correctamente", [
-        { text: "OK", onPress: () => router.push("/(app)/(user)/") },
+        { text: "OK", onPress: () => router.push("/(app)/(user)/citasUsuario") },
       ]);
     } catch (error) {
       console.error("Error al crear cita", error);
@@ -170,7 +171,7 @@ const AppointmentBooking = () => {
   };
 
   if (!veterinaryDetails) {
-    return <Text>Cargando detalles de la veterinaria...</Text>;
+    return <LoadingCat />;
   }
 
   return (
