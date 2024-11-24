@@ -33,7 +33,7 @@ const SearchBar = () => {
             color={ColorPalette.medium}
           />
           <TextField
-            placeholder="Veterinaries, care services, products"
+            placeholder="Search veterinaries..."
             padding-10
             style={styles.input}
             placeholderTextColor={ColorPalette.medium}

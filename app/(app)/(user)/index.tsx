@@ -183,7 +183,7 @@ const Index = () => {
         <ScrollView style={{ flex: 1 }}>
           <View paddingH-20>
             <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 10 }}>
-              Clínicas que coinciden con el código postal:
+              Clinics near you:
             </Text>
             <FlatList
               data={clinicsMatchingPostalCode}
@@ -191,12 +191,14 @@ const Index = () => {
               renderItem={renderItem}
               contentContainerStyle={{ paddingBottom: 20 }}
               showsVerticalScrollIndicator={false}
+              scrollEnabled={false}
               ListEmptyComponent={
                 <Text
                   style={{
                     textAlign: "center",
                     fontFamily: Fonts.PoppinsRegular,
                     color: ColorPalette.medium,
+                    marginVertical: 20,
                   }}
                 >
                   No clinics found for this postal code
@@ -207,7 +209,7 @@ const Index = () => {
 
           <View paddingH-20 marginT-20>
             <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 10 }}>
-              Clinicas Cercanas:
+              Clinics nearby:
             </Text>
             <FlatList
               data={clinicsNotMatchingPostalCode}
@@ -215,6 +217,7 @@ const Index = () => {
               renderItem={renderItem}
               contentContainerStyle={{ paddingBottom: 20 }}
               showsVerticalScrollIndicator={false}
+              scrollEnabled={false}
               ListEmptyComponent={
                 <Text
                   style={{

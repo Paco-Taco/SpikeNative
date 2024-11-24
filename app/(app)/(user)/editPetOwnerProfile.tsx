@@ -205,6 +205,8 @@ const EditPetOwnerProfile = () => {
     return <LoadingCat />;
   }
 
+  if (isUpdatingProfile) return <LoadingCat />;
+
   return (
     <EditProfileLayout
       disabledWhen={!isFormValid()}
@@ -256,7 +258,7 @@ const EditPetOwnerProfile = () => {
           keyboardType="number-pad"
         />
       </View>
-      <Incubator.Dialog
+      {/* <Incubator.Dialog
         useSafeArea
         center
         visible={isUpdatingProfile}
@@ -280,7 +282,7 @@ const EditPetOwnerProfile = () => {
           />
           <Text center>Guardando...</Text>
         </View>
-      </Incubator.Dialog>
+      </Incubator.Dialog> */}
     </EditProfileLayout>
   );
 };
