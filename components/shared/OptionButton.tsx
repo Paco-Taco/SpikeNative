@@ -6,7 +6,7 @@ import { ColorPalette } from "@/constants/Colors";
 
 const OptionButton = ({ text, icon, href }: { text: string; icon: ReactNode, href: string }) => {
   return (
-    <Link href={href as any} asChild>
+    <Link href={href as any} push asChild>
     <TouchableOpacity style={styles.optionButton}>
       <Text style={styles.optionText}>{text}</Text>
       {icon}

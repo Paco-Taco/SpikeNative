@@ -18,6 +18,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useLoginStore } from "@/stores/login.store";
 import { useSearch } from "@/app/context/SearchContext"; // Importa el hook del contexto
 import { TextField, Image, AnimatedImage, LoaderScreen } from "react-native-ui-lib";
+import { Fonts } from "@/constants/Fonts";
 
 const SearchBar = () => {
   const { searchQuery, setSearchQuery } = useSearch(); // Usa el contexto
@@ -66,7 +67,7 @@ const CustomHeader = () => {
       />
       <BottomSheet ref={bottomSheetRef} />
       <View style={styles.container}>
-        <TouchableOpacity onPress={onLogout}>
+        <TouchableOpacity>
           <Ionicons
             name="location-outline"
             color={ColorPalette.bluePalette}
@@ -135,6 +136,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     color: Colors.light.text,
+    fontFamily: Fonts.PoppinsLight
   },
   profileButton: {
     width: 30,
@@ -142,8 +144,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   subtitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontFamily: Fonts.PoppinsBold,
     color: Colors.light.text,
   },
   locationName: {

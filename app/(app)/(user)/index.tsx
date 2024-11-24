@@ -17,7 +17,6 @@ import NewPetModal from "@/components/user/NewPetModal";
 import { Fonts } from "@/constants/Fonts";
 import { ScrollView } from "react-native";
 
-
 const Index = () => {
   const { getVets } = useUserStore((state) => state);
   const { dataLogin } = useLoginStore((state) => state);
@@ -54,7 +53,9 @@ const Index = () => {
 
     const fetchPets = async () => {
       try {
-        const response = await axiosInstanceSpikeCore.get(`/getpets/${idOwner}`);
+        const response = await axiosInstanceSpikeCore.get(
+          `/getpets/${idOwner}`
+        );
         const petsData = response.data || [];
         setPets(petsData);
 
@@ -129,6 +130,7 @@ const Index = () => {
             { label: "Recreation" },
             { label: "Care" },
           ]}
+          segmentLabelStyle={{ fontFamily: Fonts.PoppinsRegular }}
           onChangeIndex={(index) => {
             setSelectedCategory(categories[index]);
           }}
@@ -182,7 +184,13 @@ const Index = () => {
       ) : (
         <ScrollView style={{ flex: 1 }}>
           <View paddingH-20>
-            <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 10 }}>
+            <Text
+              style={{
+                fontFamily: Fonts.PoppinsBold,
+                fontSize: 18,
+                marginBottom: 10,
+              }}
+            >
               Clinics near you:
             </Text>
             <FlatList
@@ -201,14 +209,20 @@ const Index = () => {
                     marginVertical: 20,
                   }}
                 >
-                  No clinics found for this postal code
+                  No clinics found near this postal code
                 </Text>
               }
             />
           </View>
 
           <View paddingH-20 marginT-20>
-            <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 10 }}>
+            <Text
+              style={{
+                fontFamily: Fonts.PoppinsBold,
+                fontSize: 18,
+                marginBottom: 10,
+              }}
+            >
               Clinics nearby:
             </Text>
             <FlatList

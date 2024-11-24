@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   Image,
   TextField,
+  Avatar,
 } from "react-native-ui-lib";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,7 +29,7 @@ const CustomVetHeader = () => {
         backgroundColor={"#FFFFFF"} // Fondo blanco
       />
       <View style={styles.container}>
-        <TouchableOpacity onPress={onLogout}>
+        <TouchableOpacity>
           <Ionicons
             name="storefront-outline"
             color={ColorPalette.bluePalette}
@@ -82,6 +83,8 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
   },
   profileButton: {
+    borderWidth: 1, 
+    borderColor: ColorPalette.grey,
     width: 30,
     height: 30,
     borderRadius: 20,
