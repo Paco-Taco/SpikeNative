@@ -15,6 +15,7 @@ import {
   FloatingButton,
   ActionSheet,
   Image,
+  TouchableOpacity,
 } from "react-native-ui-lib";
 import * as ImagePicker from "expo-image-picker";
 import { useLoginStore } from "@/stores/login.store";
@@ -24,6 +25,7 @@ import SimpleTextField from "@/components/wizard/SimpleTextField";
 import { Ionicons } from "@expo/vector-icons";
 import FontSize from "@/constants/FontSize";
 import LoadingCat from "@/components/shared/LoadingCat";
+import { ScrollView } from "react-native-gesture-handler";
 
 const editPetScreen = () => {
   const params = useLocalSearchParams();
@@ -109,8 +111,8 @@ const editPetScreen = () => {
         },
       });
 
-      router.replace("/petlist");
       showToastWithGravity();
+      router.replace("/petlist");
     } catch (error) {
       setIsSavingChanges(false);
       console.error(
@@ -210,21 +212,47 @@ const editPetScreen = () => {
             onChangeText={(value) => handleChange("name", value)}
           />
 
-          <Text bold>Weight (kg)</Text>
-          <SimpleTextField
-            label="Weight"
-            value={formData.weight}
-            onChangeText={(value) => handleChange("weight", value)}
-            keyboardType="number-pad"
-          />
-
-          <Text bold>Height (cm)</Text>
+          <Text bold>
+            Weight (kg)
+          </Text>
           <SimpleTextField
             label="Height"
             value={formData.height}
             keyboardType="number-pad"
             onChangeText={(value) => handleChange("height", value)}
           />
+
+          <Text bold marginB-10>Size</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.scrollView}
+          >
+            {[
+              { label: "Small", value: "1" },
+              { label: "Medium", value: "2" },
+              { label: "Big", value: "3" },
+              { label: "Very big", value: "4" },
+            ].map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                onPress={() => handleChange("height", option.value)}
+                style={[
+                  styles.chip,
+                  formData.height === option.value && styles.selectedChip,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    formData.height === option.value && styles.selectedChipText,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
       </EditProfileLayout>
       <Button
@@ -245,6 +273,29 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: ColorPalette.white,
+  },
+  scrollView: {
+    // marginVertical: 10,
+    marginBottom: 10,
+  },
+  chip: {
+    backgroundColor: ColorPalette.white,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: ColorPalette.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginHorizontal: 5,
+  },
+  selectedChip: {
+    backgroundColor: ColorPalette.primary,
+  },
+  chipText: {
+    color: ColorPalette.primary,
+    fontFamily: Fonts.PoppinsMedium,
+  },
+  selectedChipText: {
+    color: "white",
   },
   container: {
     padding: 20,

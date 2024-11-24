@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StyleSheet, TextInput, Alert, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginStore } from "@/stores/login.store";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { Link, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import LoadingCat from "@/components/shared/LoadingCat";
@@ -25,13 +25,14 @@ import { ColorPalette } from "@/constants/Colors";
 import PetsNotFoundScreen from "@/components/user/PetsNotFoundScreen";
 import FontSize from "@/constants/FontSize";
 import { Ionicons } from "@expo/vector-icons";
+import { RefreshControl } from "react-native-gesture-handler";
 
 const PetListAndEdit = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const { user, token } = dataLogin || {};
   const userId = user?.id;
   const router = useRouter();
-  
+
   const [pets, setPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [formData, setFormData] = useState({});
@@ -55,6 +56,10 @@ const PetListAndEdit = () => {
       setLoading(false);
     }
   };
+
+  const onRefresh = () => {
+    fetchPets();
+  }
 
   useEffect(() => {
     if (userId && token) {
@@ -88,13 +93,18 @@ const PetListAndEdit = () => {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchPets(); // Recarga las mascotas cuando la pantalla vuelve a ser el foco
+    }, [])
+  );
   // Cancelar edición y volver a la lista de mascotas
   const handleCancel = () => {
     setSelectedPet(null);
   };
 
   const goToEditPetScreen = (pet: any) => {
-    router.replace({
+    router.push({
       pathname: "/editPetScreen",
       params: {
         name: pet.name,
@@ -196,6 +206,8 @@ const PetListAndEdit = () => {
             numColumns={2}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderPets}
+            contentContainerStyle={{ paddingBottom: 50 }}
+            refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
           />
 
           <Link asChild href={"/petRegister"}>

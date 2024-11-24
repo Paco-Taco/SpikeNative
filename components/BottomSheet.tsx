@@ -10,6 +10,7 @@ import { ColorPalette } from "@/constants/Colors";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import LocationSelector from "./LocationSelector";
+import { Fonts } from "@/constants/Fonts";
 
 export type Ref = BottomSheetModal;
 
@@ -84,6 +85,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     margin: 16,
     color: ColorPalette.medium,
+    fontFamily: Fonts.PoppinsMedium
   },
   button: {
     backgroundColor: ColorPalette.primary,
@@ -94,7 +96,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontFamily: Fonts.PoppinsMedium
   },
   item: {
     flexDirection: "row",

@@ -11,8 +11,12 @@ import {
 } from "react-native";
 import { ColorPalette } from "@/constants/Colors";
 import FontSize from "@/constants/FontSize";
+import { Fonts } from "@/constants/Fonts";
 
-const LocationSelector = ({ onLocationSelect, currentLocation = "Manzanillo" }) => {
+const LocationSelector = ({
+  onLocationSelect,
+  currentLocation = "Manzanillo",
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(currentLocation);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -60,7 +64,6 @@ const LocationSelector = ({ onLocationSelect, currentLocation = "Manzanillo" }) 
       <TouchableOpacity
         style={styles.spinnerButton}
         onPress={() => setIsModalVisible(true)}
-        
       >
         <Text style={styles.spinnerButtonText}>
           {selectedLocation ? selectedLocation : "Select Location"}
@@ -93,7 +96,16 @@ const LocationSelector = ({ onLocationSelect, currentLocation = "Manzanillo" }) 
                     ]}
                     onPress={() => handleLocationSelect(item)}
                   >
-                    <Text style={styles.locationText}>{item}</Text>
+                    <Text
+                      style={[
+                        styles.locationText,
+                        item === selectedLocation && {
+                          color: ColorPalette.white,
+                        },
+                      ]}
+                    >
+                      {item}
+                    </Text>
                   </TouchableOpacity>
                 )}
               />
@@ -120,7 +132,7 @@ const styles = StyleSheet.create({
   spinnerButtonText: {
     color: ColorPalette.medium,
     fontSize: FontSize.medium,
-    fontWeight: "bold",
+    fontFamily: Fonts.PoppinsSemiBold,
   },
   modalOverlay: {
     flex: 1,
@@ -129,7 +141,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: ColorPalette.graphitePalette,
+    backgroundColor: ColorPalette.offWhite,
     width: "80%",
     borderRadius: 8,
     padding: 16,
@@ -143,9 +155,10 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 8,
     color: "#666",
+    fontFamily: Fonts.PoppinsRegular,
   },
   locationButton: {
-    backgroundColor: ColorPalette.lightGraphite,
+    backgroundColor: ColorPalette.white,
     padding: 12,
     borderRadius: 4,
     marginVertical: 4,
@@ -156,18 +169,20 @@ const styles = StyleSheet.create({
     backgroundColor: ColorPalette.primary,
   },
   locationText: {
-    color: "#fff",
-    fontWeight: "bold",
+    color: ColorPalette.medium,
+    fontFamily: Fonts.PoppinsMedium,
+
   },
   closeButton: {
     marginTop: 16,
     padding: 12,
-    backgroundColor: ColorPalette.medium,
+    backgroundColor: "transparent",
     borderRadius: 4,
   },
   closeButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    color: ColorPalette.medium,
+    fontSize: FontSize.medium,
+    fontFamily: Fonts.PoppinsLight,
   },
 });
 

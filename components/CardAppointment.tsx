@@ -48,7 +48,7 @@ const CardAppointment = ({ item, onComplete, onCancel, onPressDetails }: CardApp
           </Text>
         </View>
 
-        <View style={styles.buttonContainer}>
+        {/* <View style={styles.buttonContainer}>
           <Button
             label="Completar"
             size="small"
@@ -62,7 +62,7 @@ const CardAppointment = ({ item, onComplete, onCancel, onPressDetails }: CardApp
             marginL-10
             onPress={() => onCancel(item.id)}
           />
-        </View>
+        </View> */}
       </View>
     </Card>
   );
