@@ -10,6 +10,9 @@ import { Alert } from "react-native";
 import LottieView from "lottie-react-native";
 import { Fonts } from "@/constants/Fonts";
 import { ColorPalette } from "@/constants/Colors";
+import LoadingCat from "@/components/shared/LoadingCat";
+import FontSize from "@/constants/FontSize";
+import { RefreshControl } from "react-native-gesture-handler";
 
 const Index = () => {
   const { dataLogin } = useLoginStore((state) => state);
@@ -62,18 +65,12 @@ const Index = () => {
     setModalVisible(true);
   };
 
+  const onRefresh = () => {
+    loadAppointments();
+  }
+
   if (loading) {
-    return (
-      <View flex center>
-        <LottieView
-          source={require("@/assets/lottie/LoadingCat.json")}
-          autoPlay
-          loop
-          style={{ width: 100, height: 100 }}
-        />
-        <Text medium>Cargando...</Text>
-      </View>
-    );
+    return <LoadingCat />;
   }
 
   return (
@@ -81,12 +78,12 @@ const Index = () => {
       <Text
         marginB-20
         style={{
-          fontSize: 30,
+          fontSize: 25,
           fontFamily: Fonts.PoppinsBold,
           textAlign: "center",
         }}
       >
-        Citas Pendientes
+        Pending Appointments
       </Text>
       <FlatList
         data={appointments?.pendientes}
@@ -101,10 +98,18 @@ const Index = () => {
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text text70 center marginT-60>
-            No hay citas pendientes
+          <Text
+            style={{
+              fontFamily: Fonts.PoppinsMedium,
+              fontSize: FontSize.large,
+            }}
+            center
+            marginT-60
+          >
+            No pending appointments
           </Text>
         }
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
       />
 
       <AppointmentDetailModal

@@ -216,10 +216,10 @@ const editPetScreen = () => {
             Weight (kg)
           </Text>
           <SimpleTextField
-            label="Height"
-            value={formData.height}
+            label="Weight"
+            value={formData.weight}
             keyboardType="number-pad"
-            onChangeText={(value) => handleChange("height", value)}
+            onChangeText={(value) => handleChange("weight", value)}
           />
 
           <Text bold marginB-10>Size</Text>

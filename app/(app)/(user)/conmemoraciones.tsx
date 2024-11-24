@@ -11,6 +11,8 @@ import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { useLoginStore } from "@/stores/login.store";
 import LoadingCat from "@/components/shared/LoadingCat";
 import AbsoluteBackArrow from "@/components/shared/AbsoluteBackArrow";
+import { Fonts } from "@/constants/Fonts";
+import FontSize from "@/constants/FontSize";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -115,7 +117,7 @@ const Conmemoraciones = () => {
     return (
       <SafeAreaView
         style={{
-          padding: 16,
+          padding: 26,
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
@@ -133,16 +135,30 @@ const Conmemoraciones = () => {
             borderRadius: 75,
           }}
         />
-        <Text center text50 color={Colors.black} marginB-10 bold>
-          Conmemoraciones
+        <Text
+          center
+          color={Colors.black}
+          marginB-10
+          style={{ fontSize: FontSize.xLarge, fontFamily: Fonts.PoppinsBold }}
+        >
+          Memorials
         </Text>
-        <Text center text70 color={Colors.grey30} marginB-20>
-          Este espacio está dedicado a recordar a nuestras queridas mascotas que
-          ya no están con nosotros.
+        <Text
+          center
+          style={{ fontSize: FontSize.medium, fontFamily: Fonts.PoppinsMedium }}
+          color={Colors.grey30}
+          marginB-20
+        >
+          This space is dedicated to remembering our beloved pets who are no
+          longer with us.
         </Text>
-        <Text center text80 color={Colors.grey40}>
-          Aquí puedes rendirles homenaje y recordar los momentos especiales que
-          viviste junto a ellas.
+        <Text
+          center
+          style={{ fontSize: FontSize.small, fontFamily: Fonts.PoppinsMedium }}
+          color={Colors.grey40}
+        >
+          Here, you can pay tribute and remember the special moments you shared
+          with them.
         </Text>
       </SafeAreaView>
     );
@@ -153,11 +169,11 @@ const Conmemoraciones = () => {
       <AbsoluteBackArrow color={Colors.grey30} />
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Text center text50 color={Colors.black} marginB-20 marginT-30 bold>
-          Conmemoraciones
+          Memorials
         </Text>
         <Text center text70 color={Colors.grey30} marginB-30 italic>
-          "Aunque sus patas ya no corran en la tierra, sus huellas quedarán para
-          siempre en nuestros corazones."
+          "Even though their paws no longer run on the ground, their footprints
+          will remain forever in our hearts."
         </Text>
         {deathPets.map((pet) => (
           <TouchableWithoutFeedback key={pet.id} onPress={addHeart}>
@@ -193,7 +209,7 @@ const Conmemoraciones = () => {
                   style={{
                     width: 120,
                     height: 120,
-                    borderRadius: 60, // Redonda
+                    borderRadius: 60, // Round
                     marginBottom: 12,
                   }}
                 />
@@ -212,5 +228,4 @@ const Conmemoraciones = () => {
     </SafeAreaView>
   );
 };
-
 export default Conmemoraciones;

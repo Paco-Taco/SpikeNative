@@ -39,6 +39,7 @@ export class VeterinaryService {
     try {
       const { data } = await axiosInstanceSpikeCore.post(
         "/createVeterinary",
+
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -47,14 +48,14 @@ export class VeterinaryService {
       return data;
     } catch (error) {
       console.error("Error al registrar la veterinaria:", error);
-      if (error instanceof AxiosError) {
-        const errorMessage = error.response?.data?.message || error.message;
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.error;
         console.error("Detalles del error:", error.response?.data);
-        throw new Error(`Error en la solicitud: ${errorMessage}`);
+        throw errorMessage;
       }
-      throw new Error(
-        "VeterinaryService: No se pudo completar el registro de la veterinaria."
-      );
+
+      throw "VeterinaryService: No se pudo completar el registro de la veterinaria."
+
     }
   };
 

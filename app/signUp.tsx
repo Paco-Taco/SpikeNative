@@ -32,12 +32,12 @@ const SignUp = () => {
           <CardSignUp
             source={require("@/assets/images/user.webp")}
             text={"User"}
-            onPress={() => router.navigate("/userRegister")}
+            onPress={() => router.push("/userRegister")}
           />
           <CardSignUp
             source={require("@/assets/images/veterinary.webp")}
             text={"Vet"}
-            onPress={() => router.navigate("/vetRegister")}
+            onPress={() => router.push("/vetRegister")}
           />
         </View>
       </View>

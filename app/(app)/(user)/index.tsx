@@ -148,7 +148,7 @@ const Index = () => {
         />
       </View>
 
-      <View row paddingH-20 marginB-20 centerV>
+      <View row paddingH-20 marginV-20 centerV>
         <TextInput
           style={{
             flex: 1,
@@ -164,7 +164,7 @@ const Index = () => {
             shadowRadius: 4,
             elevation: 2,
           }}
-          placeholder="Buscar por CP"
+          placeholder="Postal code"
           value={postalCodeFilter}
           keyboardType="numeric"
           onChangeText={setPostalCodeFilter}

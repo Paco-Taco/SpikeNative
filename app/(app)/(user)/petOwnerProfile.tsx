@@ -91,19 +91,19 @@ const PetOwnerProfile = () => {
       onPressLogoutButton={() => setIsLogoutModalVisible(true)}
     >
       <OptionButton
-        text="Mis mascotas"
+        text="My Pets"
         icon={<Ionicons name="paw-outline" size={24} color={ColorPalette.black} />}
         href="/petlist"
       />
       <Divider />
       <OptionButton
-        text="Mis citas"
+        text="Appointments"
         icon={<Ionicons name="list-outline" size={24} color={ColorPalette.black} />}
         href="/citasUsuario"
       />
       <Divider />
       <OptionButton
-        text="Conmemoraciones"
+        text="Memorials"
         icon={<Ionicons name="flower-outline" size={24} color={ColorPalette.black} />}
         href="/conmemoraciones"
       />
