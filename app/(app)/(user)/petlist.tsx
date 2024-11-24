@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, TextInput, Alert, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginStore } from "@/stores/login.store";
-import { useRouter } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import LoadingCat from "@/components/shared/LoadingCat";
@@ -15,50 +15,52 @@ import {
   Button,
   ListItem,
   AnimatedImage,
+  GridList,
+  GridListItem,
+  Card,
 } from "react-native-ui-lib";
 import AbsoluteBackArrow from "@/components/shared/AbsoluteBackArrow";
 import { Fonts } from "@/constants/Fonts";
 import { ColorPalette } from "@/constants/Colors";
 import PetsNotFoundScreen from "@/components/user/PetsNotFoundScreen";
+import FontSize from "@/constants/FontSize";
+import { Ionicons } from "@expo/vector-icons";
 
 const PetListAndEdit = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const { user, token } = dataLogin || {};
   const userId = user?.id;
   const router = useRouter();
-
+  
   const [pets, setPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
 
   // Obtener lista de mascotas
-  useEffect(() => {
-    const fetchPets = async () => {
-      try {
-        setLoading(true);
-        const response = await axiosInstanceSpikeCore.get(
-          `/getpets/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setPets(response.data);
-      } catch (error) {
-        console.error(
-          "Error fetching pets:",
-          error.response?.data || error.message
-        );
-        Alert.alert("Error", "No se pudo cargar la lista de mascotas.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPets = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstanceSpikeCore.get(`/getpets/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPets(response.data);
+    } catch (error) {
+      console.error(
+        "Error fetching pets:",
+        error.response?.data || error.message
+      );
+      Alert.alert("Error", "No se pudo cargar la lista de mascotas.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (userId && token) {
       fetchPets();
     }
-  }, [userId, token]);
+  }, []);
 
   // Manejo de cambios en el formulario
   const handleChange = (name, value) => {
@@ -86,86 +88,48 @@ const PetListAndEdit = () => {
     }
   };
 
-  // Manejo de actualización de mascota
-  const handleSubmit = async () => {
-    const data = new FormData();
-
-    // Iterar sobre los datos del formulario y agregar al FormData
-    Object.keys(formData).forEach((key) => {
-      if (formData[key] !== undefined && formData[key] !== null) {
-        if (key === "img" && formData.img) {
-          data.append("img", {
-            uri: formData.img,
-            name: "pet_image.jpg",
-            type: "image/jpeg",
-          });
-        } else {
-          data.append(key, formData[key]);
-        }
-      }
-    });
-
-    console.log("Datos a actualizar:", formData); // Verificar datos en la consola
-
-    try {
-      const response = await axiosInstanceSpikeCore.post(
-        `/updatepet/${selectedPet.id}`,
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Actualizar la lista de mascotas localmente después de la actualización
-      setPets((prevPets) => {
-        return prevPets.map((pet) =>
-          pet.id === selectedPet.id ? { ...pet, ...formData } : pet
-        );
-      });
-
-      // Verificar respuesta del servidor
-      console.log("Respuesta del servidor:", response.data);
-      Alert.alert("Éxito", response.data.message);
-      setSelectedPet(null); // Volver a la lista de mascotas
-    } catch (error) {
-      console.error(
-        "Error actualizando la mascota:",
-        error.response?.data || error
-      );
-      Alert.alert(
-        "Error",
-        "No se pudo actualizar la mascota. Intente nuevamente."
-      );
-    }
-  };
-
   // Cancelar edición y volver a la lista de mascotas
   const handleCancel = () => {
     setSelectedPet(null);
   };
 
+  const goToEditPetScreen = (pet: any) => {
+    router.replace({
+      pathname: "/editPetScreen",
+      params: {
+        name: pet.name,
+        petId: pet.id,
+        img: pet.img,
+        weight: pet.weight,
+        height: pet.height,
+      },
+    });
+  };
+
   const renderPets = ({ item }: { item: any }) => {
     return (
-      <View padding-10>
-        <ListItem
-          activeBackgroundColor={Colors.grey70}
-          onPress={() => {}}
-          style={{ borderRadius: 10, backgroundColor: ColorPalette.white }}
-          height={120}
-        >
-          <ListItem.Part left>
-            <AnimatedImage source={{ uri: item.img }} style={styles.petImage} />
-          </ListItem.Part>
-          <ListItem.Part middle column containerStyle={{ paddingRight: 20 }}>
-            <ListItem.Part>
-              <Text bold>{item.name}</Text>
-            </ListItem.Part>
-          </ListItem.Part>
-        </ListItem>
-      </View>
+      <Card flex onPress={() => goToEditPetScreen(item)}>
+        <Card.Section
+          imageSource={{ uri: item.img }}
+          imageStyle={{
+            width: "100%",
+            height: 150,
+            borderRadius: 5,
+          }}
+        />
+        <View padding-10>
+          <Text
+            center
+            style={{
+              fontSize: FontSize.medium,
+              fontFamily: Fonts.PoppinsSemiBold,
+            }}
+          >
+            {item.name}
+          </Text>
+          <Text center>Age: {item.age}</Text>
+        </View>
+      </Card>
     );
   };
 
@@ -226,13 +190,27 @@ const PetListAndEdit = () => {
       ) : (
         <View flex>
           <Text style={styles.sectionTitle}>Your pets</Text>
-          <FlatList
+          <GridList
+            listPadding={30}
             data={pets}
+            numColumns={2}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderPets}
           />
+
+          <Link asChild href={"/petRegister"}>
+            <Button
+              round
+              size="large"
+              padding-15
+              backgroundColor={ColorPalette.bluePalette}
+              enableShadow
+              style={{ position: "absolute", bottom: 30, right: 30 }}
+            >
+              <Ionicons name="add" size={30} color="white" />
+            </Button>
+          </Link>
         </View>
-        // Lista de mascotas con FlatList
       )}
     </SafeAreaView>
   );
