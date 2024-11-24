@@ -1,18 +1,34 @@
 import React from "react";
-import { StyleSheet, SafeAreaView, StatusBar } from "react-native";
+import { StyleSheet, SafeAreaView, StatusBar, Linking } from "react-native";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
-import { View, Text, TouchableOpacity, Card, Image } from "react-native-ui-lib";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Card,
+  Image,
+  Colors,
+} from "react-native-ui-lib";
 import { Fonts } from "@/constants/Fonts";
 import CardSignUp from "@/components/shared/CardSignUp";
 
 const SignUp = () => {
+  const openURL = (url: string) => {
+    Linking.openURL(url).catch((err) =>
+      console.error("Couldn't load URL:", err)
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle={"dark-content"} backgroundColor={ColorPalette.white} />
+      <StatusBar
+        barStyle={"dark-content"}
+        backgroundColor={ColorPalette.white}
+      />
 
-      <View style={{ position: "absolute", left: 20, top: 50, }}>
+      <View style={{ position: "absolute", left: 20, top: 50 }}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.navigate("/login")}
@@ -40,6 +56,28 @@ const SignUp = () => {
             onPress={() => router.push("/vetRegister")}
           />
         </View>
+      </View>
+      <View padding-20>
+        <Text center color={Colors.grey30}>
+          By signing up, you agree to our{" "}
+          <Text
+            color={ColorPalette.bluePalette}
+            onPress={() =>
+              openURL("https://generator.lorem-ipsum.info/terms-and-conditions")
+            }
+          >
+            Terms of Service
+          </Text>{" "}
+          and{" "}
+          <Text
+            color={ColorPalette.bluePalette}
+            onPress={() =>
+              openURL("https://generator.lorem-ipsum.info/terms-and-conditions")
+            }
+          >
+            Privacy Policy
+          </Text>
+        </Text>
       </View>
     </SafeAreaView>
   );
