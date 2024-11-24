@@ -4,13 +4,26 @@ import { ColorPalette } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import LottieView from "lottie-react-native";
 import { useState } from "react";
-import { Alert, StyleSheet, ToastAndroid } from "react-native";
-import { View, Text, Incubator, TextField } from "react-native-ui-lib";
+import { Alert, Modal, StyleSheet, ToastAndroid } from "react-native";
+import {
+  View,
+  Text,
+  Incubator,
+  TextField,
+  Button,
+  Colors,
+  FloatingButton,
+  ActionSheet,
+  Image,
+} from "react-native-ui-lib";
 import * as ImagePicker from "expo-image-picker";
 import { useLoginStore } from "@/stores/login.store";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import SimpleTextField from "@/components/wizard/SimpleTextField";
+import { Ionicons } from "@expo/vector-icons";
+import FontSize from "@/constants/FontSize";
+import LoadingCat from "@/components/shared/LoadingCat";
 
 const editPetScreen = () => {
   const params = useLocalSearchParams();
@@ -24,6 +37,7 @@ const editPetScreen = () => {
   const [isSavingChanges, setIsSavingChanges] = useState(false);
   const { dataLogin } = useLoginStore((state) => state);
   const { user, token } = dataLogin || {};
+  const [isRipModalVisible, setIsRipModalVisible] = useState(false);
   const navigation = useNavigation();
 
   // Manejo de cambios en el formulario
@@ -95,7 +109,7 @@ const editPetScreen = () => {
         },
       });
 
-      router.replace("/petlist")
+      router.replace("/petlist");
       showToastWithGravity();
     } catch (error) {
       setIsSavingChanges(false);
@@ -108,67 +122,122 @@ const editPetScreen = () => {
         "No se pudo actualizar la mascota. Intente nuevamente."
       );
     } finally {
-        setIsSavingChanges(false);
+      setIsSavingChanges(false);
     }
   };
 
-  return (
-    <EditProfileLayout
-      disabledWhen={!isFormValid()}
-      handleSubmit={handleSubmit}
-    >
-      <EditableAvatar img={formData.img} onPress={handleImagePick} />
+  if (isSavingChanges) return <LoadingCat />;
 
-      <Text style={styles.profileName}>{formData.name}</Text>
-
-      <View style={styles.formContainer}>
-        <Text bold>Pet Name</Text>
-        <SimpleTextField
-          label="Name"
-          value={formData.name}
-          onChangeText={(value) => handleChange("name", value)}
-        />
-
-        <Text bold>Weight</Text>
-        <SimpleTextField
-          label="Weight"
-          value={formData.weight}
-          onChangeText={(value) => handleChange("weight", value)}
-        />
-
-        <Text bold>Height</Text>
-        <SimpleTextField
-          label="Height"
-          value={formData.height}
-          onChangeText={(value) => handleChange("height", value)}
-        />
-      </View>
-      <Incubator.Dialog
-        useSafeArea
+  if (isRipModalVisible) {
+    return (
+      <View
+        flex
         center
-        visible={isSavingChanges}
-        ignoreBackgroundPress
-        containerStyle={{
-          borderRadius: 8,
-          backgroundColor: ColorPalette.background,
+        style={{
+          backgroundColor: ColorPalette.white,
+          borderRadius: 20,
           padding: 30,
         }}
       >
-        <View center>
-          <LottieView
-            source={require("@/assets/lottie/LoadingCat.json")}
-            autoPlay
-            loop
+        <View width={300} height={300} center>
+          <Image
+            source={require("@/assets/images/pawDust.webp")}
+            width={"100%"}
+            height={"100%"}
+            resizeMode={"contain"}
+          />
+        </View>
+        <View marginB-5 center width={"100%"}>
+          <Text
             style={{
-              width: 100,
-              height: 100,
-              margin: 10,
+              fontSize: FontSize.large,
+              fontFamily: Fonts.PoppinsBold,
+              marginBottom: 10,
+              textAlign: "center",
+            }}
+          >
+            Are you sure you want to mark this pet as passed away?
+          </Text>
+        </View>
+        <View marginB-20 width={"100%"}>
+          <Text
+            style={{
+              fontSize: FontSize.medium,
+              fontFamily: Fonts.PoppinsRegular,
+              marginBottom: 10,
+              textAlign: "center",
+            }}
+          >
+            You can't undo this action.
+          </Text>
+        </View>
+        <View row style={{ width: "100%", justifyContent: "space-evenly" }}>
+          <Button
+            label="Close"
+            labelStyle={{ fontFamily: Fonts.PoppinsMedium }}
+            backgroundColor={ColorPalette.bluePalette}
+            onPress={() => setIsRipModalVisible(false)}
+          />
+          <Button
+            label="It's no longer with us"
+            color={Colors.grey40}
+            labelStyle={{ fontFamily: Fonts.PoppinsMedium }}
+            backgroundColor={"transparent"}
+            onPress={() => {
+              setIsRipModalVisible(false);
             }}
           />
-          <Text center>Guardando...</Text>
         </View>
-      </Incubator.Dialog>
-    </EditProfileLayout>
+      </View>
+    );
+  }
+
+  return (
+    <View flex backgroundColor="white">
+      <EditProfileLayout
+        disabledWhen={!isFormValid()}
+        handleSubmit={handleSubmit}
+      >
+        <EditableAvatar img={formData.img} onPress={handleImagePick} />
+
+        <Text style={styles.profileName}>{formData.name}</Text>
+
+        <View style={styles.formContainer}>
+          <Text bold>Pet Name</Text>
+          <SimpleTextField
+            label="Name"
+            value={formData.name}
+            onChangeText={(value) => handleChange("name", value)}
+          />
+
+          <Text bold>Weight (kg)</Text>
+          <SimpleTextField
+            label="Weight"
+            value={formData.weight}
+            onChangeText={(value) => handleChange("weight", value)}
+            keyboardType="number-pad"
+          />
+
+          <Text bold>Height (cm)</Text>
+          <SimpleTextField
+            label="Height"
+            value={formData.height}
+            keyboardType="number-pad"
+            onChangeText={(value) => handleChange("height", value)}
+          />
+        </View>
+      </EditProfileLayout>
+      <Button
+        label={"Mark as passed away"}
+        backgroundColor={Colors.white}
+        color={Colors.grey30}
+        labelStyle={{ fontFamily: Fonts.PoppinsLight, marginHorizontal: 10 }}
+        style={{ alignSelf: "center", bottom: 30, elevation: 1 }}
+        onPress={() => setIsRipModalVisible(true)}
+      >
+        <Ionicons name="flower-outline" size={24} color={Colors.grey30} />
+      </Button>
+    </View>
   );
 };
 

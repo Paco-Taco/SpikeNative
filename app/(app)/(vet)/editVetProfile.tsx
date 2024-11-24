@@ -33,7 +33,7 @@ const VetProfile = () => {
   const [loading, setLoading] = useState(true);
   const userId = user?.id;
 
-  const [isEditing, setIsEditing] = useState(true);
+  const [isSavingChanges, setIsSavingChanges] = useState(false)
   const [formData, setFormData] = useState({
     veterinarieName: "",
     email: "",
@@ -186,6 +186,7 @@ const VetProfile = () => {
     });
 
     try {
+      setIsSavingChanges(true);
       const response = await VeterinaryService.updateVeterinary(
         userId,
         data,
@@ -203,6 +204,8 @@ const VetProfile = () => {
         "Error",
         `${error}`
       );
+    } finally {
+      setIsSavingChanges(false);
     }
   };
   const handleCancel = () => {
@@ -224,6 +227,10 @@ const VetProfile = () => {
   };
 
   if (loading) {
+    return <LoadingCat />;
+  }
+
+  if (isSavingChanges) {
     return <LoadingCat />;
   }
 
@@ -306,10 +313,6 @@ const VetProfile = () => {
           dateTimeFormatter={(date) => formatTime(date)}
         />
       </View>
-      {/* <View row spread marginT-16>
-        <Button label="Cancelar" onPress={handleCancel} />
-        <Button label="Guardar" onPress={handleSubmit} />
-      </View> */}
     </EditProfileLayout>
   );
 };
