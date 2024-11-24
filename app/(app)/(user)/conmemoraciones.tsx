@@ -149,7 +149,7 @@ const Conmemoraciones = () => {
           color={Colors.grey30}
           marginB-20
         >
-          This space is dedicated to remembering our beloved pets who are no
+          This space is focused on remembering our beloved pets who are no
           longer with us.
         </Text>
         <Text
