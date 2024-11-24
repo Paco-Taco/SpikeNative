@@ -15,34 +15,6 @@ import { router } from "expo-router";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoginStore } from "@/stores/login.store";
 
-const SearchBar = () => {
-  const { searchQuery, setSearchQuery } = useSearch(); // Usa el contexto
-
-  return (
-    <View style={styles.searchContainer}>
-      <View style={styles.searchSection}>
-        <View style={styles.searchField}>
-          <Ionicons
-            style={styles.searchIcon}
-            name="search-outline"
-            size={20}
-            color={ColorPalette.medium}
-          />
-          <TextField
-            placeholder="Look for appointments..."
-            padding-10
-            style={styles.input}
-            placeholderTextColor={ColorPalette.medium}
-            cursorColor={ColorPalette.bluePalette}
-            value={searchQuery} // Enlaza el valor con el contexto
-            onChangeText={setSearchQuery} // Actualiza el valor en el contexto
-          />
-        </View>
-      </View>
-    </View>
-  );
-};
-
 const CustomVetHeader = () => {
   const { onLogout } = useAuth();
   const { dataLogin } = useLoginStore((state) => state);
@@ -52,8 +24,8 @@ const CustomVetHeader = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
-        barStyle={"dark-content"}
-        backgroundColor={ColorPalette.white}
+        barStyle={"dark-content"} // Texto oscuro para barra de estado
+        backgroundColor={"#FFFFFF"} // Fondo blanco
       />
       <View style={styles.container}>
         <TouchableOpacity onPress={onLogout}>
@@ -80,8 +52,6 @@ const CustomVetHeader = () => {
           <Image style={styles.profileButton} source={{ uri: userImg }} />
         </TouchableOpacity>
       </View>
-
-      {/* <SearchBar /> */}
     </SafeAreaView>
   );
 };
@@ -89,6 +59,7 @@ const CustomVetHeader = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: "#FFFFFF", // Fondo blanco del SafeAreaView
   },
   container: {
     height: 100,
@@ -124,37 +95,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-  },
-  searchContainer: {
-    height: 60,
-    backgroundColor: ColorPalette.background,
-  },
-  searchSection: {
-    flexDirection: "row",
-    gap: 10,
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 10 /* propio */,
-    alignItems: "center",
-  },
-  searchField: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    backgroundColor: ColorPalette.background,
-    borderWidth: 1,
-    borderColor: ColorPalette.medium,
-    borderRadius: 8,
-  },
-  input: {
-    color: ColorPalette.mediumDark,
-  },
-  searchIcon: {
-    paddingLeft: 10,
-  },
-  optionButton: {
-    padding: 10,
-    borderRadius: 50,
   },
 });
 

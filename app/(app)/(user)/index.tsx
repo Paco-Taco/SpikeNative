@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Button, SegmentedControl, Text } from "react-native-ui-lib";
 import { FlatList, Platform, TextInput } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons"; // Usando los íconos incluidos con Expo
+import { MaterialIcons } from "@expo/vector-icons";
 import { ColorPalette } from "@/constants/Colors";
 import { useUserStore } from "@/stores/user.store";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
@@ -15,6 +15,8 @@ import LoadingCat from "@/components/shared/LoadingCat";
 import { RefreshControl } from "react-native-gesture-handler";
 import NewPetModal from "@/components/user/NewPetModal";
 import { Fonts } from "@/constants/Fonts";
+import { ScrollView } from "react-native";
+
 
 const Index = () => {
   const { getVets } = useUserStore((state) => state);
@@ -26,23 +28,8 @@ const Index = () => {
   const [veterinaryClinics, setVeterinaryClinics] = useState<Veterinary[]>([]);
   const [pets, setPets] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [postalCodeFilter, setPostalCodeFilter] = useState(""); // Estado para el código postal
+  const [postalCodeFilter, setPostalCodeFilter] = useState(dataLogin?.user.cp);
   const { searchQuery } = useSearch();
-
-  const renderItem = ({ item }: { item: Veterinary }) => {
-    return (
-      <CardVeterinary
-        item={item}
-        onPress={() => {
-          if (pets.length > 0) {
-            router.push(`/appointmentBooking/${item.id}`);
-          } else {
-            setShowModal(true);
-          }
-        }}
-      />
-    );
-  };
 
   const fetchVets = async () => {
     try {
@@ -67,9 +54,7 @@ const Index = () => {
 
     const fetchPets = async () => {
       try {
-        const response = await axiosInstanceSpikeCore.get(
-          `/getpets/${idOwner}`
-        );
+        const response = await axiosInstanceSpikeCore.get(`/getpets/${idOwner}`);
         const petsData = response.data || [];
         setPets(petsData);
 
@@ -87,18 +72,38 @@ const Index = () => {
 
   const categories = ["all", "NUTRITION", "RECREATION", "CARE"];
 
-  const filteredVeterinaryClinics = veterinaryClinics
+  const clinicsMatchingPostalCode = veterinaryClinics
+    .filter((clinic) => clinic.cp === postalCodeFilter)
     .filter(
       (clinic) =>
         selectedCategory === "all" || clinic.category.includes(selectedCategory)
     )
     .filter((clinic) =>
       clinic.veterinarieName.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    );
+
+  const clinicsNotMatchingPostalCode = veterinaryClinics
+    .filter((clinic) => clinic.cp !== postalCodeFilter)
     .filter(
       (clinic) =>
-        postalCodeFilter === "" || clinic.cp === postalCodeFilter
+        selectedCategory === "all" || clinic.category.includes(selectedCategory)
+    )
+    .filter((clinic) =>
+      clinic.veterinarieName.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+  const renderItem = ({ item }: { item: Veterinary }) => (
+    <CardVeterinary
+      item={item}
+      onPress={() => {
+        if (pets.length > 0) {
+          router.push(`/appointmentBooking/${item.id}`);
+        } else {
+          setShowModal(true);
+        }
+      }}
+    />
+  );
 
   return (
     <SafeAreaView
@@ -108,7 +113,7 @@ const Index = () => {
         paddingTop: Platform.OS === "android" ? 140 : 60,
       }}
     >
-    <NewPetModal
+      <NewPetModal
         isVisible={showModal}
         onDismiss={() => setShowModal(false)}
         onOk={() => {
@@ -143,20 +148,20 @@ const Index = () => {
 
       <View row paddingH-20 marginB-20 centerV>
         <TextInput
-             style={{
-              flex: 1,
-              backgroundColor: "#f8f9fb", 
-              borderRadius: 8,
-              padding: 10,
-              marginRight: 10,
-              borderWidth: 1,
-              borderColor: "#e0e0e0", 
-              shadowColor: "#000", 
-              shadowOffset: { width: 0, height: 2 }, 
-              shadowOpacity: 0.1, 
-              shadowRadius: 4, 
-              elevation: 2, 
-            }}
+          style={{
+            flex: 1,
+            backgroundColor: "#f8f9fb",
+            borderRadius: 8,
+            padding: 10,
+            marginRight: 10,
+            borderWidth: 1,
+            borderColor: "#e0e0e0",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
           placeholder="Buscar por CP"
           value={postalCodeFilter}
           keyboardType="numeric"
@@ -166,38 +171,64 @@ const Index = () => {
           iconSource={() => (
             <MaterialIcons name="clear" size={18} color="white" />
           )}
-          size={Button.sizes.small} 
+          size={Button.sizes.small}
           backgroundColor={ColorPalette.darkGrayPalette}
-          onPress={() => setPostalCodeFilter("")} 
+          onPress={() => setPostalCodeFilter("")}
         />
       </View>
 
       {loadingVets ? (
         <LoadingCat />
       ) : (
-        <View paddingH-20 flex>
-          <FlatList
-            data={filteredVeterinaryClinics}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <Text
-                style={{
-                  textAlign: "center",
-                  fontFamily: Fonts.PoppinsRegular,
-                  color: ColorPalette.medium,
-                }}
-              >
-                No clinics found
-              </Text>
-            }
-            refreshControl={
-              <RefreshControl refreshing={loadingVets} onRefresh={onRefresh} />
-            }
-          />
-        </View>
+        <ScrollView style={{ flex: 1 }}>
+          <View paddingH-20>
+            <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 10 }}>
+              Clínicas que coinciden con el código postal:
+            </Text>
+            <FlatList
+              data={clinicsMatchingPostalCode}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontFamily: Fonts.PoppinsRegular,
+                    color: ColorPalette.medium,
+                  }}
+                >
+                  No clinics found for this postal code
+                </Text>
+              }
+            />
+          </View>
+
+          <View paddingH-20 marginT-20>
+            <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 10 }}>
+              Clinicas Cercanas:
+            </Text>
+            <FlatList
+              data={clinicsNotMatchingPostalCode}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontFamily: Fonts.PoppinsRegular,
+                    color: ColorPalette.medium,
+                  }}
+                >
+                  No other clinics available
+                </Text>
+              }
+            />
+          </View>
+        </ScrollView>
       )}
     </SafeAreaView>
   );
