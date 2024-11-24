@@ -11,6 +11,8 @@ import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { useLoginStore } from "@/stores/login.store";
 import LoadingCat from "@/components/shared/LoadingCat";
 import AbsoluteBackArrow from "@/components/shared/AbsoluteBackArrow";
+import { Fonts } from "@/constants/Fonts";
+import FontSize from "@/constants/FontSize";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -115,7 +117,7 @@ const Conmemoraciones = () => {
     return (
       <SafeAreaView
         style={{
-          padding: 16,
+          padding: 26,
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
@@ -133,16 +135,30 @@ const Conmemoraciones = () => {
             borderRadius: 75,
           }}
         />
-        <Text center text50 color={Colors.black} marginB-10 bold>
-          Conmemoraciones
+        <Text
+          center
+          color={Colors.black}
+          marginB-10
+          style={{ fontSize: FontSize.xLarge, fontFamily: Fonts.PoppinsBold }}
+        >
+          Memorials
         </Text>
-        <Text center text70 color={Colors.grey30} marginB-20>
-          Este espacio está dedicado a recordar a nuestras queridas mascotas que
-          ya no están con nosotros.
+        <Text
+          center
+          style={{ fontSize: FontSize.medium, fontFamily: Fonts.PoppinsMedium }}
+          color={Colors.grey30}
+          marginB-20
+        >
+          This space is dedicated to remembering our beloved pets who are no
+          longer with us.
         </Text>
-        <Text center text80 color={Colors.grey40}>
-          Aquí puedes rendirles homenaje y recordar los momentos especiales que
-          viviste junto a ellas.
+        <Text
+          center
+          style={{ fontSize: FontSize.small, fontFamily: Fonts.PoppinsMedium }}
+          color={Colors.grey40}
+        >
+          Here, you can pay tribute and remember the special moments you shared
+          with them.
         </Text>
       </SafeAreaView>
     );
@@ -151,82 +167,66 @@ const Conmemoraciones = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <AbsoluteBackArrow color={Colors.grey30} />
-      {/* Contenedor principal */}
-      <View style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <Text center text50 color={Colors.black} marginB-20 marginT-30 bold>
-            Conmemoraciones
-          </Text>
-          <Text center text70 color={Colors.grey30} marginB-30 italic>
-            "Aunque sus patas ya no corran en la tierra, sus huellas quedarán para
-            siempre en nuestros corazones."
-          </Text>
-          {deathPets.map((pet) => (
-            <TouchableWithoutFeedback key={pet.id} onPress={addHeart}>
-              <Animated.View
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <Text center text50 color={Colors.black} marginB-20 marginT-30 bold>
+          Memorials
+        </Text>
+        <Text center text70 color={Colors.grey30} marginB-30 italic>
+          "Even though their paws no longer run on the ground, their footprints
+          will remain forever in our hearts."
+        </Text>
+        {deathPets.map((pet) => (
+          <TouchableWithoutFeedback key={pet.id} onPress={addHeart}>
+            <Animated.View
+              style={{
+                opacity: fadeAnim,
+                transform: [
+                  {
+                    translateY: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20, 0],
+                    }),
+                  },
+                ],
+                marginBottom: 16,
+              }}
+            >
+              <View
                 style={{
-                  opacity: fadeAnim,
-                  transform: [
-                    {
-                      translateY: fadeAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [20, 0],
-                      }),
-                    },
-                  ],
-                  marginBottom: 16,
+                  backgroundColor: Colors.white,
+                  borderRadius: 16,
+                  padding: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 4,
+                  elevation: 4,
+                  alignItems: "center",
                 }}
               >
-                <View
+                <Image
+                  source={{ uri: pet.img }}
                   style={{
-                    backgroundColor: Colors.white,
-                    borderRadius: 16,
-                    padding: 16,
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.2,
-                    shadowRadius: 4,
-                    elevation: 4,
-                    alignItems: "center",
+                    width: 120,
+                    height: 120,
+                    borderRadius: 60, // Round
+                    marginBottom: 12,
                   }}
-                >
-                  <Image
-                    source={{ uri: pet.img }}
-                    style={{
-                      width: 120,
-                      height: 120,
-                      borderRadius: 60, // Redonda
-                      marginBottom: 12,
-                    }}
-                  />
-                  <Text text60 color={Colors.blue50} center bold>
-                    ❤️ {pet.name} ❤️
-                  </Text>
-                  <Text text80 color={Colors.grey40} center marginT-4>
-                    🕊️{pet.dateOfDeath}🕊️
-                  </Text>
-                </View>
-              </Animated.View>
-            </TouchableWithoutFeedback>
-          ))}
-        </ScrollView>
-        {/* Renderizar corazones animados en toda la pantalla */}
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            pointerEvents: "none", // Permitir que otros elementos sean interactivos
-          }}
-        >
-          {renderHearts()}
-        </View>
-      </View>
+                />
+                <Text text60 color={Colors.blue50} center bold>
+                  ❤️ {pet.name} ❤️
+                </Text>
+                <Text text80 color={Colors.grey40} center marginT-4>
+                  {pet.dateOfDeath}
+                </Text>
+              </View>
+            </Animated.View>
+          </TouchableWithoutFeedback>
+        ))}
+        {renderHearts()}
+      </ScrollView>
     </SafeAreaView>
   );
   
 };
-
 export default Conmemoraciones;

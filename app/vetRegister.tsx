@@ -157,12 +157,8 @@ const VetRegister = () => {
       console.log(response);
       router.replace("/(app)/(shared)/vetSuccessScreen");
     } catch (error) {
-      if (isAxiosError(error)) {
-        console.log(error.response?.data);
-      } else {
-        console.log(error);
-      }
-      setDialogMessage("Please, verify all fields are correct");
+      console.error("Error creating veterinary:", error);
+      setDialogMessage(`${error}`);
       setIsDialogVisible(true);
     } finally {
       setTimeout(() => {
@@ -465,7 +461,7 @@ const VetRegister = () => {
           {activeIndex == 0 && (
             <TouchableOpacity
               style={styles.cancelButton}
-              onPress={() => router.navigate("/signUp")}
+              onPress={() => router.back()}
             >
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
@@ -473,6 +469,7 @@ const VetRegister = () => {
           {activeIndex > 0 && (
             <Button
               label="Back"
+              labelStyle={{fontFamily: Fonts.PoppinsMedium}}
               onPress={goToPrevStep}
               backgroundColor="transparent"
               color={ColorPalette.medium}
@@ -482,6 +479,7 @@ const VetRegister = () => {
           {activeIndex < 2 ? (
             <Button
               label="Next"
+              labelStyle={{fontFamily: Fonts.PoppinsMedium}}
               onPress={goToNextStep}
               style={styles.nextButton}
               backgroundColor={ColorPalette.bluePalette}
@@ -493,6 +491,7 @@ const VetRegister = () => {
           ) : (
             <Button
               label="Done"
+              labelStyle={{fontFamily: Fonts.PoppinsMedium}}
               onPress={handleSubmit}
               backgroundColor={ColorPalette.bluePalette}
               style={styles.nextButton}

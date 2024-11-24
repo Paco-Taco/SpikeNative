@@ -121,12 +121,7 @@ const UserRegister = () => {
 
       router.replace("/(app)/(shared)/userSuccessScreen");
     } catch (error) {
-      if (isAxiosError(error)) {
-        console.log(error.response?.data);
-      } else {
-        console.log(error);
-      }
-      setDialogMessage("Please, verify all fields are correct");
+      setDialogMessage(`${error}`);
       setIsDialogVisible(true);
     } finally {
       setTimeout(() => {
@@ -346,7 +341,7 @@ const UserRegister = () => {
           {activeIndex == 0 && (
             <TouchableOpacity
               style={styles.cancelButton}
-              onPress={() => router.navigate("/signUp")}
+              onPress={() => router.back()}
             >
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
@@ -355,6 +350,7 @@ const UserRegister = () => {
             <Button
               label="Back"
               onPress={goToPrevStep}
+              labelStyle={{fontFamily: Fonts.PoppinsMedium}}
               backgroundColor="transparent"
               color={ColorPalette.medium}
               style={styles.backButton}
@@ -363,6 +359,7 @@ const UserRegister = () => {
           {activeIndex < 2 ? (
             <Button
               label="Next"
+              labelStyle={{fontFamily: Fonts.PoppinsMedium}}
               onPress={goToNextStep}
               style={styles.nextButton}
               backgroundColor={ColorPalette.bluePalette}
@@ -374,6 +371,7 @@ const UserRegister = () => {
           ) : (
             <Button
               label="Done"
+              labelStyle={{fontFamily: Fonts.PoppinsMedium}}
               onPress={handleSubmit}
               backgroundColor={ColorPalette.bluePalette}
               style={styles.nextButton}

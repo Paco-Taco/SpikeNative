@@ -359,7 +359,7 @@ const AppointmentBooking = () => {
               >
                 {isSelectedDateValid
                   ? selectedDate.toDateString()
-                  : "Selecciona una fecha"}
+                  : "Select a date"}
               </Text>
             </DateTimePicker>
           </SectionContainer>
@@ -371,7 +371,7 @@ const AppointmentBooking = () => {
                 fontSize: FontSize.large,
               }}
             >
-              Selecciona una hora:
+              Booking Hour:
             </Text>
             <ScrollView
               horizontal
@@ -414,7 +414,7 @@ const AppointmentBooking = () => {
 
           <Button
             marginT-30
-            label="Agendar cita"
+            label="Book appointment"
             onPress={handleBookAppointment}
             backgroundColor={Colors.green20}
             labelStyle={{

@@ -33,7 +33,7 @@ const VetProfile = () => {
     >
       {/* Historial de citas */}
       <OptionButton
-        text="Historial de citas"
+        text="Appointment History"
         icon={
           <Ionicons
             name="calendar-outline"
