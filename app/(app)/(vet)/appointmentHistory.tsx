@@ -67,6 +67,7 @@ const AppointmentHistory = () => {
         hour: cita.hour.hour,
         day: cita.hour.day,
         status: status,
+        isDone: cita.done,
         genderText,
         heightText,
         animalText,
@@ -99,32 +100,6 @@ const AppointmentHistory = () => {
   const renderCita = ({ item }: { item: any }) => {
     const statusColor = item.done ? "green" : "red";
     return (
-      // <View style={styles.citaContainer}>
-      //   <Text style={styles.boldText}>Mascota: {item.pet.name}</Text>
-      //   <Text>Fecha: {new Date(item.date).toLocaleDateString()}</Text>
-      //   <Text>
-      //     Hora: {item.hour.hour} - Día: {item.hour.day}
-      //   </Text>
-      //   <Text>Estado: {item.done ? "Completada" : "Pendiente"}</Text>
-
-      //   {/* Imagen de la mascota */}
-      //   <Image source={{ uri: item.pet.img }} style={styles.petImage} />
-
-      //   <Button label="Ver detalles" onPress={() => visualizarCita(item)} />
-
-      //   {/* Botón para marcar como completada */}
-      //   {!item.done && (
-      //     <Button
-      //       label="Marcar como Completada"
-      //       onPress={() => completarCita(item.id)}
-      //     />
-      //   )}
-
-      //   {/* Mostrar botón de Cancelar solo si la cita está pendiente */}
-      //   {!item.done && (
-      //     <Button label="Cancelar Cita" onPress={() => cancelarCita(item.id)} />
-      //   )}
-      // </View>
       <View padding-10>
         <ListItem
           activeBackgroundColor={Colors.grey70}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Button, SegmentedControl } from "react-native-ui-lib";
+import { View, Button, SegmentedControl, Text } from "react-native-ui-lib";
 import { FlatList, Platform, TextInput } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons"; // Usando los íconos incluidos con Expo
 import { ColorPalette } from "@/constants/Colors";
@@ -12,7 +12,9 @@ import { Veterinary } from "@/types/userTypes.types";
 import CardVeterinary from "@/components/CardVeterinary";
 import { useSearch } from "@/app/context/SearchContext";
 import LoadingCat from "@/components/shared/LoadingCat";
+import { RefreshControl } from "react-native-gesture-handler";
 import NewPetModal from "@/components/user/NewPetModal";
+import { Fonts } from "@/constants/Fonts";
 import { Text } from "react-native-ui-lib";
 import { Fonts } from "@/constants/Fonts";
 
@@ -45,22 +47,26 @@ const Index = () => {
     );
   };
 
+  const fetchVets = async () => {
+    try {
+      setLoadingVets(true);
+      const result = await getVets();
+      setVeterinaryClinics(result ? result.veterinaries : []);
+    } catch (error) {
+      console.error("Error al obtener veterinarias:", error);
+    } finally {
+      setLoadingVets(false);
+    }
+  };
+
+  const onRefresh = () => {
+    fetchVets();
+  };
+
   useEffect(() => {
     if (!idOwner) {
       return;
     }
-
-    const fetchVets = async () => {
-      try {
-        setLoadingVets(true);
-        const result = await getVets();
-        setVeterinaryClinics(result ? result.veterinaries : []);
-      } catch (error) {
-        console.error("Error al obtener veterinarias:", error);
-      } finally {
-        setLoadingVets(false);
-      }
-    };
 
     const fetchPets = async () => {
       try {
@@ -189,6 +195,9 @@ const Index = () => {
               >
                 No clinics found
               </Text>
+            }
+            refreshControl={
+              <RefreshControl refreshing={loadingVets} onRefresh={onRefresh} />
             }
           />
         </View>

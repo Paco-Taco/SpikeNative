@@ -1,8 +1,8 @@
-import { ColorPalette } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { StyleSheet } from "react-native";
-import { View, Text, TouchableOpacity } from "react-native-ui-lib";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TouchableOpacity } from "react-native-ui-lib";
 
 const AbsoluteBackArrow = ({
   color,
@@ -12,9 +12,11 @@ const AbsoluteBackArrow = ({
   background?: boolean;
 }) => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets(); // Obtiene los márgenes seguros
+
   return (
     <TouchableOpacity
-      style={styles.backButton}
+      style={[styles.backButton, { top: insets.top + 50 }]} // Ajusta según el área segura
       onPress={() => navigation.goBack()}
       backgroundColor={background ? 'rgba(0, 0, 0, 0.4)' : "transparent"}
     >
@@ -26,7 +28,6 @@ const AbsoluteBackArrow = ({
 const styles = StyleSheet.create({
   backButton: {
     position: "absolute",
-    top: 50,
     left: 20,
     padding: 10,
     borderRadius: 20,

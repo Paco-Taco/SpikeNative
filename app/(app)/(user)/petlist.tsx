@@ -13,6 +13,8 @@ import {
   Image,
   Colors,
   Button,
+  ListItem,
+  AnimatedImage,
 } from "react-native-ui-lib";
 import AbsoluteBackArrow from "@/components/shared/AbsoluteBackArrow";
 import { Fonts } from "@/constants/Fonts";
@@ -145,6 +147,28 @@ const PetListAndEdit = () => {
     setSelectedPet(null);
   };
 
+  const renderPets = ({ item }: { item: any }) => {
+    return (
+      <View padding-10>
+        <ListItem
+          activeBackgroundColor={Colors.grey70}
+          onPress={() => {}}
+          style={{ borderRadius: 10, backgroundColor: ColorPalette.white }}
+          height={120}
+        >
+          <ListItem.Part left>
+            <AnimatedImage source={{ uri: item.img }} style={styles.petImage} />
+          </ListItem.Part>
+          <ListItem.Part middle column containerStyle={{ paddingRight: 20 }}>
+            <ListItem.Part>
+              <Text bold>{item.name}</Text>
+            </ListItem.Part>
+          </ListItem.Part>
+        </ListItem>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <AbsoluteBackArrow color={Colors.grey30} />
@@ -200,35 +224,15 @@ const PetListAndEdit = () => {
           </View>
         </View>
       ) : (
+        <View flex>
+          <Text style={styles.sectionTitle}>Your pets</Text>
+          <FlatList
+            data={pets}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderPets}
+          />
+        </View>
         // Lista de mascotas con FlatList
-        <FlatList
-          data={pets}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.petItem}
-              onPress={() => {
-                setSelectedPet(item);
-                setFormData({
-                  name: item.name,
-                  weight: String(item.weight),
-                  height: item.height,
-                  img: item.img || "",
-                });
-              }}
-            >
-              <Image
-                source={
-                  item.img
-                    ? { uri: item.img }
-                    : require("@/assets/images/catbox.png")
-                }
-                style={styles.petImage}
-              />
-              <Text style={styles.petName}>{item.name}</Text>
-            </TouchableOpacity>
-          )}
-        />
       )}
     </SafeAreaView>
   );
@@ -236,6 +240,13 @@ const PetListAndEdit = () => {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
+  sectionTitle: {
+    fontSize: 28,
+    paddingHorizontal: 20,
+    fontFamily: Fonts.PoppinsBold,
+    textAlign: "center",
+    marginVertical: 50,
+  },
   container: { padding: 20, alignItems: "center" },
   profileImage: { width: 120, height: 120, borderRadius: 60, marginBottom: 20 },
   input: {
@@ -261,7 +272,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#ccc",
   },
-  petImage: { width: 50, height: 50, borderRadius: 25, marginRight: 10 },
+  petImage: {
+    marginHorizontal: 10,
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
   petName: { fontSize: 18 },
 });
 

@@ -1,15 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl, Button, Alert } from 'react-native';
-import { axiosInstanceSpikeCore } from '@/controllers/SpikeApiCore';
+import React, { useEffect, useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  RefreshControl,
+  Button,
+  Alert,
+} from "react-native";
+import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { useLoginStore } from "@/stores/login.store";
 import { useRouter } from "expo-router";
-
+import {
+  Colors,
+  View,
+  Text,
+  ListItem,
+  AnimatedImage,
+} from "react-native-ui-lib";
+import { Fonts } from "@/constants/Fonts";
+import LottieView from "lottie-react-native";
+import { ColorPalette } from "@/constants/Colors";
+import AbsoluteBackArrow from "@/components/shared/AbsoluteBackArrow";
 
 const UserAppointments = () => {
   const { dataLogin } = useLoginStore((state) => state);
   const { user } = dataLogin || {};
   const router = useRouter();
-  const [appointments, setAppointments] = useState({ pendientes: [], completadas: [] });
+  const [appointments, setAppointments] = useState({
+    pendientes: [],
+    completadas: [],
+  });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -18,23 +38,25 @@ const UserAppointments = () => {
     if (!user?.id) return;
 
     try {
-        setLoading(true);
-        const { data } = await axiosInstanceSpikeCore.post('/citasUsuario', { ownerId: user.id });
+      setLoading(true);
+      const { data } = await axiosInstanceSpikeCore.post("/citasUsuario", {
+        ownerId: user.id,
+      });
 
-        if (data?.pendientes && data?.completadas) {
-            setAppointments({
-                pendientes: data.pendientes,
-                completadas: data.completadas
-            });
-        } else {
-            console.error('Unexpected response structure:', data);
-            setAppointments({ pendientes: [], completadas: [] });
-        }
+      if (data?.pendientes && data?.completadas) {
+        setAppointments({
+          pendientes: data.pendientes,
+          completadas: data.completadas,
+        });
+      } else {
+        console.error("Unexpected response structure:", data);
+        setAppointments({ pendientes: [], completadas: [] });
+      }
     } catch (error) {
-        console.error('Error fetching appointments:', error);
+      console.error("Error fetching appointments:", error);
     } finally {
-        setLoading(false);
-        setRefreshing(false);
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -47,110 +69,152 @@ const UserAppointments = () => {
     fetchAppointments();
   };
 
-  const handleCancelAppointment = async (appointmentId) => {
-    try {
-      const response = await axiosInstanceSpikeCore.post('/cancelarcita/usuario', {
-        appointmentId: appointmentId,
-      });
-  
-      Alert.alert("Éxito", "Cita cancelada correctamente", [
-        { text: "OK", onPress: () => fetchAppointments() }
-      ]);
-    } catch (error) {
-      console.error("Error al cancelar cita", error);
-      Alert.alert("Error", error.response?.data?.error || "La cita solo se puede cancelar con al menos 3 días de anticipación");
-    }
-  };
- 
+  // Función para visualizar detalles de la cita
+  const visualizarCita = (cita: any) => {
+    const genderText = cita.pet.gender === "0" ? "Male" : "Female";
+    const heightText = ["Small", "Medium", "Big", "Very big"][
+      parseInt(cita.pet.height) - 1
+    ];
+    const animalText = ["Dog", "Cat", "Rabbit", "Bird", "Reptile", "Other"][
+      parseInt(cita.pet.animal) - 1
+    ];
+    const status = cita.done ? "Completed" : "Pending";
 
-  const renderAppointment = ({ item }) => (
-    <View style={styles.appointmentCard}>
-      <Text style={styles.appointmentText}>Mascota: {item.pet?.name || "Desconocido"}</Text>
-      <Text style={styles.appointmentText}>
-        Fecha: {item.date ? new Date(item.date).toLocaleDateString() : "Sin fecha"}
-      </Text>
-      <Text style={styles.appointmentText}>Hora: {item.hour?.hour || "Sin hora"}</Text>
-      <Text style={styles.appointmentText}>
-        Veterinaria: {item.veterinary?.veterinarieName || "Sin información"}
-      </Text>
-      <View style={styles.buttonsContainer}>
-      <Button 
-        title="Cancelar cita" 
-        onPress={() => handleCancelAppointment(item.id)}
-        color="red"
-      />
+    router.push({
+      pathname: "/appointmentDetails",
+      params: {
+        vetCategory: cita.veterinary.category,
+        appointmentId: cita.id,
+        vetName: cita.veterinary.veterinarieName,
+        vetAddress: `${cita.veterinary.street} ${cita.veterinary.number_int}, ${cita.veterinary.cologne}, ${cita.veterinary.city}`,
+        vetImg: cita.veterinary.img,
+        vetPhone: cita.veterinary.phone,
+        petImg: cita.pet.img,
+        petname: cita.pet.name,
+        age: cita.pet.age,
+        weight: cita.pet.weight,
+        date: new Date(cita.date).toLocaleDateString(),
+        hour: cita.hour.hour,
+        day: cita.hour.day,
+        status: status,
+        genderText,
+        heightText,
+        animalText,
+      },
+    });
+  };
+
+  const renderCita = ({ item }: { item: any }) => {
+    const statusColor = item.done ? "green" : Colors.grey30;
+    return (
+      <View padding-10>
+        <ListItem
+          activeBackgroundColor={Colors.grey70}
+          onPress={() => visualizarCita(item)}
+          style={{ borderRadius: 10, backgroundColor: ColorPalette.white }}
+          height={120}
+        >
+          <ListItem.Part left>
+            <AnimatedImage
+              source={{ uri: item.pet.img }}
+              style={styles.petImage}
+            />
+          </ListItem.Part>
+          <ListItem.Part middle column containerStyle={{ paddingRight: 20 }}>
+            <ListItem.Part>
+              <Text bold>{item.pet.name}</Text>
+            </ListItem.Part>
+            <ListItem.Part>
+              <Text dark10 text80>
+                {new Date(item.date).toLocaleDateString()}
+              </Text>
+            </ListItem.Part>
+            <ListItem.Part>
+              <Text dark10 text80>
+                Hour: {item.hour.hour}
+              </Text>
+            </ListItem.Part>
+            <ListItem.Part>
+              <Text>Day: {item.hour.day}</Text>
+            </ListItem.Part>
+          </ListItem.Part>
+          <ListItem.Part right containerStyle={{ paddingRight: 20 }}>
+            <Text color={statusColor}>
+              {item.done ? "Completed" : "Pending"}
+            </Text>
+          </ListItem.Part>
+        </ListItem>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
-    <View style={styles.container}>
+    <View useSafeArea flex>
+      <AbsoluteBackArrow color={Colors.grey30} />
       {loading ? (
-        <ActivityIndicator size="large" color="#007BFF" />
+        <View flex center>
+          <LottieView
+            source={require("@/assets/lottie/LoadingCat.json")}
+            autoPlay
+            loop
+            style={{ width: 100, height: 100 }}
+          />
+          <Text medium>Cargando...</Text>
+        </View>
       ) : (
-        <FlatList
-          data={appointments.pendientes}
-          renderItem={renderAppointment}
-          keyExtractor={(item) => item.id.toString()}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          ListHeaderComponent={<Text style={styles.header}>Citas Pendientes</Text>}
-          ListFooterComponent={
-            appointments.completadas.length > 0 && (
-              <>
-                <Text style={styles.header}>Citas Completadas</Text>
-                {appointments.completadas.map((cita) => (
-                  <View key={cita.id} style={styles.appointmentCard}>
-                    <Text style={styles.appointmentText}>
-                      Mascota: {cita.pet?.name || "Desconocido"}
-                    </Text>
-                    <Text style={styles.appointmentText}>
-                      Fecha: {cita.date ? new Date(cita.date).toLocaleDateString() : "Sin fecha"}
-                    </Text>
-                    <Text style={styles.appointmentText}>Hora: {cita.hour?.hour || "Sin hora"}</Text>
-                    <Text style={styles.appointmentText}>
-                      Veterinaria: {cita.veterinary?.veterinarieName || "Sin información"}
-                    </Text>
-                  </View>
-                ))}
-              </>
-            )
-          }
-        />
+        <View flex>
+          <Text style={styles.sectionTitle}>Appointments</Text>
+          <FlatList
+            data={appointments.pendientes}
+            renderItem={renderCita}
+            keyExtractor={(item) => item.id.toString()}
+            ListEmptyComponent={<Text>No hay citas completadas.</Text>}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          />
+        </View>
       )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-    padding: 10,
+  labelStyle: {
+    fontSize: 14,
+    color: Colors.grey10,
   },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginVertical: 10,
-  },
-  appointmentCard: {
-    backgroundColor: '#FFF',
-    padding: 15,
-    marginVertical: 5,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  appointmentText: {
+  selectedLabelStyle: {
     fontSize: 16,
+    color: Colors.blue10,
   },
-  buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+  sectionTitle: {
+    fontSize: 28,
+    paddingHorizontal: 20,
+    fontFamily: Fonts.PoppinsBold,
+    textAlign: "center",
+    marginVertical: 50,
+  },
+  petImage: {
+    marginHorizontal: 10,
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  closeButton: {
+    marginTop: 20,
   },
 });
 
