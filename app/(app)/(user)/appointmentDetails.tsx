@@ -74,7 +74,11 @@ const AppointmentDetails = () => {
           onConfirm: () =>
             setAlertProps((prev) => ({ ...prev, visible: false })),
         });
-        console.error("Error canceling appointment:", errorMessage, error.message);
+        console.error(
+          "Error canceling appointment:",
+          errorMessage,
+          error.message
+        );
         throw error;
       }
 
@@ -111,7 +115,9 @@ const AppointmentDetails = () => {
                   fontFamily: Fonts.PoppinsBold,
                   color: ColorPalette.white,
                 }}
-                backgroundColor={isDone ? ColorPalette.green : Colors.grey30}
+                backgroundColor={
+                  status === "Completed" ? ColorPalette.green : Colors.grey30
+                }
                 size={30}
               />
             </View>

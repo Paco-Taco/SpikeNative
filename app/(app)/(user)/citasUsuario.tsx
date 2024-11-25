@@ -97,6 +97,7 @@ const UserAppointments = () => {
         hour: cita.hour.hour,
         day: cita.hour.day,
         status: status,
+        isDone: cita.done,
         genderText,
         heightText,
         animalText,
@@ -165,7 +166,7 @@ const UserAppointments = () => {
         <View flex>
           <Text style={styles.sectionTitle}>Appointments</Text>
           <FlatList
-            data={appointments.pendientes}
+            data={[...appointments.pendientes, ...appointments.completadas]}
             renderItem={renderCita}
             keyExtractor={(item) => item.id.toString()}
             ListEmptyComponent={<Text>No hay citas completadas.</Text>}

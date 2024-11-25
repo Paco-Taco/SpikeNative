@@ -29,6 +29,7 @@ import LoadingCat from "@/components/shared/LoadingCat";
 import LottieView from "lottie-react-native";
 import { Fonts } from "@/constants/Fonts";
 import { isValidEmail } from "@/utils/isValidEmail";
+import ErrorDialog from "@/components/wizard/ErrorDialog";
 
 const Login = () => {
   const { onLogin, authState } = useAuth();
@@ -37,7 +38,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
   // Animación de lottie
   const animationRef = useRef<LottieView>(null);
   const [progress, setProgress] = useState(0);
@@ -83,8 +85,9 @@ const Login = () => {
       });
     } catch (error) {
       setTimeout(() => {
-        alert(error);
+        setDialogMessage(error as any);
       }, 2000);
+      setIsErrorDialogVisible(true);
     } finally {
       setTimeout(() => {
         setIsLoading(false);
@@ -205,6 +208,13 @@ const Login = () => {
           </ScrollView>
         </KeyboardAvoidingView>
       )}
+      {!isLoading && isErrorDialogVisible ? (
+        <ErrorDialog
+          visible={isErrorDialogVisible}
+          dialogMessage={dialogMessage}
+          onDismiss={() => setIsErrorDialogVisible(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };
