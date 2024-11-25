@@ -72,8 +72,9 @@ const UserAppointments = () => {
   };
 
   const formatToLocalDate = (date) => {
-    const localDate = new Date(date);
-    return localDate.toLocaleDateString("en-GB"); // Cambia "en-GB" por el formato deseado
+    const utcDate = new Date(date); // Crea el objeto de fecha en UTC
+    const localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000); // Corrige a local
+    return localDate.toLocaleDateString("en-GB"); // Formatea en formato DD/MM/YYYY
   };
   
 
