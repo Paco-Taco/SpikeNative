@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "SpikeTest2",
+    "name": "Spike",
     "slug": "SpikeTest2",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,17 +12,20 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "bundleIdentifier": "com.spike.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.spike.app"
     },
     "web": {
       "bundler": "metro",
@@ -31,11 +34,24 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Poppins-Regular.ttf"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9520f987-8014-4638-b591-51a07bcc2850"
+      }
     }
   }
 }

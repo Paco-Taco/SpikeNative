@@ -18,9 +18,8 @@ export default function AppLayout() {
   const navigation = useNavigation();
   const { authState } = useAuth();
 
-
   if (!authState?.authenticated) {
-    return <Redirect href={"/login"}/>
+    return <Redirect href={"/login"} />;
   }
 
   return (
@@ -34,31 +33,57 @@ export default function AppLayout() {
             }}
           />
           <Stack.Screen
-            name="(modal)/filter"
+            name="petOwnerProfile"
             options={{
-              presentation: "modal",
-              headerTitle: "Filter",
-              headerTitleAlign: "center",
-              headerTitleStyle: {
-                color: "white",
-              },
-              headerShadowVisible: false,
-              headerStyle: {
-                backgroundColor: ColorPalette.graphitePalette,
-              },
-              headerLeft: () => (
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.goBack();
-                  }}
-                >
-                  <Ionicons
-                    name="close-outline"
-                    size={28}
-                    color={ColorPalette.medium}
-                  />
-                </TouchableOpacity>
-              ),
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="editPetOwnerProfile"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="petlist"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="petRegister"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="appointmentBooking/[veterinaryId]"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="citasUsuario"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="appointmentDetails"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="conmemoraciones"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="editPetScreen"
+            options={{
+              headerShown: false,
             }}
           />
         </Stack>

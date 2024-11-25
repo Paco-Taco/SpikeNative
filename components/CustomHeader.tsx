@@ -1,65 +1,76 @@
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   TextInput,
+  StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useRef } from "react";
 import { ColorPalette, Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import BottomSheet from "./BottomSheet";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useAuth } from "@/app/context/AuthContext";
+import { useLoginStore } from "@/stores/login.store";
+import { useSearch } from "@/app/context/SearchContext"; // Importa el hook del contexto
+import { TextField, Image, AnimatedImage, LoaderScreen } from "react-native-ui-lib";
+import { Fonts } from "@/constants/Fonts";
 
-const SearchBar = () => (
-  <View style={styles.searchContainer}>
-    <View style={styles.searchSection}>
-      <View style={styles.searchField}>
-        <Ionicons
-          style={styles.searchIcon}
-          name="search-outline"
-          size={20}
-          color={ColorPalette.medium}
-        />
-        <TextInput
-          placeholder="Veterinaries, care services, products"
-          style={styles.input}
-          placeholderTextColor={ColorPalette.medium}
-          cursorColor={ColorPalette.yellowPalette}
-        />
-      </View>
-      <Link href={"/(modal)/filter"} asChild>
-        <TouchableOpacity style={styles.optionButton}>
+const SearchBar = () => {
+  const { searchQuery, setSearchQuery } = useSearch(); // Usa el contexto
+
+  return (
+    <View style={styles.searchContainer}>
+      <View style={styles.searchSection}>
+        <View style={styles.searchField}>
           <Ionicons
-            name="options-outline"
+            style={styles.searchIcon}
+            name="search-outline"
             size={20}
-            color={ColorPalette.primary}
-          ></Ionicons>
-        </TouchableOpacity>
-      </Link>
+            color={ColorPalette.medium}
+          />
+          <TextField
+            placeholder="Search veterinaries..."
+            padding-10
+            style={styles.input}
+            placeholderTextColor={ColorPalette.medium}
+            cursorColor={ColorPalette.bluePalette}
+            value={searchQuery} // Enlaza el valor con el contexto
+            onChangeText={setSearchQuery} // Actualiza el valor en el contexto
+          />
+        </View>
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 const CustomHeader = () => {
+  const { dataLogin } = useLoginStore((state) => state);
+  const role = dataLogin?.user.role;
   const { onLogout } = useAuth();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const router = useRouter();
+
   const openModal = () => {
     bottomSheetRef.current?.present();
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar
+        barStyle={"dark-content"}
+        backgroundColor={ColorPalette.white}
+      />
       <BottomSheet ref={bottomSheetRef} />
       <View style={styles.container}>
-        <TouchableOpacity onPress={onLogout}>
+        <TouchableOpacity>
           <Ionicons
             name="location-outline"
-            color={ColorPalette.medium}
+            color={ColorPalette.bluePalette}
             size={20}
           />
         </TouchableOpacity>
@@ -76,10 +87,23 @@ const CustomHeader = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.profileButton}>
-          <Image
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={() => {
+            if (role === "VETERINARY_OWNER") {
+              router.push("/vetProfile");
+            } else if (role === "PET_OWNER") {
+              router.navigate("/(app)/(user)/petOwnerProfile");
+              // console.log(role);
+            } else {
+              console.error("Role not recognized:", role);
+            }
+          }}
+        >
+          <AnimatedImage
+            loader={<ActivityIndicator />}
             style={styles.profileButton}
-            source={require("@/assets/images/ic_pet.jpg")}
+            source={{ uri: dataLogin?.user.img }}
           />
         </TouchableOpacity>
       </View>
@@ -90,14 +114,14 @@ const CustomHeader = () => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: ColorPalette.darkGrayPalette,
+    backgroundColor: ColorPalette.white,
     flex: 1,
   },
   container: {
     height: 60,
     flexDirection: "row",
     gap: 20,
-    backgroundColor: ColorPalette.darkGrayPalette,
+    backgroundColor: ColorPalette.background,
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
@@ -111,7 +135,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    color: Colors.dark.text,
+    color: Colors.light.text,
+    fontFamily: Fonts.PoppinsLight
   },
   profileButton: {
     width: 30,
@@ -119,9 +144,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   subtitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: ColorPalette.lightGrey,
+    fontSize: 17,
+    fontFamily: Fonts.PoppinsBold,
+    color: Colors.light.text,
   },
   locationName: {
     flexDirection: "row",
@@ -130,7 +155,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     height: 60,
-    backgroundColor: ColorPalette.darkGrayPalette,
+    backgroundColor: ColorPalette.background,
   },
   searchSection: {
     flexDirection: "row",
@@ -144,12 +169,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-    backgroundColor: ColorPalette.graphitePalette,
+    backgroundColor: ColorPalette.background,
+    borderWidth: 1,
+    borderColor: ColorPalette.medium,
     borderRadius: 8,
   },
   input: {
-    padding: 10,
-    color: ColorPalette.lightGrey,
+    color: ColorPalette.mediumDark,
   },
   searchIcon: {
     paddingLeft: 10,

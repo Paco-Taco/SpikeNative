@@ -1,6 +1,6 @@
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
 import { LoginRequest, LoginResponse } from "@/types/spikeLogin.types";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
 export class SpikeLoginService {
   static login = async (body: LoginRequest): Promise<LoginResponse> => {
@@ -13,7 +13,15 @@ export class SpikeLoginService {
       return data;
     } catch (error) {
       console.log(error);
-      throw new Error("LoginService: Unable to login");
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message
+        console.error("Detalles del error:", error.response?.data);
+        throw errorMessage;
+      }
+
+      throw new Error(
+        "LoginService: Couldn't login due to an unexpected error."
+      );
     }
   };
 }

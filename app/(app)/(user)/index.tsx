@@ -1,175 +1,253 @@
-import {
-  View,
-  Text,
-  Alert,
-  TextInput,
-  Button,
-  StyleSheet,
-  Platform,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
 import React, { useEffect, useState } from "react";
-import { useLoginStore } from "@/stores/login.store";
-import * as ImagePicker from "expo-image-picker";
-import axios, { isAxiosError } from "axios";
+import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Button, SegmentedControl, Text } from "react-native-ui-lib";
+import { FlatList, Platform, TextInput } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { ColorPalette } from "@/constants/Colors";
+import { useUserStore } from "@/stores/user.store";
 import { axiosInstanceSpikeCore } from "@/controllers/SpikeApiCore";
+import { useLoginStore } from "@/stores/login.store";
+import { Veterinary } from "@/types/userTypes.types";
+import CardVeterinary from "@/components/CardVeterinary";
+import { useSearch } from "@/app/context/SearchContext";
+import LoadingCat from "@/components/shared/LoadingCat";
+import { RefreshControl } from "react-native-gesture-handler";
+import NewPetModal from "@/components/user/NewPetModal";
+import { Fonts } from "@/constants/Fonts";
+import { ScrollView } from "react-native";
 
 const Index = () => {
+  const { getVets } = useUserStore((state) => state);
   const { dataLogin } = useLoginStore((state) => state);
   const idOwner = dataLogin?.user.id;
+  const [loadingVets, setLoadingVets] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
-  const [formData, setFormData] = useState({
-    id_owner: idOwner,
-    name: "",
-    gender: "",
-    age: "",
-    weight: "",
-    height: "",
-    animal: "",
-  });
-  const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [veterinaryClinics, setVeterinaryClinics] = useState<Veterinary[]>([]);
+  const [pets, setPets] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [postalCodeFilter, setPostalCodeFilter] = useState(dataLogin?.user.cp);
+  const { searchQuery } = useSearch();
 
-  const handleInputChange = (name: string, value: string) => {
-    setFormData({
-      ...formData,
-      [name]: name === "age" ? parseInt(value) : value,
-    });
-  };
-
-  const isFormComplete = () => {
-    return (
-      formData.name &&
-      formData.gender &&
-      formData.age &&
-      formData.weight &&
-      formData.height &&
-      formData.animal &&
-      image
-    );
-  };
-
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0]);
+  const fetchVets = async () => {
+    try {
+      setLoadingVets(true);
+      const result = await getVets();
+      setVeterinaryClinics(result ? result.veterinaries : []);
+    } catch (error) {
+      console.error("Error al obtener veterinarias:", error);
+    } finally {
+      setLoadingVets(false);
     }
   };
 
-  const handleSubmit = async () => {
-    if (!isFormComplete()) {
-      Alert.alert(
-        "Error",
-        "Por favor, completa todos los campos y selecciona una imagen."
-      );
+  const onRefresh = () => {
+    fetchVets();
+  };
+
+  useEffect(() => {
+    if (!idOwner) {
       return;
     }
 
-    setLoading(true); // Muestra el loader
+    const fetchPets = async () => {
+      try {
+        const response = await axiosInstanceSpikeCore.get(
+          `/getpets/${idOwner}`
+        );
+        const petsData = response.data || [];
+        setPets(petsData);
 
-    const data = new FormData();
-    data.append(
-      "ownerId",
-      formData.id_owner !== undefined ? formData.id_owner.toString() : "no_id"
-    );
-    data.append("name", formData.name);
-    data.append("gender", formData.gender);
-    data.append("age", formData.age.toString());
-    data.append("weight", formData.weight);
-    data.append("height", formData.height);
-    data.append("animal", formData.animal);
-    data.append("img", {
-      uri: image !== null ? image.uri : "no_uri",
-      name: "mascota.jpg",
-      type: "image/jpeg",
-    } as any);
-
-    try {
-      const response = await axiosInstanceSpikeCore.post("/createpet", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      Alert.alert("Éxito", "Mascota creada exitosamente.");
-    } catch (error) {
-      if (isAxiosError(error)) {
-        console.error("AxiosError: ", error.response?.data);
+        if (petsData.length === 0) {
+          setShowModal(true);
+        }
+      } catch (error) {
+        console.error("Error al obtener mascotas:", error);
       }
-      Alert.alert("Error", "Hubo un problema al crear la mascota.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchVets();
+    fetchPets();
+  }, [idOwner, getVets]);
+
+  const categories = ["all", "NUTRITION", "RECREATION", "CARE"];
+
+  const clinicsMatchingPostalCode = veterinaryClinics
+    .filter((clinic) => clinic.cp === postalCodeFilter)
+    .filter(
+      (clinic) =>
+        selectedCategory === "all" || clinic.category.includes(selectedCategory)
+    )
+    .filter((clinic) =>
+      clinic.veterinarieName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+  const clinicsNotMatchingPostalCode = veterinaryClinics
+    .filter((clinic) => clinic.cp !== postalCodeFilter)
+    .filter(
+      (clinic) =>
+        selectedCategory === "all" || clinic.category.includes(selectedCategory)
+    )
+    .filter((clinic) =>
+      clinic.veterinarieName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+  const renderItem = ({ item }: { item: Veterinary }) => (
+    <CardVeterinary
+      item={item}
+      onPress={() => {
+        if (pets.length > 0) {
+          router.push(`/appointmentBooking/${item.id}`);
+        } else {
+          setShowModal(true);
+        }
+      }}
+    />
+  );
 
   return (
-    <View style={{ marginTop: 100, padding: 20 }}>
-      <Text>Nombre de la Mascota:</Text>
-      <TextInput
-        style={{ borderWidth: 1, marginBottom: 10 }}
-        onChangeText={(value) => handleInputChange("name", value)}
-        value={formData.name}
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: ColorPalette.offWhite,
+        paddingTop: Platform.OS === "android" ? 140 : 60,
+      }}
+    >
+      <NewPetModal
+        isVisible={showModal}
+        onDismiss={() => setShowModal(false)}
+        onOk={() => {
+          setShowModal(false);
+          router.push("/petRegister");
+        }}
       />
-      <Text>Género (0 = masculino, 1 = femenino):</Text>
-      <TextInput
-        style={{ borderWidth: 1, marginBottom: 10 }}
-        onChangeText={(value) => handleInputChange("gender", value)}
-        value={formData.gender}
-        keyboardType="numeric"
-      />
-      <Text>Edad:</Text>
-      <TextInput
-        style={{ borderWidth: 1, marginBottom: 10 }}
-        onChangeText={(value) => handleInputChange("age", value)}
-        value={formData.age.toString()}
-        keyboardType="numeric"
-      />
-      <Text>Peso (kg):</Text>
-      <TextInput
-        style={{ borderWidth: 1, marginBottom: 10 }}
-        onChangeText={(value) => handleInputChange("weight", value)}
-        value={formData.weight}
-        keyboardType="numeric"
-      />
-      <Text>Tamaño (1 = pequeño, 2 = mediano, 3 = grande, 4 = gigante):</Text>
-      <TextInput
-        style={{ borderWidth: 1, marginBottom: 10 }}
-        onChangeText={(value) => handleInputChange("height", value)}
-        value={formData.height}
-        keyboardType="numeric"
-      />
-      <Text>
-        Tipo de Animal (1 = Perro, 2 = Gato, 3 = Conejo, 4 = Aves, 5 = Reptiles,
-        6 = Otros):
-      </Text>
-      <TextInput
-        style={{ borderWidth: 1, marginBottom: 10 }}
-        onChangeText={(value) => handleInputChange("animal", value)}
-        value={formData.animal}
-        keyboardType="numeric"
-      />
-      <TouchableOpacity onPress={pickImage} style={{ marginBottom: 10 }}>
-        <Text style={{ color: "blue" }}>Seleccionar Imagen</Text>
-      </TouchableOpacity>
-      {image && (
-        <Image
-          source={{ uri: image.uri }}
-          style={{ width: 200, height: 200, marginBottom: 10 }}
+      <View paddingH-20 marginB-10>
+        <SegmentedControl
+          segments={[
+            { label: "All" },
+            { label: "Nutrition" },
+            { label: "Recreation" },
+            { label: "Care" },
+          ]}
+          segmentLabelStyle={{ fontFamily: Fonts.PoppinsRegular }}
+          onChangeIndex={(index) => {
+            setSelectedCategory(categories[index]);
+          }}
+          activeColor="white"
+          activeBackgroundColor={
+            selectedCategory === "all"
+              ? ColorPalette.darkGrayPalette
+              : selectedCategory === "NUTRITION"
+              ? ColorPalette.green
+              : selectedCategory === "RECREATION"
+              ? ColorPalette.yellowPalette
+              : ColorPalette.bluePalette
+          }
+          style={{ width: "100%" }}
         />
-      )}
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+
+      <View row paddingH-20 marginV-20 centerV>
+        <TextInput
+          style={{
+            flex: 1,
+            backgroundColor: "#f8f9fb",
+            borderRadius: 8,
+            padding: 10,
+            marginRight: 10,
+            borderWidth: 1,
+            borderColor: "#e0e0e0",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+          placeholder="Postal code"
+          value={postalCodeFilter}
+          keyboardType="numeric"
+          onChangeText={setPostalCodeFilter}
+        />
+        <Button
+          iconSource={() => (
+            <MaterialIcons name="clear" size={18} color="white" />
+          )}
+          size={Button.sizes.small}
+          backgroundColor={ColorPalette.darkGrayPalette}
+          onPress={() => setPostalCodeFilter("")}
+        />
+      </View>
+
+      {loadingVets ? (
+        <LoadingCat />
       ) : (
-        <Button title="Crear Mascota" onPress={handleSubmit} />
+        <ScrollView style={{ flex: 1 }}>
+          <View paddingH-20>
+            <Text
+              style={{
+                fontFamily: Fonts.PoppinsBold,
+                fontSize: 18,
+                marginBottom: 10,
+              }}
+            >
+              Clinics near you:
+            </Text>
+            <FlatList
+              data={clinicsMatchingPostalCode}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false}
+              ListEmptyComponent={
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontFamily: Fonts.PoppinsRegular,
+                    color: ColorPalette.medium,
+                    marginVertical: 20,
+                  }}
+                >
+                  No clinics found near this postal code
+                </Text>
+              }
+            />
+          </View>
+
+          <View paddingH-20 marginT-20>
+            <Text
+              style={{
+                fontFamily: Fonts.PoppinsBold,
+                fontSize: 18,
+                marginBottom: 10,
+              }}
+            >
+              Clinics nearby:
+            </Text>
+            <FlatList
+              data={clinicsNotMatchingPostalCode}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false}
+              ListEmptyComponent={
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontFamily: Fonts.PoppinsRegular,
+                    color: ColorPalette.medium,
+                  }}
+                >
+                  No other clinics available
+                </Text>
+              }
+            />
+          </View>
+        </ScrollView>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
