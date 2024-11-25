@@ -33,6 +33,8 @@ const UserAppointments = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  console.log(appointments.pendientes)
+
   // Fetch appointments for the current user
   const fetchAppointments = async () => {
     if (!user?.id) return;
@@ -68,6 +70,13 @@ const UserAppointments = () => {
     setRefreshing(true);
     fetchAppointments();
   };
+
+  const formatToLocalDate = (date) => {
+    const utcDate = new Date(date); // Crea el objeto de fecha en UTC
+    const localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000); // Corrige a local
+    return localDate.toLocaleDateString("en-GB"); // Formatea en formato DD/MM/YYYY
+  };
+  
 
   // Función para visualizar detalles de la cita
   const visualizarCita = (cita: any) => {
@@ -127,7 +136,8 @@ const UserAppointments = () => {
             </ListItem.Part>
             <ListItem.Part>
               <Text dark10 text80>
-                {new Date(item.date).toLocaleDateString()}
+              {formatToLocalDate(item.date)}
+
               </Text>
             </ListItem.Part>
             <ListItem.Part>
