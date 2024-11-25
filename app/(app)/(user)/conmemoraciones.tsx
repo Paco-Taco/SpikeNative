@@ -170,10 +170,26 @@ const Conmemoraciones = () => {
       {/* Contenedor principal */}
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <Text center text50 color={Colors.black} marginB-20 marginT-30 bold>
-            Memorialss
+          <Text
+            center
+            style={{ fontSize: FontSize.xLarge, fontFamily: Fonts.PoppinsBold }}
+            color={Colors.black}
+            marginB-20
+            marginT-35
+            bold
+          >
+            Memorials
           </Text>
-          <Text center text70 color={Colors.grey30} marginB-30 italic>
+          <Text
+            center
+            style={{
+              fontSize: FontSize.medium,
+              fontFamily: Fonts.PoppinsRegular,
+            }}
+            color={Colors.grey30}
+            marginB-30
+            italic
+          >
             "Even though their paws no longer run on the ground, their
             footprints will remain forever in our hearts."
           </Text>
@@ -215,11 +231,27 @@ const Conmemoraciones = () => {
                       marginBottom: 12,
                     }}
                   />
-                  <Text text60 color={Colors.blue50} center bold>
+                  <Text
+                    style={{
+                      fontSize: FontSize.large,
+                      fontFamily: Fonts.PoppinsBold,
+                    }}
+                    color={Colors.blue50}
+                    center
+                    bold
+                  >
                     ❤️ {pet.name} ❤️
                   </Text>
-                  <Text text80 color={Colors.grey40} center marginT-4>
-                    🕊️{pet.dateOfDeath}🕊️
+                  <Text
+                    style={{
+                      fontSize: FontSize.medium,
+                      fontFamily: Fonts.PoppinsLight,
+                    }}
+                    color={Colors.grey40}
+                    center
+                    marginT-4
+                  >
+                    🕊️{" "}{pet.dateOfDeath}{" "}🕊️
                   </Text>
                 </View>
               </Animated.View>
