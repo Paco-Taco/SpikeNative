@@ -341,8 +341,8 @@ const AppointmentBooking = () => {
                   setIsSelectedDateValid(true);
                 } else {
                   Alert.alert(
-                    "Fecha no permitida",
-                    "Por favor selecciona una fecha válida."
+                    "Date not available",
+                    "Please select a valid date."
                   );
                   setIsSelectedDateValid(false);
                 }
