@@ -128,6 +128,56 @@ const editPetScreen = () => {
     }
   };
 
+  const getCurrentDateFormatted = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0"); // Los meses son 0-indexados
+    const year = today.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+
+  const handleMarkAsPassedAway = async () => {
+    try {
+      setIsSavingChanges(true);
+      const currentDate = getCurrentDateFormatted();
+  
+      await axiosInstanceSpikeCore.post(
+        `/deathPet`,
+        {
+          petId: parseInt(petId,10),
+          dateOfDeath: currentDate,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      setIsRipModalVisible(false);
+      ToastAndroid.showWithGravity(
+        "Pet marked as passed away",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+  
+      router.replace("/petlist");
+    } catch (error: any) {
+      console.error(
+        "Error marking pet as passed away:",
+        error.response?.data || error
+      );
+      Alert.alert(
+        "Error",
+        "Could not mark the pet as passed away. Please try again."
+      );
+    } finally {
+      setIsSavingChanges(false);
+    }
+  };
+  
+
   if (isSavingChanges) return <LoadingCat />;
 
   if (isRipModalVisible) {
@@ -185,9 +235,7 @@ const editPetScreen = () => {
             color={Colors.grey40}
             labelStyle={{ fontFamily: Fonts.PoppinsMedium }}
             backgroundColor={"transparent"}
-            onPress={() => {
-              setIsRipModalVisible(false);
-            }}
+            onPress={handleMarkAsPassedAway}
           />
         </View>
       </View>
