@@ -103,7 +103,7 @@ const Conmemoraciones = () => {
             opacity: heartOpacity,
           }}
         >
-          <Text style={{ fontSize: 40, color: Colors.red30 }}>❤️</Text> 
+          <Text style={{ fontSize: 40, color: Colors.red30 }}>❤️</Text>
         </Animated.View>
       );
     });
@@ -171,11 +171,11 @@ const Conmemoraciones = () => {
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           <Text center text50 color={Colors.black} marginB-20 marginT-30 bold>
-            Conmemoraciones
+            Memorialss
           </Text>
           <Text center text70 color={Colors.grey30} marginB-30 italic>
-            "Aunque sus patas ya no corran en la tierra, sus huellas quedarán para
-            siempre en nuestros corazones."
+            "Even though their paws no longer run on the ground, their
+            footprints will remain forever in our hearts."
           </Text>
           {deathPets.map((pet) => (
             <TouchableWithoutFeedback key={pet.id} onPress={addHeart}>
@@ -242,6 +242,5 @@ const Conmemoraciones = () => {
       </View>
     </SafeAreaView>
   );
-  
 };
 export default Conmemoraciones;
