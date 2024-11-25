@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Dimensions, Alert } from "react-native";
+import {
+  Dimensions,
+  Alert,
+  FlatList,
+  Platform,
+  ToastAndroid,
+} from "react-native";
+import { View, Text, Colors } from "react-native-ui-lib";
 import { useLoginStore } from "@/stores/login.store";
 import { VeterinaryService } from "@/services/vetServices";
 import { CitasVet, Pendiente } from "@/types/vetTypes.types";
@@ -7,9 +14,8 @@ import CardAppointment from "@/components/CardAppointment";
 import AppointmentDetailModal from "@/components/AppointmentDetailModal";
 import LoadingCat from "@/components/shared/LoadingCat";
 import FontSize from "@/constants/FontSize";
-import { FlatList } from "react-native";
-
 import { Fonts } from "@/constants/Fonts";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Index = () => {
   const { dataLogin } = useLoginStore((state) => state);
@@ -19,9 +25,13 @@ const Index = () => {
     useState<Pendiente | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [todayAndWeekAppointments, setTodayAndWeekAppointments] = useState<Pendiente[]>([]);
+  const [todayAndWeekAppointments, setTodayAndWeekAppointments] = useState<
+    Pendiente[]
+  >([]);
   const [laterAppointments, setLaterAppointments] = useState<Pendiente[]>([]);
   const [allAppointments, setAllAppointments] = useState<Pendiente[]>([]);
+
+  const screenWidth = Dimensions.get("window").width;
 
   const loadAppointments = async () => {
     try {
@@ -34,35 +44,25 @@ const Index = () => {
         const oneWeekFromNow = new Date();
         oneWeekFromNow.setDate(today.getDate() + 7);
 
-        // Filtros combinados
-        const todayAndWeekFiltered = response.pendientes
-          .filter((appointment) => {
+        const todayAndWeekFiltered = response.pendientes.filter(
+          (appointment) => {
             const appointmentDate = new Date(appointment.date);
             return (
-              appointmentDate.toDateString() === today.toDateString() || // Citas de hoy
+              appointmentDate.toDateString() === today.toDateString() || // Hoy
               (appointmentDate > today && appointmentDate <= oneWeekFromNow) // Próximas dentro de una semana
             );
-          })
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Ordenar por fecha ascendente
+          }
+        );
 
-        const laterFiltered = response.pendientes
-          .filter((appointment) => {
-            const appointmentDate = new Date(appointment.date);
-            return appointmentDate > oneWeekFromNow;
-          })
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Ordenar por fecha ascendente
+        const laterFiltered = response.pendientes.filter((appointment) => {
+          const appointmentDate = new Date(appointment.date);
+          return appointmentDate > oneWeekFromNow;
+        });
 
         setTodayAndWeekAppointments(todayAndWeekFiltered);
         setLaterAppointments(laterFiltered);
-
-        // Combina todas las citas y ordénalas
-        const allAppointmentsSorted = [...response.pendientes].sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-        );
-        setAllAppointments(allAppointmentsSorted);
+        setAllAppointments(response.pendientes);
       }
-
-      setAppointments(response);
     } catch (error) {
       console.error("Error loading appointments:", error);
       Alert.alert("Error", "No se pudieron cargar las citas");
@@ -75,23 +75,39 @@ const Index = () => {
     loadAppointments();
   }, []);
 
+  const showToastWithGravity = (message: string) => {
+    ToastAndroid.showWithGravity(
+      message,
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER
+    );
+  };
+
   const handleComplete = async (appointmentId: number) => {
     try {
       await VeterinaryService.marcarCitaCompletada(appointmentId);
-      Alert.alert("Éxito", "Cita marcada como completada");
+      Platform.OS === "android"
+        ? showToastWithGravity("Appointment marked as completed")
+        : Alert.alert("Success", "Appointment marked as completed");
       loadAppointments();
     } catch (error) {
-      Alert.alert("Error", "No se pudo completar la cita");
+      Platform.OS === "android"
+        ? showToastWithGravity("Could not mark appointment as completed")
+        : Alert.alert("Error", "Could not mark appointment as completed");
     }
   };
 
   const handleCancel = async (appointmentId: number) => {
     try {
       await VeterinaryService.cancelarCita(appointmentId);
-      Alert.alert("Éxito", "Cita cancelada");
+      Platform.OS === "android"
+        ? showToastWithGravity("Appointment canceled")
+        : Alert.alert("Success", "Appointment canceled");
       loadAppointments();
     } catch (error) {
-      Alert.alert("Error", "No se pudo cancelar la cita");
+      Platform.OS === "android"
+        ? showToastWithGravity("Could not cancel appointment")
+        : Alert.alert("Error", "Could not cancel appointment");
     }
   };
 
@@ -100,140 +116,188 @@ const Index = () => {
     setModalVisible(true);
   };
 
-  const screenWidth = Dimensions.get("window").width;
-
   if (loading) {
     return <LoadingCat />;
   }
 
   return (
-    <ScrollView contentContainerStyle={{ paddingVertical: 20, paddingHorizontal: 16 }}>
+    <View
+      style={{ flex: 1, marginTop: Platform.OS === "android" ? "30%" : "25%" }}
+    >
       <Text
-        
-        style={{
-          fontSize: 25,
-          fontFamily: Fonts.PoppinsBold,
-          textAlign: "left",
-          marginBottom: 20,
-          marginTop: 80
-        }}
+        center
+        style={{ fontFamily: Fonts.PoppinsBold, fontSize: FontSize.large }}
+        marginB-25
       >
         Pending appointments
       </Text>
+      <FlatList
+        style={{ paddingHorizontal: 20 }}
+        data={[{ id: 1 }, { id: 2 }, { id: 3 }]} // Solo un índice para cada sección
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => {
+          switch (item.id) {
+            case 1: // Hoy y dentro de una semana
+              return (
+                <View style={{ marginBottom: 20 }}>
+                  <View row style={{ justifyContent: "space-between" }}>
+                    <Text
+                      style={{
+                        fontFamily: Fonts.PoppinsBold,
+                        fontSize: FontSize.medium,
+                        marginBottom: 8,
+                      }}
+                    >
+                      Today and Within a Week
+                    </Text>
+                    {todayAndWeekAppointments.length > 1 && (
+                      <Text
+                        style={{
+                          fontSize: FontSize.small,
+                          color: "gray",
+                        }}
+                      >
+                        Swipe →
+                      </Text>
+                    )}
+                  </View>
+                  <FlatList
+                    data={todayAndWeekAppointments}
+                    renderItem={({ item }) => (
+                      <View
+                        style={{
+                          width: screenWidth * 0.9,
+                          marginRight: screenWidth * 0.05,
+                          height: 200,
+                        }}
+                      >
+                        <CardAppointment
+                          item={item}
+                          onComplete={handleComplete}
+                          onCancel={handleCancel}
+                          onPressDetails={handlePressDetails}
+                        />
+                      </View>
+                    )}
+                    keyExtractor={(appointment) => appointment.id.toString()}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    ListEmptyComponent={
+                      <Text center light color={Colors.grey30}>
+                        No appointments today or within a week
+                      </Text>
+                    }
+                  />
+                </View>
+              );
+            case 2: // Más tarde
+              return (
+                <View style={{ marginBottom: 20 }}>
+                  <View row style={{ justifyContent: "space-between" }}>
+                    <Text
+                      style={{
+                        fontFamily: Fonts.PoppinsBold,
+                        fontSize: FontSize.medium,
+                        marginBottom: 8,
+                      }}
+                    >
+                      Later
+                    </Text>
+                    {laterAppointments.length > 1 && (
+                      <Text
+                        style={{
+                          fontSize: FontSize.small,
+                          color: "gray",
+                        }}
+                      >
+                        Swipe →
+                      </Text>
+                    )}
+                  </View>
 
-      {/* Sección 1: Hoy y Próximas dentro de una semana */}
-      <View style={{ marginBottom: 20 }}>
-        <Text style={{ fontFamily: Fonts.PoppinsBold, fontSize: FontSize.medium, marginBottom: 8 }}>
-          Appointments Today and Within a Week
-        </Text>
-        {todayAndWeekAppointments.length > 1 && (
-          <Text style={{ alignSelf: "flex-end", fontSize: FontSize.small, color: "gray" }}>
-            Swipe →
-          </Text>
-        )}
-        <FlatList
-          data={todayAndWeekAppointments}
-          renderItem={({ item }) => (
-            <View
-              style={{
-                width: screenWidth * 0.9,
-                marginRight: screenWidth * 0.05,
-                height: 200,
-              }}
-            >
-              <CardAppointment
-                item={item}
-                onComplete={handleComplete}
-                onCancel={handleCancel}
-                onPressDetails={handlePressDetails}
-              />
-            </View>
-          )}
-          keyExtractor={(item) => item.id.toString()}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          ListEmptyComponent={<Text>No appointments today or within a week</Text>}
-          contentContainerStyle={{ paddingVertical: 10 }}
-        />
-      </View>
-
-      {/* Sección 2: Después de una semana */}
-      <View style={{ marginBottom: 20 }}>
-        <Text style={{ fontFamily: Fonts.PoppinsBold, fontSize: FontSize.medium, marginBottom: 10 }}>
-          Later Appointments
-        </Text>
-        {laterAppointments.length > 1 && (
-          <Text style={{ alignSelf: "flex-end", fontSize: FontSize.small, color: "gray" }}>
-            Swipe →
-          </Text>
-        )}
-        <FlatList
-          data={laterAppointments}
-          renderItem={({ item }) => (
-            <View
-              style={{
-                width: screenWidth * 0.9,
-                marginRight: screenWidth * 0.05,
-                height: 200,
-              }}
-            >
-              <CardAppointment
-                item={item}
-                onComplete={handleComplete}
-                onCancel={handleCancel}
-                onPressDetails={handlePressDetails}
-              />
-            </View>
-          )}
-          keyExtractor={(item) => item.id.toString()}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          ListEmptyComponent={<Text>No appointments later</Text>}
-          contentContainerStyle={{ paddingVertical: 10 }}
-        />
-      </View>
-
-      {/* Sección 3: Todas las citas */}
-      <View>
-        <Text style={{ fontFamily: Fonts.PoppinsBold, fontSize: FontSize.medium, marginBottom: 10 }}>
-          All Appointments
-        </Text>
-        <FlatList
-          data={allAppointments}
-          renderItem={({ item }) => (
-            <View
-              style={{
-                width: "100%",
-                marginBottom: 10,
-                height: 150,
-              }}
-            >
-              <CardAppointment
-                item={item}
-                onComplete={handleComplete}
-                onCancel={handleCancel}
-                onPressDetails={handlePressDetails}
-              />
-            </View>
-          )}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={<Text>No appointments available</Text>}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
-      </View>
-
-      <AppointmentDetailModal
-        visible={modalVisible}
-        appointment={selectedAppointment}
-        onClose={() => {
-          setModalVisible(false);
-          setSelectedAppointment(null);
+                  <FlatList
+                    data={laterAppointments}
+                    renderItem={({ item }) => (
+                      <View
+                        style={{
+                          width: screenWidth * 0.9,
+                          marginRight: screenWidth * 0.05,
+                          height: 200,
+                        }}
+                      >
+                        <CardAppointment
+                          item={item}
+                          onComplete={handleComplete}
+                          onCancel={handleCancel}
+                          onPressDetails={handlePressDetails}
+                        />
+                      </View>
+                    )}
+                    keyExtractor={(appointment) => appointment.id.toString()}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    ListEmptyComponent={
+                      <Text center light color={Colors.grey30}>
+                        No appointments later
+                      </Text>
+                    }
+                    contentContainerStyle={{ paddingBottom: 10 }}
+                  />
+                </View>
+              );
+            case 3: // Todas las citas (vertical)
+              return (
+                <View style={{ marginBottom: 20 }}>
+                  <Text
+                    style={{
+                      fontFamily: Fonts.PoppinsBold,
+                      fontSize: FontSize.medium,
+                      marginBottom: 8,
+                    }}
+                  >
+                    All Appointments
+                  </Text>
+                  <FlatList
+                    data={allAppointments}
+                    renderItem={({ item }) => (
+                      <View
+                        style={{
+                          width: "100%",
+                          marginBottom: 10,
+                          height: 150,
+                        }}
+                      >
+                        <CardAppointment
+                          item={item}
+                          onComplete={handleComplete}
+                          onCancel={handleCancel}
+                          onPressDetails={handlePressDetails}
+                        />
+                      </View>
+                    )}
+                    keyExtractor={(appointment) => appointment.id.toString()}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={<Text>No appointments available</Text>}
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                  />
+                </View>
+              );
+          }
         }}
-        onComplete={handleComplete}
-        onCancel={handleCancel}
+        ListFooterComponent={
+          <AppointmentDetailModal
+            visible={modalVisible}
+            appointment={selectedAppointment}
+            onClose={() => {
+              setModalVisible(false);
+              setSelectedAppointment(null);
+            }}
+            onComplete={handleComplete}
+            onCancel={handleCancel}
+          />
+        }
       />
-    </ScrollView>
+    </View>
   );
 };
 

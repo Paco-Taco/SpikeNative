@@ -21,6 +21,8 @@ const SignUp = () => {
     );
   };
 
+  const TERMS_AND_CONDITIONS_URL = "https://arielrosasc.github.io/TermsSpike/";
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar
@@ -63,7 +65,7 @@ const SignUp = () => {
           <Text
             color={ColorPalette.bluePalette}
             onPress={() =>
-              openURL("https://generator.lorem-ipsum.info/terms-and-conditions")
+              openURL(TERMS_AND_CONDITIONS_URL)
             }
           >
             Terms of Service
@@ -72,7 +74,7 @@ const SignUp = () => {
           <Text
             color={ColorPalette.bluePalette}
             onPress={() =>
-              openURL("https://generator.lorem-ipsum.info/terms-and-conditions")
+              openURL(TERMS_AND_CONDITIONS_URL)
             }
           >
             Privacy Policy

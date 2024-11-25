@@ -1,9 +1,11 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
-import { Card, Image, Text, View, Button } from 'react-native-ui-lib';
-import { Ionicons } from '@expo/vector-icons';
-import { ColorPalette } from '@/constants/Colors';
-import { Pendiente } from '@/types/vetTypes.types';
+import React from "react";
+import { StyleSheet } from "react-native";
+import { Card, Image, Text, View, Button } from "react-native-ui-lib";
+import { Ionicons } from "@expo/vector-icons";
+import { ColorPalette } from "@/constants/Colors";
+import { Pendiente } from "@/types/vetTypes.types";
+import { Fonts } from "@/constants/Fonts";
+import FontSize from "@/constants/FontSize";
 
 interface CardAppointmentProps {
   item: Pendiente;
@@ -12,38 +14,68 @@ interface CardAppointmentProps {
   onPressDetails: (appointment: Pendiente) => void;
 }
 
-const CardAppointment = ({ item, onComplete, onCancel, onPressDetails }: CardAppointmentProps) => {
+const CardAppointment = ({
+  item,
+  onComplete,
+  onCancel,
+  onPressDetails,
+}: CardAppointmentProps) => {
   const formattedDate = new Date(item.date).toLocaleDateString();
-  
+
   return (
     <Card
       marginV-10
       padding-20
       borderRadius={10}
-      backgroundColor={'white'}
+      backgroundColor={"white"}
       style={styles.cardStyles}
       onPress={() => onPressDetails(item)}
     >
       <Image
         source={{ uri: item.pet.img }}
-        style={{ height: 110, width: '30%', borderRadius: 10 }}
+        style={{ height: 110, width: "30%", borderRadius: 10 }}
       />
 
       <View style={styles.infoAreaStyles}>
-        <Text text60 marginB-5 color={ColorPalette.mediumDark}>
+        <Text
+          style={{
+            fontFamily: Fonts.PoppinsSemiBold,
+            fontSize: FontSize.medium,
+          }}
+          marginB-5
+          color={ColorPalette.mediumDark}
+        >
           {item.pet.name}
         </Text>
 
         <View style={styles.infoRow}>
-          <Ionicons name="calendar-outline" size={14} color={ColorPalette.yellowPalette} />
-          <Text text70 color={ColorPalette.medium} marginL-10>
+          <Ionicons
+            name="calendar-outline"
+            size={14}
+            color={ColorPalette.yellowPalette}
+          />
+          <Text
+            style={{
+              fontFamily: Fonts.PoppinsRegular,
+              fontSize: FontSize.medium,
+            }}
+            color={ColorPalette.medium}
+            marginL-10
+          >
             {formattedDate}
           </Text>
         </View>
 
         <View style={styles.infoRow}>
           <Ionicons name="time-outline" size={14} color={ColorPalette.green} />
-          <Text text80 color={ColorPalette.medium} marginL-10>
+          <Text
+            style={{
+              fontFamily: Fonts.PoppinsRegular,
+              fontSize: FontSize.medium,
+            }}
+            color={ColorPalette.medium}
+            marginL-10
+          >
             {item.hour.hour} - {item.hour.day}
           </Text>
         </View>
@@ -70,20 +102,20 @@ const CardAppointment = ({ item, onComplete, onCancel, onPressDetails }: CardApp
 
 const styles = StyleSheet.create({
   cardStyles: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   infoAreaStyles: {
     flex: 1,
     marginLeft: 20,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 5,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 10,
   },
 });

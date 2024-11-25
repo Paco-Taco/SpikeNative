@@ -151,7 +151,7 @@ const AppointmentHistory = () => {
             loop
             style={{ width: 100, height: 100 }}
           />
-          <Text medium>Cargando...</Text>
+          <Text medium>Loading...</Text>
         </View>
       ) : (
         <View flex>
