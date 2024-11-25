@@ -130,6 +130,12 @@ const AppointmentBooking = () => {
     setShowDatePicker(false);
   };
 
+  const formatDateToLocalISOString = (date) => {
+    const offset = date.getTimezoneOffset() * 60000; // Obtener el offset en milisegundos
+    return new Date(date.getTime() - offset).toISOString().split("T")[0];
+  };
+  console.log(formatDateToLocalISOString(selectedDate))
+
   const handleBookAppointment = async () => {
     if (!selectedPet) {
       Alert.alert("Error", "Por favor selecciona una mascota");
@@ -140,12 +146,13 @@ const AppointmentBooking = () => {
       return;
     }
 
+
     try {
       const response = await axiosInstanceSpikeCore.post("/crearCita", {
         veterinaryId: parseInt(veterinaryId),
         petId: selectedPet.id,
         userId: userId,
-        date: selectedDate.toISOString(),
+        date: formatDateToLocalISOString(selectedDate),
         hour: selectedHour,
       });
 
