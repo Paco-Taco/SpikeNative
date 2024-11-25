@@ -33,7 +33,7 @@ const UserAppointments = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  console.log(appointments.pendientes)
+  // console.log(appointments.pendientes)
 
   // Fetch appointments for the current user
   const fetchAppointments = async () => {
