@@ -32,43 +32,40 @@ const Index = () => {
 
   const fetchVets = async () => {
     try {
-      setLoadingVets(true);
       const result = await getVets();
       setVeterinaryClinics(result ? result.veterinaries : []);
     } catch (error) {
       console.error("Error al obtener veterinarias:", error);
-    } finally {
-      setLoadingVets(false);
     }
   };
 
-  const onRefresh = () => {
-    fetchVets();
+  const fetchPets = async () => {
+    try {
+      const response = await axiosInstanceSpikeCore.get(`/getpets/${idOwner}`);
+      const petsData = response.data || [];
+      setPets(petsData);
+
+      if (petsData.length === 0) {
+        setShowModal(true);
+      }
+    } catch (error) {
+      console.error("Error al obtener mascotas:", error);
+    }
   };
 
   useEffect(() => {
     if (!idOwner) {
       return;
     }
-
-    const fetchPets = async () => {
-      try {
-        const response = await axiosInstanceSpikeCore.get(
-          `/getpets/${idOwner}`
-        );
-        const petsData = response.data || [];
-        setPets(petsData);
-
-        if (petsData.length === 0) {
-          setShowModal(true);
-        }
-      } catch (error) {
-        console.error("Error al obtener mascotas:", error);
-      }
-    };
-
-    fetchVets();
-    fetchPets();
+    try {
+      setLoadingVets(true);
+      fetchVets();
+      fetchPets();
+    } catch (error) {
+      console.error("Error al obtener veterinarias y mascotas:", error);
+    } finally {
+      setLoadingVets(false);
+    }
   }, [idOwner, getVets]);
 
   const categories = ["all", "NUTRITION", "RECREATION", "CARE"];

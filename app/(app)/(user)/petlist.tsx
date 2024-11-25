@@ -137,7 +137,7 @@ const PetListAndEdit = () => {
           >
             {item.name}
           </Text>
-          <Text center>Age: {item.age}</Text>
+          <Text center>  {item.age} {item.age === 1 ? "year old" : "years old"}</Text>
         </View>
       </Card>
     );

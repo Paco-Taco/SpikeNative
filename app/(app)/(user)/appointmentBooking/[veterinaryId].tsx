@@ -48,6 +48,7 @@ const AppointmentBooking = () => {
   const [availableHours, setAvailableHours] = useState([]);
   const [isScrolledPastImage, setIsScrolledPastImage] = useState(false);
   const [isSelectPetModalVisible, setIsSelectPetModalVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const IMAGE_HEIGHT = 400;
 
@@ -118,16 +119,21 @@ const AppointmentBooking = () => {
     }
   }, [veterinaryId, userId]);
 
-  const handleDateChange = (event, date) => {
-    if (date && isDateAllowed(date)) {
-      setSelectedDate(date);
-    } else {
-      Alert.alert(
-        "Fecha no permitida",
-        "Por favor selecciona una fecha válida."
-      );
-    }
-    setShowDatePicker(false);
+  // const handleDateChange = (event, date) => {
+  //   if (date && isDateAllowed(date)) {
+  //     setSelectedDate(date);
+  //   } else {
+  //     Alert.alert(
+  //       "Fecha no permitida",
+  //       "Por favor selecciona una fecha válida."
+  //     );
+  //   }
+  //   setShowDatePicker(false);
+  // };
+
+  const formatDateToLocalISOString = (date) => {
+    const offset = date.getTimezoneOffset() * 60000; // Obtener el offset en milisegundos
+    return new Date(date.getTime() - offset).toISOString().split("T")[0];
   };
 
   const handleBookAppointment = async () => {
@@ -140,24 +146,28 @@ const AppointmentBooking = () => {
       return;
     }
 
+
     try {
+      setIsSubmitting(true);
       const response = await axiosInstanceSpikeCore.post("/crearCita", {
         veterinaryId: parseInt(veterinaryId),
         petId: selectedPet.id,
         userId: userId,
-        date: selectedDate.toISOString(),
+        date: formatDateToLocalISOString(selectedDate),
         hour: selectedHour,
       });
 
-      Alert.alert("Éxito", "Cita agendada correctamente", [
+      Alert.alert("Success", "Appointment booked successfully", [
         { text: "OK", onPress: () => router.replace("/(app)/(user)/citasUsuario") },
       ]);
     } catch (error) {
       console.error("Error al crear cita", error);
       Alert.alert(
         "Error",
-        error.response?.data?.error || "No se pudo agendar la cita"
+        error.response?.data?.error || "Appointment could not be booked"
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -171,6 +181,10 @@ const AppointmentBooking = () => {
   };
 
   if (!veterinaryDetails) {
+    return <LoadingCat />;
+  }
+
+  if (isSubmitting) {
     return <LoadingCat />;
   }
 
@@ -341,8 +355,8 @@ const AppointmentBooking = () => {
                   setIsSelectedDateValid(true);
                 } else {
                   Alert.alert(
-                    "Fecha no permitida",
-                    "Por favor selecciona una fecha válida."
+                    "Date not available",
+                    "Please select a valid date."
                   );
                   setIsSelectedDateValid(false);
                 }
