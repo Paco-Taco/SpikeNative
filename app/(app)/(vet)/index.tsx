@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, Alert, FlatList, Platform } from "react-native";
-import { View, Text } from "react-native-ui-lib";
+import {
+  Dimensions,
+  Alert,
+  FlatList,
+  Platform,
+  ToastAndroid,
+} from "react-native";
+import { View, Text, Colors } from "react-native-ui-lib";
 import { useLoginStore } from "@/stores/login.store";
 import { VeterinaryService } from "@/services/vetServices";
 import { CitasVet, Pendiente } from "@/types/vetTypes.types";
@@ -69,23 +75,39 @@ const Index = () => {
     loadAppointments();
   }, []);
 
+  const showToastWithGravity = (message: string) => {
+    ToastAndroid.showWithGravity(
+      message,
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER
+    );
+  };
+
   const handleComplete = async (appointmentId: number) => {
     try {
       await VeterinaryService.marcarCitaCompletada(appointmentId);
-      Alert.alert("Éxito", "Cita marcada como completada");
+      Platform.OS === "android"
+        ? showToastWithGravity("Appointment marked as completed")
+        : Alert.alert("Success", "Appointment marked as completed");
       loadAppointments();
     } catch (error) {
-      Alert.alert("Error", "No se pudo completar la cita");
+      Platform.OS === "android"
+        ? showToastWithGravity("Could not mark appointment as completed")
+        : Alert.alert("Error", "Could not mark appointment as completed");
     }
   };
 
   const handleCancel = async (appointmentId: number) => {
     try {
       await VeterinaryService.cancelarCita(appointmentId);
-      Alert.alert("Éxito", "Cita cancelada");
+      Platform.OS === "android"
+        ? showToastWithGravity("Appointment canceled")
+        : Alert.alert("Success", "Appointment canceled");
       loadAppointments();
     } catch (error) {
-      Alert.alert("Error", "No se pudo cancelar la cita");
+      Platform.OS === "android"
+        ? showToastWithGravity("Could not cancel appointment")
+        : Alert.alert("Error", "Could not cancel appointment");
     }
   };
 
@@ -161,7 +183,9 @@ const Index = () => {
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     ListEmptyComponent={
-                      <Text center bold>No appointments today or within a week</Text>
+                      <Text center light color={Colors.grey30}>
+                        No appointments today or within a week
+                      </Text>
                     }
                   />
                 </View>
@@ -212,7 +236,11 @@ const Index = () => {
                     keyExtractor={(appointment) => appointment.id.toString()}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    ListEmptyComponent={<Text center bold>No appointments later</Text>}
+                    ListEmptyComponent={
+                      <Text center light color={Colors.grey30}>
+                        No appointments later
+                      </Text>
+                    }
                     contentContainerStyle={{ paddingBottom: 10 }}
                   />
                 </View>
