@@ -5,8 +5,9 @@ import {
   FlatList,
   Platform,
   ToastAndroid,
+  Modal,
 } from "react-native";
-import { View, Text, Colors } from "react-native-ui-lib";
+import { View, Text, Colors, Button, TextField } from "react-native-ui-lib";
 import { useLoginStore } from "@/stores/login.store";
 import { VeterinaryService } from "@/services/vetServices";
 import { CitasVet, Pendiente } from "@/types/vetTypes.types";
@@ -16,6 +17,7 @@ import LoadingCat from "@/components/shared/LoadingCat";
 import FontSize from "@/constants/FontSize";
 import { Fonts } from "@/constants/Fonts";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ColorPalette } from "@/constants/Colors";
 
 const Index = () => {
   const { dataLogin } = useLoginStore((state) => state);
@@ -30,6 +32,11 @@ const Index = () => {
   >([]);
   const [laterAppointments, setLaterAppointments] = useState<Pendiente[]>([]);
   const [allAppointments, setAllAppointments] = useState<Pendiente[]>([]);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
+  const [appointmentId, setAppointmentId] = useState<number | null>(null);
 
   const screenWidth = Dimensions.get("window").width;
 
@@ -78,7 +85,7 @@ const Index = () => {
   const showToastWithGravity = (message: string) => {
     ToastAndroid.showWithGravity(
       message,
-      ToastAndroid.SHORT,
+      ToastAndroid.LONG,
       ToastAndroid.CENTER
     );
   };
@@ -97,23 +104,114 @@ const Index = () => {
     }
   };
 
-  const handleCancel = async (appointmentId: number) => {
+  const handleCancel = async (appointmentId: number, razon: string) => {
     try {
-      await VeterinaryService.cancelarCita(appointmentId);
+      setIsCancelModalVisible(false);
+      setIsLoading(true);
+      await VeterinaryService.cancelarCita(appointmentId, razon);
       Platform.OS === "android"
         ? showToastWithGravity("Appointment canceled")
         : Alert.alert("Success", "Appointment canceled");
       loadAppointments();
     } catch (error) {
       Platform.OS === "android"
-        ? showToastWithGravity("Could not cancel appointment")
+        ? showToastWithGravity(`Error: ${error}`)
         : Alert.alert("Error", "Could not cancel appointment");
+    } finally {
+      setIsLoading(false);
+      setIsCancelModalVisible(false);
     }
+  };
+
+  const beforeUserCancels = (appointmentId: number | null, cancelReason: string) => {
+    return (
+      <View
+        flex
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+        }}
+      >
+        <View
+          style={{
+            width: "90%",
+            maxHeight: "70%",
+            backgroundColor: ColorPalette.offWhite,
+            borderRadius: 20,
+            padding: 20,
+            alignItems: "center",
+          }}
+        >
+          <View marginB-5 width={"100%"}>
+            <Text
+              style={{
+                fontSize: FontSize.large,
+                fontFamily: Fonts.PoppinsBold,
+                marginBottom: 10,
+                textAlign: "center",
+              }}
+            >
+              Please, tell us why you want to cancel this appointment.
+            </Text>
+          </View>
+          <View marginB-20 padding-20 width={"100%"}>
+            <TextField
+              placeholder="Reason (10 characters minimum)"
+              value={cancelReason}
+              style={{ width: "100%", fontFamily: Fonts.PoppinsRegular }}
+              containerStyle={{
+                borderWidth: 1,
+                borderColor: Colors.grey40,
+                borderRadius: 5,
+                minHeight: 100,
+              }}
+              padding-10
+              multiline
+              numberOfLines={3}
+              showCharacterCounter
+              onChangeText={(text) => setCancelReason(text)}
+              maxLength={100}
+            />
+          </View>
+          <View row style={{ width: "100%", justifyContent: "space-evenly" }}>
+            <Button
+              label="Close"
+              labelStyle={{ fontFamily: Fonts.PoppinsMedium }}
+              backgroundColor={ColorPalette.bluePalette}
+              onPress={() => {
+                setIsCancelling(false);
+                setIsCancelModalVisible(false);
+              }}
+            />
+            <Button
+              disabled={cancelReason.length < 10}
+              label="Cancel anyway"
+              labelStyle={{
+                fontFamily: Fonts.PoppinsMedium,
+                color: cancelReason.length < 10 ? Colors.grey40 : Colors.red10,
+              }}
+              style={{ backgroundColor: "transparent" }}
+              onPress={() => {
+                handleCancel(appointmentId, cancelReason);
+                setIsCancelModalVisible(false);
+              }}
+            />
+          </View>
+        </View>
+      </View>
+    );
   };
 
   const handlePressDetails = (appointment: Pendiente) => {
     setSelectedAppointment(appointment);
     setModalVisible(true);
+  };
+
+  const handleOpenCancelModal = (appointment: Pendiente) => {
+    setAppointmentId(appointment.id);
+    setCancelReason("");
+    setIsCancelModalVisible(true);
   };
 
   if (loading) {
@@ -124,6 +222,82 @@ const Index = () => {
     <View
       style={{ flex: 1, marginTop: Platform.OS === "android" ? "30%" : "25%" }}
     >
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isCancelModalVisible}
+        onRequestClose={() => setIsCancelModalVisible(false)}
+      >
+        {!isCancelling ? (
+          <View
+            flex
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <View
+              style={{
+                width: "90%",
+                maxHeight: "70%",
+                backgroundColor: ColorPalette.offWhite,
+                borderRadius: 20,
+                padding: 20,
+                alignItems: "center",
+              }}
+            >
+              <View marginB-5 width={"100%"}>
+                <Text
+                  style={{
+                    fontSize: FontSize.large,
+                    fontFamily: Fonts.PoppinsBold,
+                    marginBottom: 10,
+                    textAlign: "center",
+                  }}
+                >
+                  Are you completely sure you want to cancel this appointment?
+                </Text>
+              </View>
+              <View marginB-20 width={"100%"}>
+                <Text
+                  style={{
+                    fontSize: FontSize.medium,
+                    fontFamily: Fonts.PoppinsRegular,
+                    marginBottom: 10,
+                    textAlign: "center",
+                  }}
+                >
+                  You can't undo this action.
+                </Text>
+              </View>
+              <View
+                row
+                style={{ width: "100%", justifyContent: "space-evenly" }}
+              >
+                <Button
+                  label="Close"
+                  labelStyle={{ fontFamily: Fonts.PoppinsMedium }}
+                  backgroundColor={ColorPalette.bluePalette}
+                  onPress={() => setIsCancelModalVisible(false)}
+                />
+                <Button
+                  label="Cancel anyway"
+                  color={Colors.red10}
+                  labelStyle={{ fontFamily: Fonts.PoppinsMedium }}
+                  backgroundColor={"transparent"}
+                  onPress={() => {
+                    // setIsCancelModalVisible(false);
+                    setIsCancelling(true);
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        ) : (
+          beforeUserCancels(appointmentId, cancelReason)
+        )}
+      </Modal>
       <Text
         center
         style={{ fontFamily: Fonts.PoppinsBold, fontSize: FontSize.large }}
@@ -174,7 +348,7 @@ const Index = () => {
                         <CardAppointment
                           item={item}
                           onComplete={handleComplete}
-                          onCancel={handleCancel}
+                          // onCancel={handleCancel}
                           onPressDetails={handlePressDetails}
                         />
                       </View>
@@ -228,7 +402,7 @@ const Index = () => {
                         <CardAppointment
                           item={item}
                           onComplete={handleComplete}
-                          onCancel={handleCancel}
+                          // onCancel={handleCancel}
                           onPressDetails={handlePressDetails}
                         />
                       </View>
@@ -270,7 +444,7 @@ const Index = () => {
                         <CardAppointment
                           item={item}
                           onComplete={handleComplete}
-                          onCancel={handleCancel}
+                          // onCancel={handleCancel}
                           onPressDetails={handlePressDetails}
                         />
                       </View>
@@ -293,7 +467,7 @@ const Index = () => {
               setSelectedAppointment(null);
             }}
             onComplete={handleComplete}
-            onCancel={handleCancel}
+            onCancel={handleOpenCancelModal}
           />
         }
       />

@@ -80,17 +80,17 @@ export class VeterinaryService {
   };
 
   // Cancelar cita
-  static cancelarCita = async (appointmentId: number) => {
+  static cancelarCita = async (appointmentId: number, razon: string) => {
     try {
       const { data } = await axiosInstanceSpikeCore.post(`/cancelarCita`, {
         appointmentId,
+        razon,
       });
       return data;
     } catch (error) {
-      console.error("Error al cancelar la cita:", error);
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || error.message;
-        throw new Error(`Error en la solicitud: ${errorMessage}`);
+        throw `${errorMessage}`;
       }
       throw new Error("VeterinaryService: No se pudo cancelar la cita.");
     }

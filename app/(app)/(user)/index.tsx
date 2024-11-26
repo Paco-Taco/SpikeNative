@@ -21,7 +21,7 @@ const Index = () => {
   const { getVets } = useUserStore((state) => state);
   const { dataLogin } = useLoginStore((state) => state);
   const idOwner = dataLogin?.user.id;
-  const [loadingVets, setLoadingVets] = useState(true);
+  const [loadingVets, setLoadingVets] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   const [veterinaryClinics, setVeterinaryClinics] = useState<Veterinary[]>([]);
@@ -36,6 +36,7 @@ const Index = () => {
       setVeterinaryClinics(result ? result.veterinaries : []);
     } catch (error) {
       console.error("Error al obtener veterinarias:", error);
+    } finally {
     }
   };
 
@@ -54,19 +55,22 @@ const Index = () => {
   };
 
   useEffect(() => {
-    if (!idOwner) {
-      return;
+    const fetchData = async () => {
+      setLoadingVets(true); // Asegúrate de activar el estado de carga al inicio
+      try {
+        await Promise.all([fetchVets(), fetchPets()]); // Ejecuta ambas llamadas simultáneamente
+      } catch (error) {
+        console.error("Error al obtener veterinarias y mascotas:", error);
+      } finally {
+        setLoadingVets(false); // Siempre desactiva el estado de carga al final
+      }
+    };
+  
+    if (idOwner) {
+      fetchData(); // Llama a la función solo si `idOwner` está definido
     }
-    try {
-      setLoadingVets(true);
-      fetchVets();
-      fetchPets();
-    } catch (error) {
-      console.error("Error al obtener veterinarias y mascotas:", error);
-    } finally {
-      setLoadingVets(false);
-    }
-  }, [idOwner, getVets]);
+  }, [idOwner]);
+  
 
   const categories = ["all", "NUTRITION", "RECREATION", "CARE"];
 
@@ -102,6 +106,10 @@ const Index = () => {
       }}
     />
   );
+  
+  if (loadingVets) {
+    return <LoadingCat />;
+  }
 
   return (
     <SafeAreaView
