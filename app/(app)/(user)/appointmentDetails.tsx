@@ -67,8 +67,8 @@ const AppointmentDetails = () => {
     try {
       setIsCancelModalVisible(false);
       setIsLoading(true);
-      await axiosInstanceSpikeCore.post("/cancelarCita", {
-        appointmentId: appointmentId,
+      await axiosInstanceSpikeCore.post("/cancelarcita/usuario", {
+        appointmentId: parseInt(appointmentId, 10),
         razon: cancelReason,
       });
 
