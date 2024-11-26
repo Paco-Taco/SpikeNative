@@ -18,14 +18,16 @@ import FontSize from "@/constants/FontSize";
 interface AppointmentDetailModalProps {
   visible: boolean;
   appointment: Pendiente | null;
+  reason: string;
   onClose: () => void;
   onComplete: (id: number) => void;
-  onCancel: (id: number) => void;
+  onCancel: (appointment: Pendiente) => void;
 }
 
 const AppointmentDetailModal = ({
   visible,
   appointment,
+  reason,
   onClose,
   onComplete,
   onCancel,
@@ -39,7 +41,7 @@ const AppointmentDetailModal = ({
 
   const handleAction = () => {
     if (actionType === "cancel") {
-      onCancel(appointment.id);
+      onCancel(appointment);
     } else if (actionType === "complete") {
       onComplete(appointment.id);
     }
@@ -212,7 +214,7 @@ const AppointmentDetailModal = ({
               color={ColorPalette.mediumDark}
             >
               {actionType === "cancel"
-                ? "Are you sure you want to cancel this appointment?"
+                ? "Cancel this appointment?"
                 : "Mark this appointment as completed?"}
             </Text>
             <View row marginT-20 style={{ justifyContent: "space-evenly" }}>

@@ -10,14 +10,14 @@ import FontSize from "@/constants/FontSize";
 interface CardAppointmentProps {
   item: Pendiente;
   onComplete: (id: number) => void;
-  onCancel: (id: number) => void;
+  // onCancel: (id: number) => void;
   onPressDetails: (appointment: Pendiente) => void;
 }
 
 const CardAppointment = ({
   item,
   onComplete,
-  onCancel,
+  // onCancel,
   onPressDetails,
 }: CardAppointmentProps) => {
   const formattedDate = new Date(item.date).toLocaleDateString();
