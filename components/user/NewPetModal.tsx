@@ -35,22 +35,22 @@ const NewPetModal = ({
           color={ColorPalette.black}
           style={{ fontFamily: Fonts.PoppinsBold, fontSize: 20 }}
         >
-          Registra tu primer mascota
+          List your pet!
         </Text>
         <Text marginB-20 color={ColorPalette.mediumDark}>
-          Aún no tienes mascotas registradas. Registra tu primera mascota para
-          empezar.
+          You don't have any pets registered yet. Please register your pet to
+          access all the features.
         </Text>
         <View row spread marginT-10>
           <Button
-            label="Omitir"
+            label="Dismiss"
             labelStyle={{ fontFamily: Fonts.PoppinsRegular }}
             onPress={onDismiss}
             backgroundColor={ColorPalette.white}
             color={ColorPalette.medium}
           />
           <Button
-            label="Registrar Mascota"
+            label="Got it"
             labelStyle={{ fontFamily: Fonts.PoppinsRegular }}
             onPress={onOk}
             backgroundColor={ColorPalette.bluePalette}
