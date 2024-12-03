@@ -179,7 +179,7 @@ const UserAppointments = () => {
             data={[...appointments.pendientes, ...appointments.completadas]}
             renderItem={renderCita}
             keyExtractor={(item) => item.id.toString()}
-            ListEmptyComponent={<Text>No hay citas completadas.</Text>}
+            ListEmptyComponent={<Text center>No appointments booked yet.</Text>}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }

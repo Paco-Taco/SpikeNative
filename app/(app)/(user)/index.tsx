@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { router } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Button, SegmentedControl, Text } from "react-native-ui-lib";
 import { FlatList, Platform, TextInput } from "react-native";
@@ -54,23 +54,30 @@ const Index = () => {
     }
   };
 
+  const fetchData = async () => {
+    setLoadingVets(true); // Asegúrate de activar el estado de carga al inicio
+    try {
+      await Promise.all([fetchVets(), fetchPets()]); // Ejecuta ambas llamadas simultáneamente
+    } catch (error) {
+      console.error("Error al obtener veterinarias y mascotas:", error);
+    } finally {
+      setLoadingVets(false); // Siempre desactiva el estado de carga al final
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      setLoadingVets(true); // Asegúrate de activar el estado de carga al inicio
-      try {
-        await Promise.all([fetchVets(), fetchPets()]); // Ejecuta ambas llamadas simultáneamente
-      } catch (error) {
-        console.error("Error al obtener veterinarias y mascotas:", error);
-      } finally {
-        setLoadingVets(false); // Siempre desactiva el estado de carga al final
-      }
-    };
-  
     if (idOwner) {
       fetchData(); // Llama a la función solo si `idOwner` está definido
+    } else {
+      console.log("No se ha encontrado el id del propietario");
     }
-  }, [idOwner]);
-  
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchPets(); // Recarga las mascotas cuando la pantalla vuelve a ser el foco
+    }, [])
+  );
 
   const categories = ["all", "NUTRITION", "RECREATION", "CARE"];
 
